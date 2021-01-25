@@ -1,0 +1,37 @@
+version: 2.1
+orbs:
+  release-management: salesforce/npm-release-management@4
+
+workflows:
+  version: 2
+  test-and-release:
+    jobs:
+      - release-management/validate-pr:
+          filters:
+            branches:
+              ignore: main
+      - release-management/test-package:
+          name: node-latest
+          node_version: latest
+          upload-coverage: true
+      - release-management/test-package:
+          node_version: '14'
+          name: node-14
+      - release-management/test-package:
+          node_version: '12'
+          name: node-12
+      - release-management/test-package:
+          node_version: '10'
+          name: node-10
+      - release-management/release-package:
+          github-release: true
+          post-job-steps:
+            - run: yarn ci-docs
+          requires:
+            - node-latest
+            - node-14
+            - node-12
+            - node-10
+          filters:
+            branches:
+              only: main
