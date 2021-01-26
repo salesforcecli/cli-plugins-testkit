@@ -24,7 +24,7 @@ workflows:
           node_version: '10'
           name: node-10
       - release-management/release-package:
-          github-release: true
+          github-release: false
           post-job-steps:
             - run: yarn ci-docs
           requires:
