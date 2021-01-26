@@ -1,6 +1,6 @@
 [![NPM](https://img.shields.io/npm/v/@salesforce/cli-plugins-testkit.svg)](https://www.npmjs.com/package/@salesforce/cli-plugins-testkit)
-[![CircleCI](https://circleci.com/gh/forcedotcom/sfdx-core.svg?style=svg&circle-token=2377ca31221869e9d13448313620486da80e595f)](https://circleci.com/gh/forcedotcom/sfdx-core)
-[![codecov](https://codecov.io/gh/forcedotcom/sfdx-core/branch/develop/graph/badge.svg)](https://codecov.io/gh/forcedotcom/sfdx-core)
+[![CircleCI](https://circleci.com/gh/salesforcecli/cli-plugins-testkit.svg?style=svg&circle-token=2377ca31221869e9d13448313620486da80e595f)](https://circleci.com/gh/salesforcecli/cli-plugins-testkit)
+[![codecov](https://codecov.io/gh/salesforcecli/cli-plugins-testkit/branch/main/graph/badge.svg)](https://codecov.io/gh/salesforcecli/cli-plugins-testkit)
 
 # Description
 
