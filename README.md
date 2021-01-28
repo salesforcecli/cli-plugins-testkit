@@ -4,6 +4,8 @@
 
 # Description
 
+**This package is in heavy development. The APIs exposed from this pacakge are incomplete and will change frequently.**
+
 The @salesforce/cli-plugins-testkit library provides test utilities to assist Salesforce CLI plug-in authors with writing integration, smoke, and e2e style testing. For example, you could write tests to ensure your plugin commands execute properly using an isolated Salesforce project, scratch org, and different Salesforce CLI install paths.
 
 # Usage
