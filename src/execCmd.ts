@@ -5,20 +5,17 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { join } from 'path';
 import { inspect } from 'util';
-import { parseJson } from '@salesforce/kit';
-import Debug from 'debug';
-import { exec, ExecOptions, ShellString } from 'shelljs';
+import { fs as fsCore } from '@salesforce/core';
+import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
+import Debug from 'debug';
+import { exec, ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 export interface ExecCmdOptions extends ExecOptions {
   /**
-   * Also return command result in this format.
-   */
-  resultFormat?: 'json';
-
-  /**
-   * Throws if this exit code is not returned.
+   * Throws if this exit code is not returned by the child process.
    */
   ensureExitCode?: number;
 }
@@ -32,7 +29,7 @@ export interface ExecCmdResult {
   shellOutput: ShellString;
 
   /**
-   * Command output parsed as JSON, if resultFormat == "json" .
+   * Command output parsed as JSON, if `--json` param present.
    */
   jsonOutput?: AnyJson;
 
@@ -42,10 +39,33 @@ export interface ExecCmdResult {
   jsonError?: Error;
 
   /**
-   * Command execution time in seconds.
+   * Command execution duration.
    */
-  execTimeSecs: number;
+  execCmdDuration: Duration;
 }
+
+const DEFAULT_SHELL_OPTIONS = {
+  timeout: 300000, // 5 minutes
+  cwd: process.cwd(),
+  env: Object.assign({}, process.env),
+  silent: true,
+};
+
+// Create a Duration instance from process.hrtime
+const hrtimeToMillisDuration = (hrTime: [number, number]) =>
+  Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
+
+// Add JSON output if json flag is set
+const addJsonOutput = (cmd: string, result: ExecCmdResult): ExecCmdResult => {
+  if (cmd.includes('--json')) {
+    try {
+      result.jsonOutput = parseJson(result.shellOutput.stdout);
+    } catch (parseErr: unknown) {
+      result.jsonError = parseErr as Error;
+    }
+  }
+  return result;
+};
 
 /**
  * Synchronously execute a command with the provided options in a child process.
@@ -54,60 +74,132 @@ export interface ExecCmdResult {
  *    1. `cwd` = process.cwd()
  *    2. `timeout` = 300000 (5 minutes)
  *    3. `env` = process.env
+ *    4. `silent` = true (child process output not written to the console)
  *
  * Other defaults:
  *
- *    @see https://www.npmjs.com/package/shelljs#execcommand--options--callback
- *    @see https://nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
+ *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
+ *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
  *
  * @param cmd The command string to be executed by a child process.
- * @param options The options used to run the command and affect output.
- * @returns ExecCmdResult
+ * @param options The options used to run the command.
+ * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
  */
 export const execCmd = (cmd: string, options: ExecCmdOptions = {}): ExecCmdResult => {
   const debug = Debug('testkit:execCmd');
 
   // Ensure we run synchronously
   if (options.async) {
-    throw new Error('execCmd must be run synchronously.  Use execCmdAsync instead.');
+    throw new Error('execCmd must be run synchronously.  Use execCmdAsync to run asynchronously.');
   }
 
-  const defaultShellOptions = {
-    timeout: 300000, // 5 minutes
-    cwd: process.cwd(),
-    env: Object.assign({}, process.env),
-  };
-  const cmdOptions = Object.assign(defaultShellOptions, options);
+  const cmdOptions = Object.assign({}, DEFAULT_SHELL_OPTIONS, options);
 
-  debug(`Running cmd: ${cmd} from ${cmdOptions.cwd}`);
+  debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
   const result: ExecCmdResult = {
     shellOutput: '' as ShellString,
-    execTimeSecs: 0,
+    execCmdDuration: Duration.seconds(0),
   };
 
-  const startTime = process.hrtime();
-
   // Execute the command in a synchronous child process
+  const startTime = process.hrtime();
   result.shellOutput = exec(cmd, cmdOptions) as ShellString;
-
-  result.execTimeSecs = process.hrtime(startTime)[0];
-  const status = result.shellOutput.code === 0 ? 'SUCCESS' : 'ERROR';
-  debug(`Command completed in: ${result.execTimeSecs}s with status: ${status}`);
+  result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
+  debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
     throw new Error(`Unexpected exit code for command: ${cmd}`);
   }
 
-  // Add JSON output if requested
-  if (options.resultFormat?.toLowerCase() === 'json') {
-    try {
-      result.jsonOutput = parseJson(result.shellOutput.stdout);
-    } catch (parseErr) {
-      result.jsonError = parseErr;
-    }
-  }
+  return addJsonOutput(cmd, result);
+};
 
-  return result;
+/**
+ * Asynchronously execute a command with the provided options in a child process.
+ *
+ * Option defaults:
+ *    1. `cwd` = process.cwd()
+ *    2. `timeout` = 300000 (5 minutes)
+ *    3. `env` = process.env
+ *    4. `silent` = true (child process output not written to the console)
+ *
+ * Other defaults:
+ *
+ *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
+ *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
+ *
+ * @param cmd The command string to be executed by a child process.
+ * @param options The options used to run the command.
+ * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
+ */
+export const execCmdAsync = async (cmd: string, options: ExecCmdOptions = {}): Promise<ExecCmdResult> => {
+  const debug = Debug('testkit:execCmdAsync');
+
+  const resultPromise = new Promise<ExecCmdResult>((resolve, reject) => {
+    // Ensure we run asynchronously
+    if (options.async === false) {
+      reject(new Error('execCmdAsync must be run asynchronously.  Use execCmd to run synchronously.'));
+    }
+
+    const cmdOptions = Object.assign({}, DEFAULT_SHELL_OPTIONS, options);
+
+    debug(`Running cmd: ${cmd}`);
+    debug(`Cmd options: ${inspect(cmdOptions)}`);
+
+    const callback: ExecCallback = (code, stdout, stderr) => {
+      const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
+      debug(`Command completed with exit code: ${code}`);
+
+      if (isNumber(cmdOptions.ensureExitCode) && code !== cmdOptions.ensureExitCode) {
+        reject(new Error(`Unexpected exit code for command: ${cmd}`));
+      }
+
+      const result: ExecCmdResult = {
+        shellOutput: new ShellString(stdout),
+        execCmdDuration,
+      };
+      result.shellOutput.code = code;
+      result.shellOutput.stdout = stdout;
+      result.shellOutput.stderr = stderr;
+
+      resolve(addJsonOutput(cmd, result));
+    };
+
+    // Execute the command async in a child process
+    const startTime = process.hrtime();
+    exec(cmd, cmdOptions, callback);
+  });
+
+  return resultPromise;
+};
+
+/**
+ * Build a command string using an optional binary path for use by
+ * execCmd or execCmdAsync.
+ *
+ * The binary preference order is:
+ *    1. binaryPath arg
+ *    2. TESTKIT_BINARY_PATH env var
+ *    3. `bin/run` (default)
+ *
+ * @param cmdArgs The command name and args as a string. E.g., `"force:user:create -a testuser1"`
+ * @param binaryPath The path to a command executable. E.g., `"node_modules/bin/sfdx"`
+ * @returns The command string with CLI binary. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
+ */
+export const buildCmd = (cmdArgs: string, binaryPath?: string): string => {
+  const debug = Debug('testkit:buildCmd');
+
+  const verifyBinaryPath = (path: string) => {
+    if (path && path !== 'sfdx' && !fsCore.fileExistsSync(path)) {
+      throw new Error(`Cannot find specified binary path: ${path}`);
+    }
+  };
+
+  const bin = binaryPath || env.getString('TESTKIT_BINARY_PATH') || join('bin', 'run');
+  verifyBinaryPath(bin);
+  debug(`Using binary: ${bin}`);
+
+  return `${bin} ${cmdArgs}`;
 };

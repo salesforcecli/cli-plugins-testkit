@@ -6,3 +6,4 @@
  */
 
 export * from './genUniqueString';
+export * from './execCmd';
