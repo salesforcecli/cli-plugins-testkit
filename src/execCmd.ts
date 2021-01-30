@@ -11,7 +11,8 @@ import { fs as fsCore } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
-import { exec, ExecCallback, ExecOptions, ShellString } from 'shelljs';
+import * as shelljs from 'shelljs';
+import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 export interface ExecCmdOptions extends ExecOptions {
   /**
@@ -67,6 +68,10 @@ const addJsonOutput = (cmd: string, result: ExecCmdResult): ExecCmdResult => {
   return result;
 };
 
+const getExitCodeError = (expectedCode: number, actualCode: number, cmd: string) => {
+  return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${actualCode}`);
+};
+
 /**
  * Synchronously execute a command with the provided options in a child process.
  *
@@ -105,12 +110,12 @@ export const execCmd = (cmd: string, options: ExecCmdOptions = {}): ExecCmdResul
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  result.shellOutput = exec(cmd, cmdOptions) as ShellString;
+  result.shellOutput = shelljs.exec(cmd, cmdOptions) as ShellString;
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
-    throw new Error(`Unexpected exit code for command: ${cmd}`);
+    throw getExitCodeError(cmdOptions.ensureExitCode, result.shellOutput.code, cmd);
   }
 
   return addJsonOutput(cmd, result);
@@ -153,7 +158,7 @@ export const execCmdAsync = async (cmd: string, options: ExecCmdOptions = {}): P
       debug(`Command completed with exit code: ${code}`);
 
       if (isNumber(cmdOptions.ensureExitCode) && code !== cmdOptions.ensureExitCode) {
-        reject(new Error(`Unexpected exit code for command: ${cmd}`));
+        reject(getExitCodeError(cmdOptions.ensureExitCode, code, cmd));
       }
 
       const result: ExecCmdResult = {
@@ -169,7 +174,7 @@ export const execCmdAsync = async (cmd: string, options: ExecCmdOptions = {}): P
 
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    exec(cmd, cmdOptions, callback);
+    shelljs.exec(cmd, cmdOptions, callback);
   });
 
   return resultPromise;
