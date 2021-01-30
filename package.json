@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/cli-plugins-testkit",
-  "description": "Provides test utilities to assist Salesforcedx plug-in authors with writing non-unit tests.",
-  "version": "0.0.1",
+  "description": "Provides test utilities to assist Salesforce CLI plug-in authors with writing non-unit tests (NUT).",
+  "version": "0.0.2",
   "author": "Salesforce",
   "license": "BSD-3-Clause",
   "main": "lib/index.js",
@@ -29,7 +29,10 @@
     "salesforcedx",
     "cli",
     "plugins",
-    "testkit"
+    "testkit",
+    "test",
+    "integration",
+    "nut"
   ],
   "files": [
     "docs",
