@@ -20,7 +20,8 @@
     "prepack": "sf-build",
     "pretest": "sf-compile-test",
     "test": "sf-test --require ts-node/register",
-    "codecov": "codecov --disable=gcov"
+    "codecov": "codecov --disable=gcov",
+    "posttest": "yarn lint && yarn test:deprecation-policy && yarn test:command-reference"
   },
   "keywords": [
     "force",
