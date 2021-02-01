@@ -7,3 +7,4 @@
 
 export * from './genUniqueString';
 export * from './execCmd';
+export { Duration } from '@salesforce/kit';

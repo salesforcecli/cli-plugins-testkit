@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { join } from 'path';
+import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { fs as fsCore } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
@@ -72,33 +72,10 @@ const getExitCodeError = (expectedCode: number, actualCode: number, cmd: string)
   return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${actualCode}`);
 };
 
-/**
- * Synchronously execute a command with the provided options in a child process.
- *
- * Option defaults:
- *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
- *    3. `env` = process.env
- *    4. `silent` = true (child process output not written to the console)
- *
- * Other defaults:
- *
- *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
- *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
- *
- * @param cmd The command string to be executed by a child process.
- * @param options The options used to run the command.
- * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
- */
-export const execCmd = (cmd: string, options: ExecCmdOptions = {}): ExecCmdResult => {
+const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
   const debug = Debug('testkit:execCmd');
 
-  // Ensure we run synchronously
-  if (options.async) {
-    throw new Error('execCmd must be run synchronously.  Use execCmdAsync to run asynchronously.');
-  }
-
-  const cmdOptions = Object.assign({}, DEFAULT_SHELL_OPTIONS, options);
+  const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
 
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -121,34 +98,11 @@ export const execCmd = (cmd: string, options: ExecCmdOptions = {}): ExecCmdResul
   return addJsonOutput(cmd, result);
 };
 
-/**
- * Asynchronously execute a command with the provided options in a child process.
- *
- * Option defaults:
- *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
- *    3. `env` = process.env
- *    4. `silent` = true (child process output not written to the console)
- *
- * Other defaults:
- *
- *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
- *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
- *
- * @param cmd The command string to be executed by a child process.
- * @param options The options used to run the command.
- * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
- */
-export const execCmdAsync = async (cmd: string, options: ExecCmdOptions = {}): Promise<ExecCmdResult> => {
+const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult> => {
   const debug = Debug('testkit:execCmdAsync');
 
   const resultPromise = new Promise<ExecCmdResult>((resolve, reject) => {
-    // Ensure we run asynchronously
-    if (options.async === false) {
-      reject(new Error('execCmdAsync must be run asynchronously.  Use execCmd to run synchronously.'));
-    }
-
-    const cmdOptions = Object.assign({}, DEFAULT_SHELL_OPTIONS, options);
+    const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -181,15 +135,62 @@ export const execCmdAsync = async (cmd: string, options: ExecCmdOptions = {}): P
 };
 
 /**
- * Build a command string using an optional binary path for use by
- * execCmd or execCmdAsync.
+ * Synchronously execute a command with the provided options in a child process.
+ *
+ * Option defaults:
+ *    1. `cwd` = process.cwd()
+ *    2. `timeout` = 300000 (5 minutes)
+ *    3. `env` = process.env
+ *    4. `silent` = true (child process output not written to the console)
+ *
+ * Other defaults:
+ *
+ *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
+ *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
+ *
+ * @param cmd The command string to be executed by a child process.
+ * @param options The options used to run the command.
+ * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
+ */
+export function execCmd(cmd: string, options?: ExecCmdOptions & { async?: false }): ExecCmdResult;
+
+/**
+ * Asynchronously execute a command with the provided options in a child process.
+ *
+ * Option defaults:
+ *    1. `cwd` = process.cwd()
+ *    2. `timeout` = 300000 (5 minutes)
+ *    3. `env` = process.env
+ *    4. `silent` = true (child process output not written to the console)
+ *
+ * Other defaults:
+ *
+ *    @see www.npmjs.com/package/shelljs#execcommand--options--callback
+ *    @see www.nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback
+ *
+ * @param cmd The command string to be executed by a child process.
+ * @param options The options used to run the command.
+ * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
+ */
+export function execCmd(cmd: string, options: ExecCmdOptions & { async: true }): Promise<ExecCmdResult>;
+
+export function execCmd(cmd: string, options?: ExecCmdOptions): ExecCmdResult | Promise<ExecCmdResult> {
+  if (options?.async) {
+    return execCmdAsync(cmd, options);
+  } else {
+    return execCmdSync(cmd, options);
+  }
+}
+
+/**
+ * Build a command string using an optional binary path for use by `execCmd`.
  *
  * The binary preference order is:
  *    1. binaryPath arg
  *    2. TESTKIT_BINARY_PATH env var
  *    3. `bin/run` (default)
  *
- * @param cmdArgs The command name and args as a string. E.g., `"force:user:create -a testuser1"`
+ * @param cmdArgs The command name, args, and param as a string. E.g., `"force:user:create -a testuser1"`
  * @param binaryPath The path to a command executable. E.g., `"node_modules/bin/sfdx"`
  * @returns The command string with CLI binary. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
  */
@@ -202,9 +203,10 @@ export const buildCmd = (cmdArgs: string, binaryPath?: string): string => {
     }
   };
 
-  const bin = binaryPath || env.getString('TESTKIT_BINARY_PATH') || join('bin', 'run');
+  const bin = binaryPath || env.getString('TESTKIT_BINARY_PATH') || pathJoin('bin', 'run');
   verifyBinaryPath(bin);
-  debug(`Using binary: ${bin}`);
+  debug(`Using binary path: ${bin}`);
+  debug(`Resolved binary path: ${pathResolve(bin)}`);
 
   return `${bin} ${cmdArgs}`;
 };
