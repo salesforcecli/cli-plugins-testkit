@@ -21,7 +21,9 @@
     "pretest": "sf-compile-test",
     "test": "sf-test --require ts-node/register",
     "codecov": "codecov --disable=gcov",
-    "posttest": "yarn lint && yarn test:deprecation-policy && yarn test:command-reference"
+    "posttest": "yarn lint && yarn test:deprecation-policy && yarn test:command-reference",
+    "test:deprecation-policy": "./bin/run snapshot:compare",
+    "test:command-reference": "./bin/run commandreference:generate --erroronwarnings"
   },
   "keywords": [
     "force",
@@ -92,5 +94,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "oclif": {
+    "devPlugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-command-snapshot",
+      "@salesforce/plugin-command-reference"
+    ]
   }
 }
