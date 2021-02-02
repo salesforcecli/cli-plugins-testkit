@@ -9,57 +9,16 @@ import { EOL } from 'os';
 import { join } from 'path';
 import { expect, assert } from 'chai';
 import * as sinon from 'sinon';
-import { fs as fsCore } from '@salesforce/core';
-import { env, Duration } from '@salesforce/kit';
+import { fs } from '@salesforce/core';
+import { Duration, env } from '@salesforce/kit';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
-import { buildCmd, execCmd } from '../../lib/execCmd';
-
-describe('buildCmd', () => {
-  const sandbox = sinon.createSandbox();
-  const cmd = 'force:user:create -a testuser1';
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  it('should default to bin/run binary', () => {
-    sandbox.stub(fsCore, 'fileExistsSync').returns(true);
-    expect(buildCmd(cmd)).to.equal(`bin/run ${cmd}`);
-  });
-
-  it('should accept sfdx as a binary', () => {
-    expect(buildCmd(cmd, 'sfdx')).to.equal(`sfdx ${cmd}`);
-  });
-
-  it('should accept valid sfdx path as a binary', () => {
-    sandbox.stub(fsCore, 'fileExistsSync').returns(true);
-    const binPath = join('sfdx-cli', 'bin', 'sfdx');
-    expect(buildCmd(cmd, binPath)).to.equal(`${binPath} ${cmd}`);
-  });
-
-  it('should accept valid sfdx path in env var', () => {
-    const binPath = join('sfdx-cli', 'bin', 'sfdx');
-    sandbox.stub(fsCore, 'fileExistsSync').returns(true);
-    sandbox.stub(env, 'getString').returns(binPath);
-    expect(buildCmd(cmd)).to.equal(`${binPath} ${cmd}`);
-  });
-
-  it('should error when binary path not found', () => {
-    const binPath = join('sfdx-cli', 'bin', 'sfdx');
-    try {
-      buildCmd(cmd, binPath);
-      assert(false, 'Expected an error to be thrown');
-    } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`Cannot find specified binary path: ${binPath}`);
-    }
-  });
-});
+import { execCmd } from '../../src/execCmd';
 
 describe('execCmd (sync)', () => {
   const sandbox = sinon.createSandbox();
-  const cmd = 'bin/run force:user:create -a testuser1';
+  const cmd = 'force:user:create -a testuser1';
   const output = {
     status: 0,
     result: [{ foo: 'bar' }],
@@ -69,7 +28,46 @@ describe('execCmd (sync)', () => {
     sandbox.restore();
   });
 
+  it('should default to bin/run executable', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd);
+    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+  });
+
+  it('should accept valid sfdx path in env var', () => {
+    const binPath = join('sfdx-cli', 'bin', 'sfdx');
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    sandbox.stub(env, 'getString').returns(binPath);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+  });
+
+  it('should accept valid executable in the system path', () => {
+    const binPath = 'sfdx';
+    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sfdx'));
+    sandbox.stub(env, 'getString').returns(binPath);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+  });
+
+  it('should error when executable path not found', () => {
+    const binPath = join('bin', 'run');
+    try {
+      execCmd(cmd);
+      assert(false, 'Expected an error to be thrown');
+    } catch (err: unknown) {
+      expect((err as Error).message).to.equal(`Cannot find specified executable path: ${binPath}`);
+    }
+  });
+
   it('should throw an error when ensureExitCode does not match exit code', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     shellString.code = 0;
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -77,11 +75,13 @@ describe('execCmd (sync)', () => {
       execCmd(cmd, { ensureExitCode: 100 });
       assert(false, 'Expected an error to be thrown');
     } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`Unexpected exit code for command: ${cmd}. Expected: 100 Actual: 0`);
+      expect((err as Error).message).to.contain('Unexpected exit code for command');
+      expect((err as Error).message).to.contain('Expected: 100 Actual: 0');
     }
   });
 
   it('should return ExecCmdResult with shellOutput and Duration', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     const result = execCmd(cmd);
@@ -93,6 +93,7 @@ describe('execCmd (sync)', () => {
   });
 
   it('should return ExecCmdResult when async = false', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     const result = execCmd(cmd, { async: false });
@@ -104,6 +105,7 @@ describe('execCmd (sync)', () => {
   });
 
   it('should return ExecCmdResult with jsonOutput when command includes --json', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
@@ -116,6 +118,7 @@ describe('execCmd (sync)', () => {
   });
 
   it('should return ExecCmdResult with jsonError when command includes --json and output not parseable', () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString('try JSON parsing this');
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
@@ -132,7 +135,7 @@ describe('execCmd (sync)', () => {
 
 describe('execCmd (async)', () => {
   const sandbox = sinon.createSandbox();
-  const cmd = 'bin/run force:user:create -a testuser1';
+  const cmd = 'force:user:create -a testuser1';
   const output = {
     status: 0,
     result: [{ foo: 'bar' }],
@@ -142,18 +145,59 @@ describe('execCmd (async)', () => {
     sandbox.restore();
   });
 
+  it('should default to bin/run executable', async () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
+    await execCmd(cmd, { async: true });
+    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+  });
+
+  it('should accept valid sfdx path in env var', async () => {
+    const binPath = join('sfdx-cli', 'bin', 'sfdx');
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    sandbox.stub(env, 'getString').returns(binPath);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
+    await execCmd(cmd, { async: true });
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+  });
+
+  it('should accept valid executable in the system path', async () => {
+    const binPath = 'sfdx';
+    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sfdx'));
+    sandbox.stub(env, 'getString').returns(binPath);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
+    await execCmd(cmd, { async: true });
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+  });
+
+  it('should error when executable path not found', async () => {
+    const binPath = join('bin', 'run');
+    try {
+      await execCmd(cmd, { async: true });
+      assert(false, 'Expected an error to be thrown');
+    } catch (err: unknown) {
+      expect((err as Error).message).to.equal(`Cannot find specified executable path: ${binPath}`);
+    }
+  });
+
   it('should throw an error when ensureExitCode does not match exit code', async () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     try {
       await execCmd(cmd, { async: true, ensureExitCode: 100 });
       assert(false, 'Expected an error to be thrown');
     } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`Unexpected exit code for command: ${cmd}. Expected: 100 Actual: 0`);
+      expect((err as Error).message).to.contain('Unexpected exit code for command');
+      expect((err as Error).message).to.contain('Expected: 100 Actual: 0');
     }
   });
 
   it('should return ExecCmdResult with shellOutput and Duration', async () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     const result = await execCmd(cmd, { async: true });
@@ -165,6 +209,7 @@ describe('execCmd (async)', () => {
   });
 
   it('should return ExecCmdResult with jsonOutput when command includes --json', async () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
 
@@ -177,6 +222,7 @@ describe('execCmd (async)', () => {
   });
 
   it('should return ExecCmdResult with jsonError when command includes --json and output not parseable', async () => {
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString('try JSON parsing this');
     stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
 

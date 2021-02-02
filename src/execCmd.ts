@@ -7,7 +7,7 @@
 
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
-import { fs as fsCore } from '@salesforce/core';
+import { fs } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
@@ -72,8 +72,41 @@ const getExitCodeError = (expectedCode: number, actualCode: number, cmd: string)
   return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${actualCode}`);
 };
 
+/**
+ * Build a command string using an optional executable path for use by `execCmd`.
+ *
+ * The executable preference order is:
+ *    2. TESTKIT_EXECUTABLE_PATH env var
+ *    3. `bin/run` (default)
+ *
+ * @param cmdArgs The command name, args, and param as a string. E.g., `"force:user:create -a testuser1"`
+ * @returns The command string with CLI executable. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
+ */
+const buildCmd = (cmdArgs: string): string => {
+  const debug = Debug('testkit:buildCmd');
+
+  const bin = env.getString('TESTKIT_EXECUTABLE_PATH') || pathJoin('bin', 'run');
+  const which = shelljs.which(bin);
+  let resolvedPath = pathResolve(bin);
+
+  // If which finds the path in the system path, use that.
+  if (which) {
+    resolvedPath = which;
+  } else if (!fs.fileExistsSync(bin)) {
+    throw new Error(`Cannot find specified executable path: ${bin}`);
+  }
+
+  debug(`Using executable path: ${bin}`);
+  debug(`Resolved executable path: ${resolvedPath}`);
+
+  return `${bin} ${cmdArgs}`;
+};
+
 const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
   const debug = Debug('testkit:execCmd');
+
+  // Add on the bin path
+  cmd = buildCmd(cmd);
 
   const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
 
@@ -100,6 +133,9 @@ const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
 
 const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult> => {
   const debug = Debug('testkit:execCmdAsync');
+
+  // Add on the bin path
+  cmd = buildCmd(cmd);
 
   const resultPromise = new Promise<ExecCmdResult>((resolve, reject) => {
     const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
@@ -181,32 +217,3 @@ export function execCmd(cmd: string, options?: ExecCmdOptions): ExecCmdResult | 
     return execCmdSync(cmd, options);
   }
 }
-
-/**
- * Build a command string using an optional binary path for use by `execCmd`.
- *
- * The binary preference order is:
- *    1. binaryPath arg
- *    2. TESTKIT_BINARY_PATH env var
- *    3. `bin/run` (default)
- *
- * @param cmdArgs The command name, args, and param as a string. E.g., `"force:user:create -a testuser1"`
- * @param binaryPath The path to a command executable. E.g., `"node_modules/bin/sfdx"`
- * @returns The command string with CLI binary. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
- */
-export const buildCmd = (cmdArgs: string, binaryPath?: string): string => {
-  const debug = Debug('testkit:buildCmd');
-
-  const verifyBinaryPath = (path: string) => {
-    if (path && path !== 'sfdx' && !fsCore.fileExistsSync(path)) {
-      throw new Error(`Cannot find specified binary path: ${path}`);
-    }
-  };
-
-  const bin = binaryPath || env.getString('TESTKIT_BINARY_PATH') || pathJoin('bin', 'run');
-  verifyBinaryPath(bin);
-  debug(`Using binary path: ${bin}`);
-  debug(`Resolved binary path: ${pathResolve(bin)}`);
-
-  return `${bin} ${cmdArgs}`;
-};
