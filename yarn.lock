@@ -418,9 +418,9 @@
     safe-json-stringify "~1"
 
 "@salesforce/core@^2.16.3":
-  version "2.16.4"
-  resolved "https://registry.npmjs.org/@salesforce/core/-/core-2.16.4.tgz#a8399b6fe8d76431bf22f9555d3ca207ba8dac60"
-  integrity sha512-92SNi3yLQ2PCr91wopOXpzWejLsp1+ICEEzI65uRK06cset1YeoVnxSPs7C3nQ1qpJqFuWW52PmheKY310lP2Q==
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-2.18.0.tgz#0a514682c5720c9bae4cc05a6a62edb78bdb9ded"
+  integrity sha512-LBcQ8rIkf6fKnN96XkfRZPbQ3yyioihJppUyZ8O+/JQjlGu6Me18YHR84ic92p+LqhtQqyth84xFvcCHmJCZxg==
   dependencies:
     "@salesforce/bunyan" "^2.0.0"
     "@salesforce/kit" "^1.3.3"
