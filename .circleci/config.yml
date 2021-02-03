@@ -23,8 +23,6 @@ workflows:
           node_version: '10'
           name: node-10
       - release-management/release-package:
-          post-job-steps:
-            - run: yarn ci-docs
           requires:
             - node-latest
             - node-14
