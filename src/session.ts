@@ -12,17 +12,24 @@ import { fs as fsCore } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 import { createSandbox, SinonStub } from 'sinon';
 import { genUniqueString } from './genUniqueString';
+import { zipDir } from './zip';
 import { TestProject, TestProjectConfig } from './project';
 
 export interface SessionOptions {
-  sessionDir?: string;
-  project?: TestProjectConfig;
+  sessionDir?: string; // if a plugin dev wants to control where a test session lives
+  project?: TestProjectConfig; // Define a test project to use for tests
+  verifyEnv?: string[]; // ensure your test has env vars required to run successfully???
+  setupCommands?: string[]; // run these commands before your tests run.  all must have exit code 0;
 }
 
 /*
    *** ENV VARS ***
   TESTKIT_SESSION_DIR = path to a directory for all testkit artifacts to live
-  TESTKIT_SFDX_DIR = path to a .sfdx directory
+  TESTKIT_SFDX_DIR = path to a .sfdx directory that the tests should use.
+  TESTKIT_ORG_USERNAME = an org username to use for test commands. tests will use this org rather than creating new orgs.
+  TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
+  TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs
+  TESTKIT_ZIP_SESSION = zips the session dir when a test fails; enum of ON_ERROR | ALWAYS
 */
 
 // Map of existing test sessions
@@ -97,26 +104,33 @@ export class Session {
   }
 
   /**
-   * Clean the test session by restoring the sandbox and
-   * deleting all orgs created during the test.
+   * Clean the test session by restoring the sandbox, deleting
+   * all orgs created during the test, and deleting the test session dir.
    */
   public clean(): void {
     this.sandbox.restore();
     // delete test orgs unless TESTKIT_SAVE_ARTIFACTS set
-    // this.projects.
+    // delete the test session
   }
 
   /**
-   * Zip the test session contents
+   * Zip the contents of a test session directory.
+   *
+   * @name The name of the zip file to create. Default is the test session dirname.
+   * @destDir The zip file will be written to this path. Default is `../this.dir`.
+   * @returns The created zip file path.
    */
-  public zip(): string {
-    return 'NOT YET IMPLEMENTED';
+  public zip(name?: string, destDir?: string): Promise<string> {
+    name ??= path.dirname(this.dir);
+    destDir ??= path.resolve('..', this.dir);
+    return zipDir({ name, sourceDir: this.dir, destDir });
   }
 
   /**
    * Add another SFDX project to the test session.
    *
-   * @param config a test project config to use for the new project
+   * @param config a test project config to use for the new project.
+   * @returns The added TestProject
    */
   public addProject(config: TestProjectConfig): TestProject {
     const projConfig = { ...{ dir: this.dir }, ...config };

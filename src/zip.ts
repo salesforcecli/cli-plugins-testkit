@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+import * as path from 'path';
+import { create as createArchive } from 'archiver';
+import { debug as Debug } from 'debug';
+import { fs as fsCore } from '@salesforce/core';
+
+interface ZipDirConfig {
+  sourceDir: string;
+  destDir: string;
+  name: string;
+}
+
+/**
+ * Zip the contents of a directory to a file.
+ *
+ * @param config what and where to zip
+ * @returns The created zip file path
+ */
+export const zipDir = async (config: ZipDirConfig): Promise<string> => {
+  const debug = Debug('testkit:zipDir');
+  const { sourceDir, destDir, name } = config;
+  const zip = createArchive('zip', { zlib: { level: 3 } });
+  const zipFilePath = path.join(destDir, name);
+  const output = fsCore.createWriteStream(zipFilePath);
+  debug(`Zipping contents of ${sourceDir} to ${zipFilePath}`);
+
+  return new Promise((resolve, reject) => {
+    output.on('close', () => {
+      debug(`Zip ${zipFilePath} is closed`);
+    });
+    output.on('end', () => {
+      debug(`Zip data has drained for ${zipFilePath}`);
+      resolve(zipFilePath);
+    });
+    zip.on('warning', (err) => {
+      if (err.code === 'ENOENT') {
+        debug(`Zip warning for ${zipFilePath}\n${err.message}`);
+      } else {
+        reject(err);
+      }
+    });
+    zip.on('error', (err) => {
+      reject(err);
+    });
+    zip.pipe(output);
+    zip.directory(sourceDir, path.dirname(sourceDir));
+    zip.finalize().catch((err: unknown) => {
+      debug(`Zip finalize error with: ${(err as Error).message}`);
+    });
+  });
+};
