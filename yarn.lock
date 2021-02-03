@@ -473,9 +473,9 @@
     tslib "^1.10.0"
 
 "@salesforce/ts-types@^1.0.0", "@salesforce/ts-types@^1.4.4":
-  version "1.4.4"
-  resolved "https://registry.npmjs.org/@salesforce/ts-types/-/ts-types-1.4.4.tgz#9a6f885bf9b9882177103f50afb1e8b1b2d5485c"
-  integrity sha512-BKAbzS9PPnhcLibWDFKUFdy2fFchoMhRrnB0Uc0GJ+sGfqw8G3YJIy2JTKP8o8/V2snm1br9fMXV8cZKi62htg==
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-1.5.0.tgz#e2baaca088f30a3f9d10127eb789a12abad44958"
+  integrity sha512-fJsVXSJ0s8voDNM7TYulPkiRDdR1bC/rE2hsY/+2q0DDa57UAeql34tEdaBs84GGbe/VGCVbiazkLDJW/bX7KQ==
   dependencies:
     tslib "^1.10.0"
 
