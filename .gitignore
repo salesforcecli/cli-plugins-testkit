@@ -1,5 +1,5 @@
 # -- CLEAN
-
+tmp/
 # use yarn by default, so ignore npm
 package-lock.json
 
@@ -24,13 +24,16 @@ coverage
 # generated docs
 docs
 
+# ignore sfdx-trust files
+*.tgz
+*.sig
+package.json.bak.
+
 # -- CLEAN ALL
 node_modules
 
 # --
 # put files here you don't want cleaned with sf-clean
-
-.sfdx
 
 # os specific files
 .DS_Store
