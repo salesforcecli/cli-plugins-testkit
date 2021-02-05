@@ -7,7 +7,7 @@
 
 import * as path from 'path';
 import { create as createArchive } from 'archiver';
-import { debug as Debug } from 'debug';
+import Debug from 'debug';
 import { fs as fsCore } from '@salesforce/core';
 
 interface ZipDirConfig {
@@ -31,8 +31,10 @@ export const zipDir = async (config: ZipDirConfig): Promise<string> => {
   debug(`Zipping contents of ${sourceDir} to ${zipFilePath}`);
 
   return new Promise((resolve, reject) => {
+    Debug('here');
     output.on('close', () => {
       debug(`Zip ${zipFilePath} is closed`);
+      resolve(zipFilePath);
     });
     output.on('end', () => {
       debug(`Zip data has drained for ${zipFilePath}`);
@@ -49,7 +51,7 @@ export const zipDir = async (config: ZipDirConfig): Promise<string> => {
       reject(err);
     });
     zip.pipe(output);
-    zip.directory(sourceDir, path.dirname(sourceDir));
+    zip.directory(sourceDir, false);
     zip.finalize().catch((err: unknown) => {
       debug(`Zip finalize error with: ${(err as Error).message}`);
     });

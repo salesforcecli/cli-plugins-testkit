@@ -6,10 +6,10 @@
  */
 
 import * as path from 'path';
+import { inspect } from 'util';
 import { debug, Debugger } from 'debug';
 import * as shell from 'shelljs';
 import { genUniqueString } from './genUniqueString';
-import { execCmd } from './execCmd';
 import { zipDir } from './zip';
 
 export interface TestProjectConfig {
@@ -27,23 +27,24 @@ export interface TestProjectConfig {
  */
 export class TestProject {
   public createdDate: Date;
-  public path: string;
+  public dir: string;
   private debug: Debugger;
 
   public constructor(options: TestProjectConfig) {
     this.debug = debug('testkit:project');
+    this.debug(`Creating TestProject with options: ${inspect(options)}`);
     this.createdDate = new Date();
 
     const dir = options.destinationDir || path.join(process.cwd(), 'tmp');
 
     // Copy a dir containing a SFDX project to a dir for testing.
     if (options?.sourceDir) {
-      const rv = shell.cp(options.sourceDir, dir);
+      const rv = shell.cp('-r', options.sourceDir, dir);
       this.debug('project copy result=', rv);
       if (rv.code !== 0) {
         throw new Error(`project copy failed \n${rv.stderr}`);
       }
-      this.path = path.join(dir, path.dirname(options.sourceDir));
+      this.dir = path.join(dir, path.basename(options.sourceDir));
     }
     // Clone a git repo containing a SFDX project in a dir for testing.
     else if (options?.gitClone) {
@@ -52,15 +53,18 @@ export class TestProject {
       if (rv.code !== 0) {
         throw new Error(`git clone failed \n${rv.stderr}`);
       }
-      this.path = path.join(dir, 'changeme');
+      this.dir = path.join(dir, 'changeme');
     }
     // Create a new project using the command.
     else {
       const name = options.name || genUniqueString('project_%s');
-      execCmd(`force:project:create -n ${name}`, { ensureExitCode: 0 });
-      this.path = path.join(dir, name);
+      const rv = shell.exec(`sfdx force:project:create -n ${name} -d ${dir}`, { silent: true });
+      if (rv.code !== 0) {
+        throw new Error(`force:project:create failed \n${rv.stderr}`);
+      }
+      this.dir = path.join(dir, name);
     }
-    this.debug(`Created test project: ${this.path}`);
+    this.debug(`Created test project: ${this.dir}`);
   }
 
   /**
@@ -71,8 +75,8 @@ export class TestProject {
    * @returns The created zip file path.
    */
   public async zip(name?: string, destDir?: string): Promise<string> {
-    name ??= path.dirname(this.path);
-    destDir ??= process.cwd();
-    return zipDir({ name, sourceDir: this.path, destDir });
+    name ??= `${path.basename(this.dir)}.zip`;
+    destDir ??= path.dirname(this.dir);
+    return zipDir({ name, sourceDir: this.dir, destDir });
   }
 }

@@ -45,11 +45,14 @@ export interface ExecCmdResult {
   execCmdDuration: Duration;
 }
 
-const DEFAULT_SHELL_OPTIONS = {
-  timeout: 300000, // 5 minutes
-  cwd: process.cwd(),
-  env: Object.assign({}, process.env),
-  silent: true,
+const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
+  const defaults = {
+    env: Object.assign({}, process.env),
+    cwd: process.cwd(),
+    timeout: 300000, // 5 minutes
+    silent: true,
+  };
+  return { ...defaults, ...options };
 };
 
 // Create a Duration instance from process.hrtime
@@ -68,8 +71,9 @@ const addJsonOutput = (cmd: string, result: ExecCmdResult): ExecCmdResult => {
   return result;
 };
 
-const getExitCodeError = (expectedCode: number, actualCode: number, cmd: string) => {
-  return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${actualCode}`);
+const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString) => {
+  const io = cmd.includes('--json') ? output.stdout : output.stderr;
+  return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${output.code}\n${io}`);
 };
 
 /**
@@ -107,8 +111,7 @@ const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
 
   // Add on the bin path
   cmd = buildCmd(cmd);
-
-  const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
+  const cmdOptions = buildCmdOptions(options);
 
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -125,7 +128,7 @@ const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
-    throw getExitCodeError(cmdOptions.ensureExitCode, result.shellOutput.code, cmd);
+    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
   return addJsonOutput(cmd, result);
@@ -138,7 +141,7 @@ const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecC
   cmd = buildCmd(cmd);
 
   const resultPromise = new Promise<ExecCmdResult>((resolve, reject) => {
-    const cmdOptions = { ...DEFAULT_SHELL_OPTIONS, ...options };
+    const cmdOptions = buildCmdOptions(options);
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -148,7 +151,10 @@ const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecC
       debug(`Command completed with exit code: ${code}`);
 
       if (isNumber(cmdOptions.ensureExitCode) && code !== cmdOptions.ensureExitCode) {
-        reject(getExitCodeError(cmdOptions.ensureExitCode, code, cmd));
+        const output = new ShellString(stdout);
+        output.code = code;
+        output.stderr = stderr;
+        reject(getExitCodeError(cmd, cmdOptions.ensureExitCode, output));
       }
 
       const result: ExecCmdResult = {
