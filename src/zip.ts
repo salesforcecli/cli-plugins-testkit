@@ -31,7 +31,6 @@ export const zipDir = async (config: ZipDirConfig): Promise<string> => {
   debug(`Zipping contents of ${sourceDir} to ${zipFilePath}`);
 
   return new Promise((resolve, reject) => {
-    Debug('here');
     output.on('close', () => {
       debug(`Zip ${zipFilePath} is closed`);
       resolve(zipFilePath);
