@@ -6,10 +6,9 @@
  */
 
 import * as path from 'path';
-import * as os from 'os';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
-import { env, parseJson } from '@salesforce/kit';
+import { Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
@@ -39,14 +38,22 @@ export interface TestSessionOptions {
 // Executes commands and sets the org username if an org was created.
 // Throws if any commands return a non-zero exitCode.
 const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
+  // Add setup command results to an array on the TestSession so tests have access
+  // to that data.
+  testSession.setupCommandsResults = [];
+
   if (cmds) {
     const dbug = debug('testkit:setupCommands');
     for (let cmd of cmds) {
       // if it's an org:create without --json, append it anyway so we
       // can get the org username and keep track of it.
       if (cmd.includes('org:create')) {
-        if (testSession.orgUsername) {
-          return;
+        // Don't create orgs if we are supposed to reuse one from the env
+        const org = env.getString('TESTKIT_ORG_USERNAME');
+        if (org) {
+          dbug(`Not creating a new org. Resuing TESTKIT_ORG_USERNAME of: ${org}`);
+          testSession.setupCommandsResults.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
+          continue;
         }
         if (!cmd.includes('--json')) {
           cmd += ' --json';
@@ -57,9 +64,10 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
         const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
         throw Error(`Setup command ${cmd} failed due to: ${io}`);
       }
+      dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
 
-      // keep track of org creates
-      if (cmd.includes('org:create')) {
+      // keep track of the first org create
+      if (cmd.includes('org:create') && !testSession.orgUsername) {
         try {
           dbug(`Saving username from ${cmd}`);
           const jsonOutput = parseJson(rv.stdout);
@@ -68,6 +76,8 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
           dbug(`TestSession created an org but failed JSON parsing due to:\n${(err as Error).message}`);
         }
       }
+
+      testSession.setupCommandsResults.push(rv);
     }
   }
 };
@@ -75,7 +85,7 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
 /**
  * Represents a test session, which is a unique location for non-unit test (nut)
  * artifacts such as a project and a mocked home dir.  It also provides easy
- * access to org usernames created by setup commands, cwd stubbing, and a way to
+ * access to an org username created by a setup command, cwd stubbing, and a way to
  * zip up the test session.
  *
  * Create a TestSession instance with: `const testSession = TestSession.create(options)`
@@ -97,6 +107,7 @@ export class TestSession {
   public project?: TestProject;
   public orgUsername = env.getString('TESTKIT_ORG_USERNAME');
   public sandbox = createSandbox();
+  public setupCommandsResults?: shell.ShellString[];
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
@@ -112,14 +123,11 @@ export class TestSession {
     this.dir = this.overridenDir || path.join(process.cwd(), `test_session_${this.id}`);
     fsCore.mkdirpSync(this.dir);
 
-    // Write the test session options
-    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
-
     // Setup a test project and stub process.cwd to be the project dir
     if (options.project) {
       let projectDir = env.getString('TESTKIT_PROJECT_DIR');
       if (!projectDir) {
-        this.project = new TestProject({ destinationDir: this.dir, ...options.project });
+        this.project = new TestProject({ ...options.project, destinationDir: this.dir });
         projectDir = this.project.dir;
       }
 
@@ -127,14 +135,18 @@ export class TestSession {
       // a test project is used since process.cwd is changed.  If the
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
       // to use the bin/run from the cwd now.
-      env.setString('TESTKIT_EXECUTABLE_PATH', path.join(process.cwd(), 'bin', 'run'));
+      if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
+        env.setString('TESTKIT_EXECUTABLE_PATH', path.join(process.cwd(), 'bin', 'run'));
+      }
 
       this.stubCwd(projectDir);
     }
 
-    // Create the .sfdx directory used by this test
-    this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
-    this.sandbox.stub(os, 'homedir').returns(this.homeDir);
+    // Write the test session options used to create this session
+    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
+
+    // Set the homedir used by this test, on the TestSession and the process
+    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
 
     // Run all setup commands
     setupCommands(this, options.setupCommands);
@@ -187,8 +199,8 @@ export class TestSession {
   }
 
   /**
-   * Clean the test session by restoring the sandbox, deleting
-   * all orgs created during the test, and deleting the test session dir.
+   * Clean the test session by restoring the sandbox, deleting any setup
+   * org created during the test, and deleting the test session dir.
    */
   public async clean(): Promise<void> {
     this.debug(`Cleaning test session: ${this.id}`);
@@ -203,12 +215,16 @@ export class TestSession {
         if (rv.code !== 0) {
           throw Error(`Deleting org ${this.orgUsername} failed due to: ${rv.stderr}`);
         }
+        this.debug('Deleted org result=', rv.stdout);
       }
 
       // Delete the test session unless they overrode the test session dir
       if (!this.overridenDir) {
         this.debug(`Deleting test session dir: ${this.dir}`);
-        const rv = shell.rm('-r', [this.dir]);
+        // Processes can hang on to files within the test session dir, preventing
+        // removal so we wait a bit before trying.
+        await sleep(Duration.seconds(2));
+        const rv = shell.rm('-rf', this.dir);
         if (rv.code !== 0) {
           throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
         }
