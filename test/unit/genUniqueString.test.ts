@@ -7,7 +7,7 @@
 
 import { isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { genUniqueString } from '../../lib/genUniqueString';
+import { genUniqueString } from '../../src/genUniqueString';
 
 describe('genUniqueString', () => {
   it('should generate a unique string by default', () => {
