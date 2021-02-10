@@ -51,7 +51,7 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
         // Don't create orgs if we are supposed to reuse one from the env
         const org = env.getString('TESTKIT_ORG_USERNAME');
         if (org) {
-          dbug(`Not creating a new org. Resuing TESTKIT_ORG_USERNAME of: ${org}`);
+          dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
           testSession.setupCommandsResults.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
           continue;
         }
@@ -111,7 +111,7 @@ export class TestSession {
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
-  private overridenDir?: string;
+  private overriddenDir?: string;
 
   private constructor(options: TestSessionOptions = {}) {
     this.debug = debug('testkit:session');
@@ -119,8 +119,8 @@ export class TestSession {
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
 
     // Create the test session directory
-    this.overridenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
-    this.dir = this.overridenDir || path.join(process.cwd(), `test_session_${this.id}`);
+    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
+    this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
     fsCore.mkdirpSync(this.dir);
 
     // Setup a test project and stub process.cwd to be the project dir
@@ -219,7 +219,7 @@ export class TestSession {
       }
 
       // Delete the test session unless they overrode the test session dir
-      if (!this.overridenDir) {
+      if (!this.overriddenDir) {
         this.debug(`Deleting test session dir: ${this.dir}`);
         // Processes can hang on to files within the test session dir, preventing
         // removal so we wait a bit before trying.

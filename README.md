@@ -4,7 +4,7 @@
 
 # Description
 
-**This package is in heavy development. The APIs exposed from this pacakge are incomplete and will change frequently.**
+**This package is in heavy development. The APIs exposed from this package are incomplete and will change frequently.**
 
 The @salesforce/cli-plugins-testkit library provides test utilities to assist Salesforce CLI plug-in authors with writing NUTs (non-unit-tests), like integration, smoke, and e2e style testing. For example, you could write tests to ensure your plugin commands execute properly using an isolated Salesforce project, scratch org, and different Salesforce CLI executables.
 
@@ -16,9 +16,9 @@ Add this library as a dev dependencies to your project.
 yarn add @salesforcecli/cli-plugins-testkit --dev
 ```
 
-Create a test file and import the utilties from this library that you'd like to use.
+Create a test file and import the utilities from this library that you'd like to use.
 
-Using a different file exention will help seperate your unit tests from your NUTs even if they are in the same directories. For example, if you use `mytest.nut.ts` instead of `mytest.test.ts`, you can have the following scripts in your package.json (assuming mocha).
+Using a different file extension will help separate your unit tests from your NUTs even if they are in the same directories. For example, if you use `mytest.nut.ts` instead of `mytest.test.ts`, you can have the following scripts in your package.json (assuming mocha).
 
 ```json
 {
@@ -39,7 +39,7 @@ const result = exec('./bin/run mycommand --myflag --json');
 console.log(JSON.parse(result.stdout));
 ```
 
-However, that doesn't provide flexiblity to target different CLI executables in Continous Integration (CI). For example, you may want to run NUTs against the newly published version of your plugin against the latest-rc of the Salesforce CLI to make sure everything still works as expected.
+However, that doesn't provide flexibility to target different CLI executables in Continuos Integration (CI). For example, you may want to run NUTs against the newly published version of your plugin against the latest-rc of the Salesforce CLI to make sure everything still works as expected.
 
 The testkit provides `execCmd` which makes the executable configurable as well as builtin json parsing.
 
