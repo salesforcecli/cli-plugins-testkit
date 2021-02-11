@@ -97,7 +97,7 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
  *   TESTKIT_ORG_USERNAME = an org username to use for test commands. tests will use this org rather than creating new orgs.
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
- *   TESTKIT_ZIP_SESSION = zips the session dir when this is true
+ *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
  */
 export class TestSession {
   public id: string;
@@ -106,12 +106,12 @@ export class TestSession {
   public homeDir: string;
   public project?: TestProject;
   public orgUsername = env.getString('TESTKIT_ORG_USERNAME');
-  public sandbox = createSandbox();
   public setupCommandsResults?: shell.ShellString[];
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
   private overridenDir?: string;
+  private sandbox = createSandbox();
 
   private constructor(options: TestSessionOptions = {}) {
     this.debug = debug('testkit:session');
@@ -233,7 +233,7 @@ export class TestSession {
   }
 
   /**
-   * Zip the contents of a test session directory if the TESTKIT_ZIP_SESSION
+   * Zip the contents of a test session directory if the TESTKIT_ENABLE_ZIP
    * env var is set.
    *
    * @name The name of the zip file to create. Default is the test session dirname with .zip extension.
@@ -241,7 +241,7 @@ export class TestSession {
    * @returns The created zip file path.
    */
   public async zip(name?: string, destDir?: string): Promise<Optional<string>> {
-    if (env.getBoolean('TESTKIT_ZIP_SESSION')) {
+    if (env.getBoolean('TESTKIT_ENABLE_ZIP')) {
       name ??= `${path.basename(this.dir)}.zip`;
       destDir ??= path.dirname(this.dir);
       return zipDir({ name, sourceDir: this.dir, destDir });
