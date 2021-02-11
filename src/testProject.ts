@@ -14,7 +14,7 @@ import { fs as fsCore } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
-export interface TestProjectConfig {
+export interface TestProjectOptions {
   sourceDir?: string;
   gitClone?: string;
   name?: string;
@@ -35,7 +35,7 @@ export class TestProject {
   public dir: string;
   private debug: Debugger;
 
-  public constructor(options: TestProjectConfig) {
+  public constructor(options: TestProjectOptions) {
     this.debug = debug('testkit:project');
     this.debug(`Creating TestProject with options: ${inspect(options)}`);
     this.createdDate = new Date();
