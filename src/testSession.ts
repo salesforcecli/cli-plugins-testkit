@@ -4,7 +4,6 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
 import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
@@ -15,7 +14,7 @@ import * as shell from 'shelljs';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 import { TestProject, TestProjectConfig } from './testProject';
-
+import { authFromStubbedHome, transferExistingAuthToEnv } from './hubAuth';
 export interface TestSessionOptions {
   /**
    * Specify a different location for the test session.
@@ -98,6 +97,12 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ZIP_SESSION = zips the session dir when this is true
+ *
+ *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
+ *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
+ *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
+ *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
+ *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
  */
 export class TestSession {
   public id: string;
@@ -145,9 +150,14 @@ export class TestSession {
     // Write the test session options used to create this session
     fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
 
-    // Set the homedir used by this test, on the TestSession and the process
-    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+    // have to grab this before we change the home
+    transferExistingAuthToEnv();
 
+    // Set the homedir used by this test, on the TestSession and the process
+    // TODO: does this work on Windows?
+    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+    process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
+    authFromStubbedHome(this.homeDir);
     // Run all setup commands
     setupCommands(this, options.setupCommands);
 
