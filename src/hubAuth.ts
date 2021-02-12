@@ -29,7 +29,8 @@ export const authFromStubbedHome = (homeDir: string): void => {
     shell.exec(
       `sfdx auth:jwt:grant -d -u ${process.env.TESTKIT_HUB_USERNAME} -i ${
         process.env.TESTKIT_JWT_CLIENT_ID
-      } -f ${jwtKey} -r ${process.env.TESTKIT_HUB_INSTANCE || 'https://login.salesforce.com'}`
+      } -f ${jwtKey} -r ${process.env.TESTKIT_HUB_INSTANCE || 'https://login.salesforce.com'}`,
+      { silent: true }
     );
     return;
   }
@@ -39,7 +40,7 @@ export const authFromStubbedHome = (homeDir: string): void => {
     const tmpUrl = path.join(homeDir, 'tmpUrl');
     fs.writeFileSync(tmpUrl, process.env.TESTKIT_AUTH_URL);
 
-    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`);
+    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
     logger(shellOutput);
 
     return;
@@ -82,7 +83,9 @@ export const transferExistingAuthToEnv = (): void => {
     // this is a org from web:auth or auth:url.  Generate the authUrl and set in the env
     logger('copying variables to env from org:display for AuthUrl');
     const displayContents = JSON.parse(
-      shell.exec(`sfdx force:org:display -u ${process.env.TESTKIT_HUB_USERNAME} --verbose --json`) as string
+      shell.exec(`sfdx force:org:display -u ${process.env.TESTKIT_HUB_USERNAME} --verbose --json`, {
+        silent: true,
+      }) as string
     ) as OrgDisplayResult;
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
 
