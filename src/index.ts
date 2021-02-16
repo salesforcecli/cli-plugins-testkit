@@ -7,4 +7,6 @@
 
 export * from './genUniqueString';
 export * from './execCmd';
+export * from './testProject';
+export * from './testSession';
 export { Duration } from '@salesforce/kit';
