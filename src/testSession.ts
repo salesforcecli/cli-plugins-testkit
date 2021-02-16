@@ -8,13 +8,15 @@ import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
 import { Duration, env, parseJson, sleep } from '@salesforce/kit';
-import { getString, Optional } from '@salesforce/ts-types';
+import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
-import { TestProject, TestProjectConfig } from './testProject';
+
+import { TestProject, TestProjectOptions } from './testProject';
 import { authFromStubbedHome, transferExistingAuthToEnv } from './hubAuth';
+
 export interface TestSessionOptions {
   /**
    * Specify a different location for the test session.
@@ -24,62 +26,15 @@ export interface TestSessionOptions {
   /**
    * Define a test project to use for tests.
    */
-  project?: TestProjectConfig;
+  project?: TestProjectOptions;
 
   /**
    * Commands to run as setup for tests.  All must have exitCode == 0 or session
-   * creation will throw.  If an org create command is specified the test session
-   * will have a `orgUsername` property for use in tests.
+   * creation will throw.  Any org:create commands run as setup commands will
+   * be deleted as part of `TestSession.clean()`.
    */
   setupCommands?: string[];
 }
-
-// Executes commands and sets the org username if an org was created.
-// Throws if any commands return a non-zero exitCode.
-const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
-  // Add setup command results to an array on the TestSession so tests have access
-  // to that data.
-  testSession.setupCommandsResults = [];
-
-  if (cmds) {
-    const dbug = debug('testkit:setupCommands');
-    for (let cmd of cmds) {
-      // if it's an org:create without --json, append it anyway so we
-      // can get the org username and keep track of it.
-      if (cmd.includes('org:create')) {
-        // Don't create orgs if we are supposed to reuse one from the env
-        const org = env.getString('TESTKIT_ORG_USERNAME');
-        if (org) {
-          dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
-          testSession.setupCommandsResults.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
-          continue;
-        }
-        if (!cmd.includes('--json')) {
-          cmd += ' --json';
-        }
-      }
-      const rv = shell.exec(cmd, { silent: true });
-      if (rv.code !== 0) {
-        const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
-        throw Error(`Setup command ${cmd} failed due to: ${io}`);
-      }
-      dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
-
-      // keep track of the first org create
-      if (cmd.includes('org:create') && !testSession.orgUsername) {
-        try {
-          dbug(`Saving username from ${cmd}`);
-          const jsonOutput = parseJson(rv.stdout);
-          testSession.orgUsername = getString(jsonOutput, 'result.username') || undefined;
-        } catch (err: unknown) {
-          dbug(`TestSession created an org but failed JSON parsing due to:\n${(err as Error).message}`);
-        }
-      }
-
-      testSession.setupCommandsResults.push(rv);
-    }
-  }
-};
 
 /**
  * Represents a test session, which is a unique location for non-unit test (nut)
@@ -96,13 +51,14 @@ const setupCommands = (testSession: TestSession, cmds?: string[]): void => {
  *   TESTKIT_ORG_USERNAME = an org username to use for test commands. tests will use this org rather than creating new orgs.
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
- *   TESTKIT_ZIP_SESSION = zips the session dir when this is true
+ *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
  *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
  *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
+ 
  */
 export class TestSession {
   public id: string;
@@ -110,16 +66,21 @@ export class TestSession {
   public dir: string;
   public homeDir: string;
   public project?: TestProject;
-  public orgUsername = env.getString('TESTKIT_ORG_USERNAME');
-  public sandbox = createSandbox();
-  public setupCommandsResults?: shell.ShellString[];
+  public setup?: AnyJson[] | shell.ShellString;
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
+
   private overriddenDir?: string;
+  private sandbox = createSandbox();
+  private orgs: string[] = [];
+  private zipDir;
+  private sleep;
 
   private constructor(options: TestSessionOptions = {}) {
     this.debug = debug('testkit:session');
+    this.zipDir = zipDir;
+    this.sleep = sleep;
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
 
@@ -159,15 +120,15 @@ export class TestSession {
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     authFromStubbedHome(this.homeDir);
     // Run all setup commands
-    setupCommands(this, options.setupCommands);
+    this.setupCommands(options.setupCommands);
 
     this.debug('Created testkit session:');
     this.debug(`  ID: ${this.id}`);
     this.debug(`  Created Date: ${this.createdDate}`);
     this.debug(`  Dir: ${this.dir}`);
     this.debug(`  Home Dir: ${this.homeDir}`);
-    if (this.orgUsername) {
-      this.debug(`  Org Username: ${this.orgUsername}`);
+    if (this.orgs?.length) {
+      this.debug('  Orgs: ', this.orgs);
     }
     if (this.project) {
       this.debug(`  Project: ${this.project.dir}`);
@@ -219,13 +180,15 @@ export class TestSession {
 
     if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
       // Delete the orgs created by the tests unless pointing to a specific org
-      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgUsername) {
-        this.debug(`Deleting test org: ${this.orgUsername}`);
-        const rv = shell.exec(`sfdx force:org:delete -u ${this.orgUsername} -p`, { silent: true });
-        if (rv.code !== 0) {
-          throw Error(`Deleting org ${this.orgUsername} failed due to: ${rv.stderr}`);
+      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
+        for (const org of this.orgs) {
+          this.debug(`Deleting test org: ${org}`);
+          const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
+          if (rv.code !== 0) {
+            throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
+          }
+          this.debug('Deleted org result=', rv.stdout);
         }
-        this.debug('Deleted org result=', rv.stdout);
       }
 
       // Delete the test session unless they overrode the test session dir
@@ -233,7 +196,7 @@ export class TestSession {
         this.debug(`Deleting test session dir: ${this.dir}`);
         // Processes can hang on to files within the test session dir, preventing
         // removal so we wait a bit before trying.
-        await sleep(Duration.seconds(2));
+        await this.sleep(Duration.seconds(2));
         const rv = shell.rm('-rf', this.dir);
         if (rv.code !== 0) {
           throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
@@ -243,7 +206,7 @@ export class TestSession {
   }
 
   /**
-   * Zip the contents of a test session directory if the TESTKIT_ZIP_SESSION
+   * Zip the contents of a test session directory if the TESTKIT_ENABLE_ZIP
    * env var is set.
    *
    * @name The name of the zip file to create. Default is the test session dirname with .zip extension.
@@ -251,10 +214,65 @@ export class TestSession {
    * @returns The created zip file path.
    */
   public async zip(name?: string, destDir?: string): Promise<Optional<string>> {
-    if (env.getBoolean('TESTKIT_ZIP_SESSION')) {
+    if (env.getBoolean('TESTKIT_ENABLE_ZIP')) {
       name ??= `${path.basename(this.dir)}.zip`;
       destDir ??= path.dirname(this.dir);
-      return zipDir({ name, sourceDir: this.dir, destDir });
+      return this.zipDir({ name, sourceDir: this.dir, destDir });
+    }
+  }
+
+  // Executes commands and keeps track of any orgs created.
+  // Throws if any commands return a non-zero exitCode.
+  private setupCommands(cmds?: string[]): void {
+    if (cmds) {
+      const dbug = debug('testkit:setupCommands');
+      this.setup = [];
+
+      for (let cmd of cmds) {
+        if (cmd.includes('org:create')) {
+          // Don't create orgs if we are supposed to reuse one from the env
+          const org = env.getString('TESTKIT_ORG_USERNAME');
+          if (org) {
+            dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+            this.setup.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
+            continue;
+          }
+        }
+
+        // Add the json flag if it looks like an sfdx command so we can return
+        // parsed json in the command return.
+        if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
+          cmd += ' --json';
+        }
+
+        const rv = shell.exec(cmd, { silent: true });
+        if (rv.code !== 0) {
+          const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
+          throw Error(`Setup command ${cmd} failed due to: ${io}`);
+        }
+        dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
+
+        // Automatically parse json results
+        if (cmd.includes('--json')) {
+          try {
+            const jsonOutput = parseJson(rv.stdout);
+            // keep track of all org creates
+            if (cmd.includes('org:create')) {
+              const username = getString(jsonOutput, 'result.username');
+              if (username) {
+                dbug(`Saving org username: ${username} from ${cmd}`);
+                this.orgs.push(username);
+              }
+            }
+            this.setup.push(jsonOutput);
+          } catch (err: unknown) {
+            dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
+            this.setup.push(rv);
+          }
+        } else {
+          this.setup.push(rv);
+        }
+      }
     }
   }
 }

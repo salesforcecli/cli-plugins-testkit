@@ -12,9 +12,9 @@ import { debug, Debugger } from 'debug';
 import * as shell from 'shelljs';
 import { fs as fsCore } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
-import { zipDir } from './zip';
+import { zipDir, ZipDirConfig } from './zip';
 
-export interface TestProjectConfig {
+export interface TestProjectOptions {
   sourceDir?: string;
   gitClone?: string;
   name?: string;
@@ -34,10 +34,12 @@ export class TestProject {
   public createdDate: Date;
   public dir: string;
   private debug: Debugger;
+  private zipDir: (config: ZipDirConfig) => Promise<string>;
 
-  public constructor(options: TestProjectConfig) {
+  public constructor(options: TestProjectOptions) {
     this.debug = debug('testkit:project');
     this.debug(`Creating TestProject with options: ${inspect(options)}`);
+    this.zipDir = zipDir;
     this.createdDate = new Date();
 
     const destDir = options.destinationDir || tmpdir();
@@ -88,6 +90,6 @@ export class TestProject {
   public async zip(name?: string, destDir?: string): Promise<string> {
     name ??= `${path.basename(this.dir)}.zip`;
     destDir ??= path.dirname(this.dir);
-    return zipDir({ name, sourceDir: this.dir, destDir });
+    return this.zipDir({ name, sourceDir: this.dir, destDir });
   }
 }
