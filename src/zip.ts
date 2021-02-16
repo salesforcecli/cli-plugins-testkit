@@ -10,9 +10,21 @@ import { create as createArchive } from 'archiver';
 import Debug from 'debug';
 import { fs as fsCore } from '@salesforce/core';
 
-interface ZipDirConfig {
+export interface ZipDirConfig {
+  /**
+   * The directory to zip.
+   */
   sourceDir: string;
+
+  /**
+   * Zip will be written to this directory.
+   */
   destDir: string;
+
+  /**
+   * The name of the zip file to create including extension.
+   * E.g., "myArchivedDir.zip"
+   */
   name: string;
 }
 

@@ -65,9 +65,13 @@ export class TestSession {
   private overridenDir?: string;
   private sandbox = createSandbox();
   private orgs: string[] = [];
+  private zipDir;
+  private sleep;
 
   private constructor(options: TestSessionOptions = {}) {
     this.debug = debug('testkit:session');
+    this.zipDir = zipDir;
+    this.sleep = sleep;
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
 
@@ -178,7 +182,7 @@ export class TestSession {
         this.debug(`Deleting test session dir: ${this.dir}`);
         // Processes can hang on to files within the test session dir, preventing
         // removal so we wait a bit before trying.
-        await sleep(Duration.seconds(2));
+        await this.sleep(Duration.seconds(2));
         const rv = shell.rm('-rf', this.dir);
         if (rv.code !== 0) {
           throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
@@ -199,7 +203,7 @@ export class TestSession {
     if (env.getBoolean('TESTKIT_ENABLE_ZIP')) {
       name ??= `${path.basename(this.dir)}.zip`;
       destDir ??= path.dirname(this.dir);
-      return zipDir({ name, sourceDir: this.dir, destDir });
+      return this.zipDir({ name, sourceDir: this.dir, destDir });
     }
   }
 
