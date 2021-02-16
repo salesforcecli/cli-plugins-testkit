@@ -35,7 +35,7 @@ export const authFromStubbedHome = (homeDir: string): void => {
     return;
   }
   if (getAuthStrategy() === AuthStrategy.AUTH_URL && process.env.TESTKIT_AUTH_URL) {
-    logger(`trying url based auth using ${process.env.TESTKIT_AUTH_URL} for dir ${homeDir}`);
+    logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = path.join(homeDir, 'tmpUrl');
     fs.writeFileSync(tmpUrl, process.env.TESTKIT_AUTH_URL);
