@@ -39,12 +39,13 @@ export const testkitHubAuth = (homeDir: string): void => {
   if (getAuthStrategy() === AuthStrategy.JWT && process.env.TESTKIT_JWT_KEY) {
     logger('trying jwt auth');
     const jwtKey = path.join(homeDir, 'jwtKey');
-    fs.writeFileSync(jwtKey, process.env.TESTKIT_JWT_KEY);
+    fs.writeFileSync(jwtKey, env.getString('TESTKIT_JWT_KEY', ''));
 
     shell.exec(
-      `sfdx auth:jwt:grant -d -u ${process.env.TESTKIT_HUB_USERNAME} -i ${
-        process.env.TESTKIT_JWT_CLIENT_ID
-      } -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
+      `sfdx auth:jwt:grant -d -u ${env.getString('TESTKIT_HUB_USERNAME', '')} -i ${env.getString(
+        'TESTKIT_JWT_CLIENT_ID',
+        ''
+      )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       { silent: true, fatal: true }
     );
     return;
@@ -53,7 +54,7 @@ export const testkitHubAuth = (homeDir: string): void => {
     logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = path.join(homeDir, 'tmpUrl');
-    fs.writeFileSync(tmpUrl, process.env.TESTKIT_AUTH_URL);
+    fs.writeFileSync(tmpUrl, env.getString('TESTKIT_AUTH_URL', ''));
 
     const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true, fatal: true });
     logger(shellOutput);
@@ -94,34 +95,37 @@ export const transferExistingAuthToEnv = (): void => {
   if (getAuthStrategy() !== AuthStrategy.REUSE) return;
 
   const logger = debug('testkit:AuthReuse');
-  logger(`reading ${process.env.TESTKIT_HUB_USERNAME}.json`);
-  const authFileName = `${process.env.TESTKIT_HUB_USERNAME}.json`;
+  logger(`reading ${env.getString('TESTKIT_HUB_USERNAME', '')}.json`);
+  const authFileName = `${env.getString('TESTKIT_HUB_USERNAME', '')}.json`;
   const hubAuthFileSource = path.join(process.env.HOME || os.homedir(), '.sfdx', authFileName);
   const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFile;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
     // this is jwt.  set the appropriate env vars
-    process.env.TESTKIT_JWT_KEY = fs.readFileSync(authFileContents.privateKey, 'utf-8');
-    process.env.TESTKIT_JWT_CLIENT_ID = authFileContents.clientId;
-    process.env.TESTKIT_HUB_INSTANCE = authFileContents.instanceUrl;
+    env.setString('TESTKIT_JWT_KEY', fs.readFileSync(authFileContents.privateKey, 'utf-8'));
+    env.setString('TESTKIT_JWT_CLIENT_ID', authFileContents.clientId);
+    env.setString('TESTKIT_HUB_INSTANCE', authFileContents.instanceUrl);
+
     return;
   }
   if (authFileContents.refreshToken) {
     // this is an org from web:auth or auth:url.  Generate the authUrl and set in the env
     logger('copying variables to env from org:display for AuthUrl');
     const displayContents = JSON.parse(
-      shell.exec(`sfdx force:org:display -u ${process.env.TESTKIT_HUB_USERNAME} --verbose --json`, {
+      shell.exec(`sfdx force:org:display -u ${env.getString('TESTKIT_HUB_USERNAME', '')} --verbose --json`, {
         silent: true,
         fatal: true,
       }) as string
     ) as OrgDisplayResult;
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
-
-    process.env.TESTKIT_AUTH_URL = displayContents.result.sfdxAuthUrl;
+    env.setString('TESTKIT_AUTH_URL', displayContents.result.sfdxAuthUrl);
     return;
   }
   throw new Error(
-    `Unable to reuse existing hub ${process.env.TESTKIT_HUB_USERNAME}.  Check file ${process.env.TESTKIT_HUB_USERNAME}.json`
+    `Unable to reuse existing hub ${env.getString('TESTKIT_HUB_USERNAME', '')}.  Check file ${env.getString(
+      'TESTKIT_HUB_USERNAME',
+      ''
+    )}.json`
   );
 };
 
