@@ -9,7 +9,7 @@ import * as os from 'os';
 import { fs } from '@salesforce/core';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
-
+import { env } from '@salesforce/kit';
 // this seems to be a known eslint error for enums
 // eslint-disable-next-line no-shadow
 enum AuthStrategy {
@@ -19,6 +19,7 @@ enum AuthStrategy {
   NONE = 'NONE',
 }
 
+const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
 /**
  * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
  * Sets the hub as default for use in tests
@@ -40,7 +41,7 @@ export const testkitHubAuth = (homeDir: string): void => {
     shell.exec(
       `sfdx auth:jwt:grant -d -u ${process.env.TESTKIT_HUB_USERNAME} -i ${
         process.env.TESTKIT_JWT_CLIENT_ID
-      } -f ${jwtKey} -r ${process.env.TESTKIT_HUB_INSTANCE || 'https://login.salesforce.com'}`,
+      } -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       { silent: true }
     );
     return;
