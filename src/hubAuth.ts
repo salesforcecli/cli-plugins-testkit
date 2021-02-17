@@ -48,7 +48,7 @@ export const authFromStubbedHome = (homeDir: string): void => {
   logger('no hub configured');
 };
 
-export const getAuthStrategy = (): AuthStrategy => {
+const getAuthStrategy = (): AuthStrategy => {
   if (process.env.TESTKIT_JWT_CLIENT_ID && process.env.TESTKIT_HUB_USERNAME && process.env.TESTKIT_JWT_KEY) {
     return AuthStrategy.JWT;
   }
