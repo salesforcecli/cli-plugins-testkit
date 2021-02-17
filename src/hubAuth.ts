@@ -6,10 +6,12 @@
  */
 import * as path from 'path';
 import * as os from 'os';
-import { fs } from '@salesforce/core';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
+
+import { fs } from '@salesforce/core';
 import { env } from '@salesforce/kit';
+
 // this seems to be a known eslint error for enums
 // eslint-disable-next-line no-shadow
 enum AuthStrategy {
@@ -20,6 +22,7 @@ enum AuthStrategy {
 }
 
 const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
+
 /**
  * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
  * Sets the hub as default for use in tests
@@ -42,7 +45,7 @@ export const testkitHubAuth = (homeDir: string): void => {
       `sfdx auth:jwt:grant -d -u ${process.env.TESTKIT_HUB_USERNAME} -i ${
         process.env.TESTKIT_JWT_CLIENT_ID
       } -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
-      { silent: true }
+      { silent: true, fatal: true }
     );
     return;
   }
@@ -52,7 +55,7 @@ export const testkitHubAuth = (homeDir: string): void => {
     const tmpUrl = path.join(homeDir, 'tmpUrl');
     fs.writeFileSync(tmpUrl, process.env.TESTKIT_AUTH_URL);
 
-    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
+    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true, fatal: true });
     logger(shellOutput);
 
     return;
@@ -89,6 +92,7 @@ const getAuthStrategy = (): AuthStrategy => {
 export const transferExistingAuthToEnv = (): void => {
   // nothing to do if the variables are already provided
   if (getAuthStrategy() !== AuthStrategy.REUSE) return;
+
   const logger = debug('testkit:AuthReuse');
   logger(`reading ${process.env.TESTKIT_HUB_USERNAME}.json`);
   const authFileName = `${process.env.TESTKIT_HUB_USERNAME}.json`;
@@ -103,11 +107,12 @@ export const transferExistingAuthToEnv = (): void => {
     return;
   }
   if (authFileContents.refreshToken) {
-    // this is a org from web:auth or auth:url.  Generate the authUrl and set in the env
+    // this is an org from web:auth or auth:url.  Generate the authUrl and set in the env
     logger('copying variables to env from org:display for AuthUrl');
     const displayContents = JSON.parse(
       shell.exec(`sfdx force:org:display -u ${process.env.TESTKIT_HUB_USERNAME} --verbose --json`, {
         silent: true,
+        fatal: true,
       }) as string
     ) as OrgDisplayResult;
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
