@@ -15,7 +15,7 @@ import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
-import { authFromStubbedHome, transferExistingAuthToEnv } from './hubAuth';
+import { testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
 export interface TestSessionOptions {
   /**
@@ -118,7 +118,7 @@ export class TestSession {
     // TODO: does this work on Windows?
     process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
-    authFromStubbedHome(this.homeDir);
+    testkitHubAuth(this.homeDir);
     // Run all setup commands
     this.setupCommands(options.setupCommands);
 

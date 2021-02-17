@@ -19,7 +19,18 @@ enum AuthStrategy {
   NONE = 'NONE',
 }
 
-export const authFromStubbedHome = (homeDir: string): void => {
+/**
+ * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
+ * Sets the hub as default for use in tests
+ *
+ * @param homeDir the testSession directory where credential files will be written
+ *
+ * reads environment variables that are set by the user OR via transferExistingAuthToEnv
+ *   for jwt: TESTKIT_HUB_USERNAME, TESTKIT_JWT_CLIENT_ID, TESTKIT_JWT_KEY
+ *     optional but recommended: TESTKIT_HUB_INSTANCE
+ *   required for AuthUrl:
+ */
+export const testkitHubAuth = (homeDir: string): void => {
   const logger = debug('testkit:authFromStubbedHome');
   if (getAuthStrategy() === AuthStrategy.JWT && process.env.TESTKIT_JWT_KEY) {
     logger('trying jwt auth');
@@ -62,7 +73,18 @@ const getAuthStrategy = (): AuthStrategy => {
   return AuthStrategy.NONE;
 };
 
-// moves jwt files;
+/**
+ * For scenarios where a hub has already been authenticated in the environment and the username is provided,
+ * set the environment variables from the existing hub's information.
+ *
+ * reads environment variables
+ *   TESTKIT_HUB_USERNAME : the username (not alias) of a devHub
+ *
+ * write environment variables
+ *  TESTKIT_AUTH_URL (if using refreshToken)
+ *  TESTKIT_JWT_KEY,TESTKIT_JWT_CLIENT_ID,TESTKIT_HUB_INSTANCE (if using jwt)
+ *
+ */
 export const transferExistingAuthToEnv = (): void => {
   // nothing to do if the variables are already provided
   if (getAuthStrategy() !== AuthStrategy.REUSE) return;
