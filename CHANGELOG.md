@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.5...v0.0.6) (2021-02-18)
+
+
+### Bug Fixes
+
+* properly format jwtkey prior to file save ([c6045d3](https://github.com/salesforcecli/cli-plugins-testkit/commit/c6045d301ba97511e50d9fbd470e2ec74fed614a))
+
 ### [0.0.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.4...v0.0.5) (2021-02-18)
 
 
