@@ -76,7 +76,7 @@ export const testkitHubAuth = (homeDir: string): void => {
       )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       { silent: true }
     );
-    if (results.code) {
+    if (results.code !== 0) {
       throw new Error(
         `jwt:grant for org ${env.getString(
           'TESTKIT_HUB_USERNAME',
@@ -94,7 +94,7 @@ export const testkitHubAuth = (homeDir: string): void => {
 
     const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
     logger(shellOutput);
-    if (shellOutput.code) {
+    if (shellOutput.code !== 0) {
       throw new Error(
         `auth:sfdxurl for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
           shellOutput.stdout + shellOutput.stderr
