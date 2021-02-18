@@ -302,7 +302,7 @@ describe('TestSession', () => {
 
     it('should not remove the test session dir when overridden', async () => {
       // @ts-ignore
-      session.overridenDir = 'overriden';
+      session.overriddenDir = 'overriden';
 
       await session.clean();
 
