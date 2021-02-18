@@ -164,19 +164,7 @@ export class TestSession {
     // Always restore the sandbox
     this.sandbox.restore();
 
-    if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
-      // Delete the orgs created by the tests unless pointing to a specific org
-      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
-        for (const org of this.orgs) {
-          this.debug(`Deleting test org: ${org}`);
-          const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
-          if (rv.code !== 0) {
-            throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
-          }
-          this.debug('Deleted org result=', rv.stdout);
-        }
-      }
-
+    const rmSessionDir = async () => {
       // Delete the test session unless they overrode the test session dir
       if (!this.overridenDir) {
         this.debug(`Deleting test session dir: ${this.dir}`);
@@ -188,6 +176,24 @@ export class TestSession {
           throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
         }
       }
+    };
+
+    if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
+      // Delete the orgs created by the tests unless pointing to a specific org
+      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
+        for (const org of this.orgs) {
+          this.debug(`Deleting test org: ${org}`);
+          const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
+          if (rv.code !== 0) {
+            // Must still delete the session dir if org:delete fails
+            await rmSessionDir();
+            throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
+          }
+          this.debug('Deleted org result=', rv.stdout);
+        }
+      }
+      // Delete the session dir
+      await rmSessionDir();
     }
   }
 
@@ -220,7 +226,7 @@ export class TestSession {
           const org = env.getString('TESTKIT_ORG_USERNAME');
           if (org) {
             dbug(`Not creating a new org. Resuing TESTKIT_ORG_USERNAME of: ${org}`);
-            this.setup.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
+            this.setup.push({ result: { username: org } });
             continue;
           }
         }
