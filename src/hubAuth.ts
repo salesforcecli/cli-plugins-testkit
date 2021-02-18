@@ -24,6 +24,38 @@ enum AuthStrategy {
 const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
 
 /**
+ * Function examines the env var TESTKIT_JWT_KEY to determine if it needs to be
+ * reformatted so when saved to a file the RSA key file contents are formatted
+ * properly.
+ *
+ * Throws an error if function is called and the env var is undefined
+ *
+ * returns a string that complies with RSA private key file format
+ */
+const formatJwtKey = (): string => {
+  if (env.getString('TESTKIT_JWT_KEY')) {
+    let keyLines = env.getString('TESTKIT_JWT_KEY', '').split('\n');
+    if (keyLines.length <= 1) {
+      const footer = '-----END RSA PRIVATE KEY-----';
+      const header = '-----BEGIN RSA PRIVATE KEY-----';
+      // strip out header and footer
+      const newKeyContents = env.getString('TESTKIT_JWT_KEY', '').replace(header, '').replace(footer, '');
+      // check to see if newlines were replaced with spaces
+      keyLines = newKeyContents.trim().split(/\s/);
+      if (keyLines.length <= 1) {
+        // still one big string, split into 64 byte chucks
+        keyLines = [header, ...(newKeyContents.match(/.{1,64}/g) as string[]), footer];
+      } else {
+        keyLines = [header, ...keyLines, footer];
+      }
+    }
+    return keyLines.join('\n');
+  } else {
+    throw new Error('env var TESTKIT_JWT_KEY is undefined');
+  }
+};
+
+/**
  * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
  * Sets the hub as default for use in tests
  *
@@ -36,10 +68,10 @@ const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
  */
 export const testkitHubAuth = (homeDir: string): void => {
   const logger = debug('testkit:authFromStubbedHome');
-  if (getAuthStrategy() === AuthStrategy.JWT && process.env.TESTKIT_JWT_KEY) {
+  if (getAuthStrategy() === AuthStrategy.JWT) {
     logger('trying jwt auth');
     const jwtKey = path.join(homeDir, 'jwtKey');
-    fs.writeFileSync(jwtKey, env.getString('TESTKIT_JWT_KEY', ''));
+    fs.writeFileSync(jwtKey, formatJwtKey());
 
     shell.exec(
       `sfdx auth:jwt:grant -d -u ${env.getString('TESTKIT_HUB_USERNAME', '')} -i ${env.getString(
@@ -50,7 +82,7 @@ export const testkitHubAuth = (homeDir: string): void => {
     );
     return;
   }
-  if (getAuthStrategy() === AuthStrategy.AUTH_URL && process.env.TESTKIT_AUTH_URL) {
+  if (getAuthStrategy() === AuthStrategy.AUTH_URL) {
     logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = path.join(homeDir, 'tmpUrl');
@@ -65,14 +97,18 @@ export const testkitHubAuth = (homeDir: string): void => {
 };
 
 const getAuthStrategy = (): AuthStrategy => {
-  if (process.env.TESTKIT_JWT_CLIENT_ID && process.env.TESTKIT_HUB_USERNAME && process.env.TESTKIT_JWT_KEY) {
+  if (
+    env.getString('TESTKIT_JWT_CLIENT_ID') &&
+    env.getString('TESTKIT_HUB_USERNAME') &&
+    env.getString('TESTKIT_JWT_KEY')
+  ) {
     return AuthStrategy.JWT;
   }
-  if (process.env.TESTKIT_AUTH_URL) {
+  if (env.getString('TESTKIT_AUTH_URL')) {
     return AuthStrategy.AUTH_URL;
   }
   // none of the above are included, so we want to reuse an already authenticated hub
-  if (process.env.TESTKIT_HUB_USERNAME) {
+  if (env.getString('TESTKIT_HUB_USERNAME')) {
     return AuthStrategy.REUSE;
   }
   return AuthStrategy.NONE;
@@ -97,7 +133,7 @@ export const transferExistingAuthToEnv = (): void => {
   const logger = debug('testkit:AuthReuse');
   logger(`reading ${env.getString('TESTKIT_HUB_USERNAME', '')}.json`);
   const authFileName = `${env.getString('TESTKIT_HUB_USERNAME', '')}.json`;
-  const hubAuthFileSource = path.join(process.env.HOME || os.homedir(), '.sfdx', authFileName);
+  const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
   const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFile;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
