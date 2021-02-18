@@ -34,20 +34,16 @@ const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
  */
 const formatJwtKey = (): string => {
   if (env.getString('TESTKIT_JWT_KEY')) {
-    let keyLines = env.getString('TESTKIT_JWT_KEY', '').split('\n');
+    const jwtKey = env.getString('TESTKIT_JWT_KEY') as string;
+    let keyLines = jwtKey.split(os.EOL);
     if (keyLines.length <= 1) {
       const footer = '-----END RSA PRIVATE KEY-----';
       const header = '-----BEGIN RSA PRIVATE KEY-----';
-      // strip out header and footer
-      const newKeyContents = env.getString('TESTKIT_JWT_KEY', '').replace(header, '').replace(footer, '');
-      // check to see if newlines were replaced with spaces
-      keyLines = newKeyContents.trim().split(/\s/);
-      if (keyLines.length <= 1) {
-        // still one big string, split into 64 byte chucks
-        keyLines = [header, ...(newKeyContents.match(/.{1,64}/g) as string[]), footer];
-      } else {
-        keyLines = [header, ...keyLines, footer];
-      }
+      // strip out header, footer and spaces
+      const newKeyContents = jwtKey.replace(header, '').replace(footer, '').replace(/\s/g, '');
+      // one big string, split into 64 byte chucks
+      // const chunks = newKeyContents.match(/.{1,64}/g) as string[];
+      keyLines = [header, ...(newKeyContents.match(/.{1,64}/g) as string[]), footer];
     }
     return keyLines.join('\n');
   } else {
@@ -73,13 +69,21 @@ export const testkitHubAuth = (homeDir: string): void => {
     const jwtKey = path.join(homeDir, 'jwtKey');
     fs.writeFileSync(jwtKey, formatJwtKey());
 
-    shell.exec(
+    const results = shell.exec(
       `sfdx auth:jwt:grant -d -u ${env.getString('TESTKIT_HUB_USERNAME', '')} -i ${env.getString(
         'TESTKIT_JWT_CLIENT_ID',
         ''
       )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
-      { silent: true, fatal: true }
+      { silent: true }
     );
+    if (results.code) {
+      throw new Error(
+        `jwt:grant for org ${env.getString(
+          'TESTKIT_HUB_USERNAME',
+          'TESTKIT_HUB_USERNAME was not set'
+        )} failed with exit code: ${results.code}\n ${results.stdout + results.stderr}`
+      );
+    }
     return;
   }
   if (getAuthStrategy() === AuthStrategy.AUTH_URL) {
@@ -88,8 +92,15 @@ export const testkitHubAuth = (homeDir: string): void => {
     const tmpUrl = path.join(homeDir, 'tmpUrl');
     fs.writeFileSync(tmpUrl, env.getString('TESTKIT_AUTH_URL', ''));
 
-    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true, fatal: true });
+    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
     logger(shellOutput);
+    if (shellOutput.code) {
+      throw new Error(
+        `auth:sfdxurl for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
+          shellOutput.stdout + shellOutput.stderr
+        }`
+      );
+    }
 
     return;
   }
