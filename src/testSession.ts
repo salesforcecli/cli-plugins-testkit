@@ -4,7 +4,6 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
 import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
@@ -14,7 +13,9 @@ import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
+
 import { TestProject, TestProjectOptions } from './testProject';
+import { testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
 export interface TestSessionOptions {
   /**
@@ -51,6 +52,13 @@ export interface TestSessionOptions {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
+ *
+ *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
+ *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
+ *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
+ *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
+ *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
+ 
  */
 export class TestSession {
   public id: string;
@@ -62,7 +70,8 @@ export class TestSession {
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
-  private overridenDir?: string;
+
+  private overriddenDir?: string;
   private sandbox = createSandbox();
   private orgs: string[] = [];
   private zipDir;
@@ -76,8 +85,8 @@ export class TestSession {
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
 
     // Create the test session directory
-    this.overridenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
-    this.dir = this.overridenDir || path.join(process.cwd(), `test_session_${this.id}`);
+    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
+    this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
     fsCore.mkdirpSync(this.dir);
 
     // Setup a test project and stub process.cwd to be the project dir
@@ -102,9 +111,14 @@ export class TestSession {
     // Write the test session options used to create this session
     fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
 
-    // Set the homedir used by this test, on the TestSession and the process
-    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+    // have to grab this before we change the home
+    transferExistingAuthToEnv();
 
+    // Set the homedir used by this test, on the TestSession and the process
+    // TODO: does this work on Windows?
+    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+    process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
+    testkitHubAuth(this.homeDir);
     // Run all setup commands
     this.setupCommands(options.setupCommands);
 
@@ -178,7 +192,7 @@ export class TestSession {
       }
 
       // Delete the test session unless they overrode the test session dir
-      if (!this.overridenDir) {
+      if (!this.overriddenDir) {
         this.debug(`Deleting test session dir: ${this.dir}`);
         // Processes can hang on to files within the test session dir, preventing
         // removal so we wait a bit before trying.
@@ -219,7 +233,7 @@ export class TestSession {
           // Don't create orgs if we are supposed to reuse one from the env
           const org = env.getString('TESTKIT_ORG_USERNAME');
           if (org) {
-            dbug(`Not creating a new org. Resuing TESTKIT_ORG_USERNAME of: ${org}`);
+            dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
             this.setup.push(new shell.ShellString(`TESTKIT_ORG_USERNAME=${org}`));
             continue;
           }
