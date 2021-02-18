@@ -29,6 +29,8 @@ Using a different file extension will help separate your unit tests from your NU
 }
 ```
 
+**See [Samples](./SAMPLES.md) doc for many testkit usecases and sample code**
+
 ## Running Commands
 
 Running oclif commands locally is as simple as running against the local `bin/run` file.
