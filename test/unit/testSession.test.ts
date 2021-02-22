@@ -15,10 +15,12 @@ import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { fs as fsCore } from '@salesforce/core';
-import { env } from '@salesforce/kit';
+import { Duration, env } from '@salesforce/kit';
 import Sinon = require('sinon');
+import { ensureAnyJson } from '@salesforce/ts-types';
 import { TestSession } from '../../src/testSession';
 import { TestProject } from '../../src/testProject';
+import { ExecCmdResult } from '../../src/execCmd';
 
 describe('TestSession', () => {
   const sandbox = sinon.createSandbox();
@@ -144,8 +146,18 @@ describe('TestSession', () => {
 
     it('should create a session with setup commands', () => {
       const setupCommands = ['sfdx foo:bar -r testing'];
-      const execRv = { result: { donuts: 'yum' } };
-      const shellString = new ShellString(JSON.stringify(execRv));
+      const testSessionSetupResult: ExecCmdResult = {
+        command: 'sfdx foo:bar -r testing --json',
+        jsonOutput: ensureAnyJson({
+          result: {
+            donuts: 'yum',
+          },
+        }),
+        shellOutput: new ShellString(JSON.stringify({ result: { donuts: 'yum' } })),
+        execCmdDuration: Duration.milliseconds(0),
+      };
+      const execRv = [testSessionSetupResult];
+      const shellString = execRv[0].shellOutput;
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
@@ -158,7 +170,9 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([execRv]);
+      expect(session.setup).to.have.lengthOf(1);
+      (session.setup ?? []).forEach((setup) => (setup.execCmdDuration = Duration.milliseconds(0)));
+      expect(session.setup).to.deep.equal(execRv);
       expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
       expect(process.env.HOME).to.equal(session.homeDir);
     });
@@ -166,8 +180,18 @@ describe('TestSession', () => {
     it('should create a session with org creation setup commands', () => {
       const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
       const username = 'hey@ho.org';
-      const execRv = { result: { username } };
-      const shellString = new ShellString(JSON.stringify(execRv));
+      const testSessionSetupResult: ExecCmdResult = {
+        command: 'sfdx org:create -f config/project-scratch-def.json --json',
+        jsonOutput: ensureAnyJson({
+          result: {
+            username: 'hey@ho.org',
+          },
+        }),
+        shellOutput: new ShellString(JSON.stringify({ result: { username } })),
+        execCmdDuration: Duration.milliseconds(0),
+      };
+      const execRv = [testSessionSetupResult];
+      const shellString = execRv[0].shellOutput;
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
@@ -180,7 +204,8 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([execRv]);
+      (session.setup ?? []).forEach((setup) => (setup.execCmdDuration = Duration.milliseconds(0)));
+      expect(session.setup).to.deep.equal(execRv);
       expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
       expect(process.env.HOME).to.equal(session.homeDir);
       // @ts-ignore session.orgs is private
@@ -197,10 +222,22 @@ describe('TestSession', () => {
         .returns(homedir);
       const username = 'hey@ho.org';
       const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
-      const execRv = { result: { username } };
-      const shellString = new ShellString(JSON.stringify(execRv));
+      const testSessionSetupResult: ExecCmdResult = {
+        command: 'sfdx org:create -f config/project-scratch-def.json',
+        jsonOutput: ensureAnyJson({
+          result: {
+            username: overriddenUsername,
+          },
+        }),
+        shellOutput: new ShellString(JSON.stringify({ result: { username: overriddenUsername } })),
+        execCmdDuration: Duration.milliseconds(0),
+      };
+      const execRv = [testSessionSetupResult];
+      const shellString = execRv[0].shellOutput;
       shellString.code = 0;
-      const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+      const execStub = stubMethod(sandbox, shelljs, 'exec').returns(
+        new ShellString(JSON.stringify({ result: { username } }))
+      );
 
       const session = TestSession.create({ setupCommands });
 
@@ -211,7 +248,7 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(homedir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([{ result: { username: overriddenUsername } }]);
+      expect(session.setup).to.deep.equal(execRv);
       expect(execStub.called).to.equal(false);
       expect(process.env.HOME).to.equal(session.homeDir);
       // @ts-ignore session.orgs is private

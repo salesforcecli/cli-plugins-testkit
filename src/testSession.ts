@@ -8,14 +8,16 @@ import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
 import { Duration, env, parseJson, sleep } from '@salesforce/kit';
-import { AnyJson, getString, Optional } from '@salesforce/ts-types';
+import { ensureAnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
+import stripAnsi = require('strip-ansi');
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
 import { testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+import { hrtimeToMillisDuration, ExecCmdResult } from './execCmd';
 
 export interface TestSessionOptions {
   /**
@@ -58,22 +60,22 @@ export interface TestSessionOptions {
  *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
- 
  */
+
 export class TestSession {
   public id: string;
   public createdDate: Date;
   public dir: string;
   public homeDir: string;
   public project?: TestProject;
-  public setup?: AnyJson[] | shell.ShellString;
+  public setup?: ExecCmdResult[];
+  public orgs: string[] = [];
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
 
   private overriddenDir?: string;
   private sandbox = createSandbox();
-  private orgs: string[] = [];
   private zipDir;
   private sleep;
 
@@ -240,7 +242,12 @@ export class TestSession {
           const org = env.getString('TESTKIT_ORG_USERNAME');
           if (org) {
             dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
-            this.setup.push({ result: { username: org } });
+            this.setup.push({
+              command: cmd,
+              jsonOutput: { result: { username: org } },
+              shellOutput: new shell.ShellString(JSON.stringify({ result: { username: org } })),
+              execCmdDuration: Duration.milliseconds(0),
+            });
             continue;
           }
         }
@@ -251,7 +258,11 @@ export class TestSession {
           cmd += ' --json';
         }
 
+        const startTime = process.hrtime();
         const rv = shell.exec(cmd, { silent: true });
+        const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
+        rv.stdout = stripAnsi(rv.stdout);
+        rv.stderr = stripAnsi(rv.stderr);
         if (rv.code !== 0) {
           const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
           throw Error(`Setup command ${cmd} failed due to: ${io}`);
@@ -270,13 +281,18 @@ export class TestSession {
                 this.orgs.push(username);
               }
             }
-            this.setup.push(jsonOutput);
+            this.setup.push({
+              command: cmd,
+              jsonOutput: ensureAnyJson(jsonOutput),
+              shellOutput: rv,
+              execCmdDuration,
+            });
           } catch (err: unknown) {
             dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
-            this.setup.push(rv);
+            this.setup.push({ command: cmd, shellOutput: rv, execCmdDuration });
           }
         } else {
-          this.setup.push(rv);
+          this.setup.push({ command: cmd, shellOutput: rv, execCmdDuration });
         }
       }
     }

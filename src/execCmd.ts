@@ -14,6 +14,8 @@ import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
+import stripAnsi = require('strip-ansi');
+
 export interface ExecCmdOptions extends ExecOptions {
   /**
    * Throws if this exit code is not returned by the child process.
@@ -22,6 +24,10 @@ export interface ExecCmdOptions extends ExecOptions {
 }
 
 export interface ExecCmdResult {
+  /**
+   * The command
+   */
+  command: string;
   /**
    * Command output from the shell.
    *
@@ -55,15 +61,11 @@ const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
   return { ...defaults, ...options };
 };
 
-// Create a Duration instance from process.hrtime
-const hrtimeToMillisDuration = (hrTime: [number, number]) =>
-  Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
-
 // Add JSON output if json flag is set
 const addJsonOutput = (cmd: string, result: ExecCmdResult): ExecCmdResult => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(result.shellOutput.stdout);
+      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout));
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
@@ -117,6 +119,7 @@ const execCmdSync = (cmd: string, options?: ExecCmdOptions): ExecCmdResult => {
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
   const result: ExecCmdResult = {
+    command: cmd,
     shellOutput: '' as ShellString,
     execCmdDuration: Duration.seconds(0),
   };
@@ -158,12 +161,13 @@ const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecC
       }
 
       const result: ExecCmdResult = {
+        command: cmd,
         shellOutput: new ShellString(stdout),
         execCmdDuration,
       };
       result.shellOutput.code = code;
-      result.shellOutput.stdout = stdout;
-      result.shellOutput.stderr = stderr;
+      result.shellOutput.stdout = stripAnsi(stdout);
+      result.shellOutput.stderr = stripAnsi(stderr);
 
       resolve(addJsonOutput(cmd, result));
     };
@@ -175,6 +179,10 @@ const execCmdAsync = async (cmd: string, options: ExecCmdOptions): Promise<ExecC
 
   return resultPromise;
 };
+
+// Create a Duration instance from process.hrtime
+export const hrtimeToMillisDuration = (hrTime: [number, number]) =>
+  Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
 
 /**
  * Synchronously execute a command with the provided options in a child process.
