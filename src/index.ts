@@ -7,6 +7,7 @@
 
 export * from './genUniqueString';
 export * from './execCmd';
+export { prepareForAuthUrl, prepareForJwt } from './hubAuth';
 export * from './testProject';
 export * from './testSession';
 export { Duration } from '@salesforce/kit';
