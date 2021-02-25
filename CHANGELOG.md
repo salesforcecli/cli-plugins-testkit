@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.10...v0.0.11) (2021-02-25)
+
+
+### Bug Fixes
+
+* windows homedir ([aafc2d2](https://github.com/salesforcecli/cli-plugins-testkit/commit/aafc2d2eea6d8168968916089fe10afc9dcfab73))
+
 ### [0.0.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.8...v0.0.10) (2021-02-21)
 
 
