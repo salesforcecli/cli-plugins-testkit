@@ -52,6 +52,7 @@ describe('TestSession', () => {
       expect(session.project).to.equal(undefined);
       expect(session.setup).to.equal(undefined);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should create a session with specific dir', () => {
@@ -67,6 +68,7 @@ describe('TestSession', () => {
       expect(session.project).to.equal(undefined);
       expect(session.setup).to.equal(undefined);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should create a session with specific dir and homedir from env', () => {
@@ -88,6 +90,7 @@ describe('TestSession', () => {
       expect(session.project).to.equal(undefined);
       expect(session.setup).to.equal(undefined);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should create a session with a project', () => {
@@ -111,6 +114,7 @@ describe('TestSession', () => {
       expect(stubCwdStub.firstCall.args[0]).to.equal(session.project?.dir);
       expect(session.setup).to.equal(undefined);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should use an existing project', () => {
@@ -140,6 +144,7 @@ describe('TestSession', () => {
       expect(stubCwdStub.firstCall.args[0]).to.equal(projectDir);
       expect(session.setup).to.equal(undefined);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should create a session with setup commands', () => {
@@ -161,6 +166,7 @@ describe('TestSession', () => {
       expect(session.setup).to.deep.equal([execRv]);
       expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
     it('should create a session with org creation setup commands', () => {
@@ -183,6 +189,8 @@ describe('TestSession', () => {
       expect(session.setup).to.deep.equal([execRv]);
       expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
+
       // @ts-ignore session.orgs is private
       expect(session.orgs).to.deep.equal([username]);
     });
@@ -214,6 +222,8 @@ describe('TestSession', () => {
       expect(session.setup).to.deep.equal([{ result: { username: overriddenUsername } }]);
       expect(execStub.called).to.equal(false);
       expect(process.env.HOME).to.equal(session.homeDir);
+      expect(process.env.USERPROFILE).to.equal(session.homeDir);
+
       // @ts-ignore session.orgs is private
       expect(session.orgs).to.deep.equal([]);
     });
