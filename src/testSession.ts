@@ -15,7 +15,7 @@ import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
-import { testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+import { AuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
 export interface TestSessionOptions {
   /**
@@ -34,6 +34,11 @@ export interface TestSessionOptions {
    * be deleted as part of `TestSession.clean()`.
    */
   setupCommands?: string[];
+
+  /**
+   * The preferred auth method to use
+   */
+  authStrategy?: keyof typeof AuthStrategy;
 }
 
 /**
@@ -58,7 +63,6 @@ export interface TestSessionOptions {
  *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
- 
  */
 export class TestSession {
   public id: string;
@@ -111,14 +115,15 @@ export class TestSession {
     // Write the test session options used to create this session
     fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
 
+    const authStrategy = options.authStrategy ? AuthStrategy[options.authStrategy] : undefined;
     // have to grab this before we change the home
-    transferExistingAuthToEnv();
+    transferExistingAuthToEnv(authStrategy);
 
     // Set the homedir used by this test, on the TestSession and the process
     process.env.USERPROFILE = process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
 
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
-    testkitHubAuth(this.homeDir);
+    testkitHubAuth(this.homeDir, authStrategy);
     // Run all setup commands
     this.setupCommands(options.setupCommands);
 

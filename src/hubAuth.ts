@@ -9,12 +9,12 @@ import * as os from 'os';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
 
-import { fs } from '@salesforce/core';
+import { AuthFields, fs } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
 // this seems to be a known eslint error for enums
 // eslint-disable-next-line no-shadow
-enum AuthStrategy {
+export enum AuthStrategy {
   JWT = 'JWT',
   AUTH_URL = 'AUTH_URL',
   REUSE = 'REUSE',
@@ -51,23 +51,35 @@ const formatJwtKey = (): string => {
   }
 };
 
+export const prepareForJwt = (homeDir: string): string => {
+  const jwtKey = path.join(homeDir, 'jwtKey');
+  fs.writeFileSync(jwtKey, formatJwtKey());
+  return jwtKey;
+};
+
+export const prepareForAuthUrl = (homeDir: string): string => {
+  const tmpUrl = path.join(homeDir, 'tmpUrl');
+  fs.writeFileSync(tmpUrl, env.getString('TESTKIT_AUTH_URL', ''));
+  return tmpUrl;
+};
+
 /**
  * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
  * Sets the hub as default for use in tests
  *
  * @param homeDir the testSession directory where credential files will be written
+ * @param authStrategy the authorization method to use
  *
  * reads environment variables that are set by the user OR via transferExistingAuthToEnv
  *   for jwt: TESTKIT_HUB_USERNAME, TESTKIT_JWT_CLIENT_ID, TESTKIT_JWT_KEY
  *     optional but recommended: TESTKIT_HUB_INSTANCE
- *   required for AuthUrl:
+ *   required for AuthUrl: TESTKIT_AUTH_URL
  */
-export const testkitHubAuth = (homeDir: string): void => {
+export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = getAuthStrategy()): void => {
   const logger = debug('testkit:authFromStubbedHome');
-  if (getAuthStrategy() === AuthStrategy.JWT) {
+  if (authStrategy === AuthStrategy.JWT) {
     logger('trying jwt auth');
-    const jwtKey = path.join(homeDir, 'jwtKey');
-    fs.writeFileSync(jwtKey, formatJwtKey());
+    const jwtKey = prepareForJwt(homeDir);
 
     const results = shell.exec(
       `sfdx auth:jwt:grant -d -u ${env.getString('TESTKIT_HUB_USERNAME', '')} -i ${env.getString(
@@ -86,11 +98,10 @@ export const testkitHubAuth = (homeDir: string): void => {
     }
     return;
   }
-  if (getAuthStrategy() === AuthStrategy.AUTH_URL) {
+  if (authStrategy === AuthStrategy.AUTH_URL) {
     logger('trying to authenticate with AuthUrl');
 
-    const tmpUrl = path.join(homeDir, 'tmpUrl');
-    fs.writeFileSync(tmpUrl, env.getString('TESTKIT_AUTH_URL', ''));
+    const tmpUrl = prepareForAuthUrl(homeDir);
 
     const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
     logger(shellOutput);
@@ -137,15 +148,15 @@ const getAuthStrategy = (): AuthStrategy => {
  *  TESTKIT_JWT_KEY,TESTKIT_JWT_CLIENT_ID,TESTKIT_HUB_INSTANCE (if using jwt)
  *
  */
-export const transferExistingAuthToEnv = (): void => {
+export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthStrategy()): void => {
   // nothing to do if the variables are already provided
-  if (getAuthStrategy() !== AuthStrategy.REUSE) return;
+  if (authStrategy !== AuthStrategy.REUSE) return;
 
   const logger = debug('testkit:AuthReuse');
   logger(`reading ${env.getString('TESTKIT_HUB_USERNAME', '')}.json`);
   const authFileName = `${env.getString('TESTKIT_HUB_USERNAME', '')}.json`;
   const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
-  const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFile;
+  const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFields;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
     // this is jwt.  set the appropriate env vars
@@ -175,14 +186,6 @@ export const transferExistingAuthToEnv = (): void => {
     )}.json`
   );
 };
-
-interface AuthFile {
-  username: string;
-  instanceUrl: string;
-  clientId?: string;
-  privateKey?: string;
-  refreshToken?: string;
-}
 
 interface OrgDisplayResult {
   result: {
