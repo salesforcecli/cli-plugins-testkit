@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.11...v0.0.12) (2021-02-25)
+
+
+### Features
+
+* specify auth strategy ([7f07f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/7f07f228ba3c4f957a5cbf81e22ffc43189a6413))
+
 ### [0.0.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.10...v0.0.11) (2021-02-25)
 
 
