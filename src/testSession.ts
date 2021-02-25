@@ -115,8 +115,8 @@ export class TestSession {
     transferExistingAuthToEnv();
 
     // Set the homedir used by this test, on the TestSession and the process
-    // TODO: does this work on Windows?
-    process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+    process.env.USERPROFILE = process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
+
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     testkitHubAuth(this.homeDir);
     // Run all setup commands
