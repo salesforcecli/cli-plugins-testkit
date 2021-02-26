@@ -11,6 +11,7 @@ import { Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
+import stripAnsi = require('strip-ansi');
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
@@ -257,6 +258,8 @@ export class TestSession {
         }
 
         const rv = shell.exec(cmd, { silent: true });
+        rv.stdout = stripAnsi(rv.stdout);
+        rv.stderr = stripAnsi(rv.stderr);
         if (rv.code !== 0) {
           const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
           throw Error(`Setup command ${cmd} failed due to: ${io}`);
