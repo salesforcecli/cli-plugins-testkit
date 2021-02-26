@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.13](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.12...v0.0.13) (2021-02-26)
+
+
+### Features
+
+* add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([7ce118a](https://github.com/salesforcecli/cli-plugins-testkit/commit/7ce118abe02e9128a04f9a80767a32b909ace96c))
+
 ### [0.0.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.11...v0.0.12) (2021-02-25)
 
 
