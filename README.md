@@ -24,10 +24,16 @@ Using a different file extension will help separate your unit tests from your NU
 {
   "scripts": {
     "test": "mocha **/*.test.ts",
-    "test-nut": "mocha **/*.nut.ts"
+    "test:nuts": "mocha **/*.nut.ts"
   }
 }
 ```
+
+Because NUTs run much slower than unit tests, you may also want to add some mocha options
+
+- `--timeout 600000` to give tests time to complete
+- `--parallel` to run tests in parallel (requires mocha >= 8)
+- `--slow 4500` to set a reasonable value for the color coded output
 
 **See [Samples](./SAMPLES.md) doc for many testkit usecases and sample code**
 
@@ -52,6 +58,37 @@ const result = execCmd('mycommand --myflag --json');
 console.log(result.jsonOutput);
 ```
 
+### Simplified Assertions
+
+You can pass in an expected exit code in the options to avoid repetitively checking for it to easily assert pass/fail.
+
+```typescript
+import { execCmd } from '@salesforce/cli-plugins-testkit';
+
+execCmd('force:user:password:generate', { ensureExitCode: 0 });
+```
+
+### Simplified Types
+
+You can set the return type to avoid casting/any/unknown in your tests.
+
+```typescript
+import { execCmd } from '@salesforce/cli-plugins-testkit';
+
+const output = execCmd<SomeType>('mycommand --myflag --json').jsonOutput;
+```
+
+`output` will be of type
+
+```typescript
+{
+  status: number;
+  result: SomeType;
+}
+```
+
+### Other Executables
+
 The executable can then be configured in CI using the `TESTKIT_EXECUTABLE_PATH`.
 
 ```bash
@@ -64,8 +101,8 @@ npm install sfdx@latest-rc
 # Target the local sfdx
 export TESTKIT_EXECUTABLE_PATH=./node_modules/.bin/sfdx
 
-# Run NUT test (requires a test-nut script target in the package.json)
-yarn test-nut
+# Run NUT test (requires a test:nuts script target in the package.json)
+yarn test:nuts
 ```
 
 You will notice that the executable is not configurable in the `execCmd` method directly. If you need to run other commands not located in your plugin, use shelljs directly.
