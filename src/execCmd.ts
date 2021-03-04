@@ -14,6 +14,8 @@ import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
+import stripAnsi = require('strip-ansi');
+
 export interface ExecCmdOptions extends ExecOptions {
   /**
    * Throws if this exit code is not returned by the child process.
@@ -68,7 +70,7 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
 const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(result.shellOutput.stdout) as JsonOutput<T>;
+      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as JsonOutput<T>;
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
@@ -167,8 +169,8 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         execCmdDuration,
       };
       result.shellOutput.code = code;
-      result.shellOutput.stdout = stdout;
-      result.shellOutput.stderr = stderr;
+      result.shellOutput.stdout = stripAnsi(stdout);
+      result.shellOutput.stderr = stripAnsi(stderr);
 
       resolve(addJsonOutput<T>(cmd, result));
     };
