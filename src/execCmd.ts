@@ -132,7 +132,7 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   const startTime = process.hrtime();
   result.shellOutput = shelljs.exec(cmd, cmdOptions) as ShellString;
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
-  debug(`Command completed with exit code: ${result.shellOutput.code}`);
+  debug(`Command completed with exit code: ${result.shellOutput.code} in ${result.execCmdDuration} milliseconds`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
