@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.13...v0.0.14) (2021-03-04)
+
+
+### Features
+
+* add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([14639f7](https://github.com/salesforcecli/cli-plugins-testkit/commit/14639f76d9bba2f15c99f6b80d6e912bfcc176a8))
+
+
+### Bug Fixes
+
+* add strip-ansi ([1684979](https://github.com/salesforcecli/cli-plugins-testkit/commit/16849790c12a20d48b4250084b2988fac401f87e))
+
 ### [0.0.13](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.12...v0.0.13) (2021-02-26)
 
 
