@@ -40,6 +40,11 @@ export interface TestSessionOptions {
    * The preferred auth method to use
    */
   authStrategy?: keyof typeof AuthStrategy;
+
+  /**
+   * The number of times to retry the setupCommands after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
+   */
+  retries?: number;
 }
 
 /**
@@ -58,6 +63,8 @@ export interface TestSessionOptions {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
+ *   TESTKIT_SETUP_RETRIES = number of times to retry the setupCommands after the initial attempt before throwing an error
+ *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of setupCommands. Defaults to 5000
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
  *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
@@ -81,13 +88,16 @@ export class TestSession {
   private orgs: string[] = [];
   private zipDir;
   private sleep;
+  private setupRetries: number;
 
   private constructor(options: TestSessionOptions = {}) {
+    this.sandbox.resetBehavior();
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
     this.sleep = sleep;
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
+    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', options.retries) || 0;
 
     // Create the test session directory
     this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
@@ -236,57 +246,84 @@ export class TestSession {
   // Executes commands and keeps track of any orgs created.
   // Throws if any commands return a non-zero exitCode.
   private setupCommands(cmds?: string[]): void {
-    if (cmds) {
-      const dbug = debug('testkit:setupCommands');
-      this.setup = [];
+    const dbug = debug('testkit:setupCommands');
+    const setup = () => {
+      if (cmds) {
+        this.setup = [];
 
-      for (let cmd of cmds) {
-        if (cmd.includes('org:create')) {
-          // Don't create orgs if we are supposed to reuse one from the env
-          const org = env.getString('TESTKIT_ORG_USERNAME');
-          if (org) {
-            dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
-            this.setup.push({ result: { username: org } });
-            continue;
-          }
-        }
-
-        // Add the json flag if it looks like an sfdx command so we can return
-        // parsed json in the command return.
-        if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
-          cmd += ' --json';
-        }
-
-        const rv = shell.exec(cmd, { silent: true });
-        rv.stdout = stripAnsi(rv.stdout);
-        rv.stderr = stripAnsi(rv.stderr);
-        if (rv.code !== 0) {
-          const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
-          throw Error(`Setup command ${cmd} failed due to: ${io}`);
-        }
-        dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
-
-        // Automatically parse json results
-        if (cmd.includes('--json')) {
-          try {
-            const jsonOutput = parseJson(rv.stdout);
-            // keep track of all org creates
-            if (cmd.includes('org:create')) {
-              const username = getString(jsonOutput, 'result.username');
-              if (username) {
-                dbug(`Saving org username: ${username} from ${cmd}`);
-                this.orgs.push(username);
-              }
+        for (let cmd of cmds) {
+          if (cmd.includes('org:create')) {
+            // Don't create orgs if we are supposed to reuse one from the env
+            const org = env.getString('TESTKIT_ORG_USERNAME');
+            if (org) {
+              dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+              this.setup.push({ result: { username: org } });
+              continue;
             }
-            this.setup.push(jsonOutput);
-          } catch (err: unknown) {
-            dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
+          }
+
+          // Add the json flag if it looks like an sfdx command so we can return
+          // parsed json in the command return.
+          if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
+            cmd += ' --json';
+          }
+
+          const rv = shell.exec(cmd, { silent: true });
+          rv.stdout = stripAnsi(rv.stdout);
+          rv.stderr = stripAnsi(rv.stderr);
+          if (rv.code !== 0) {
+            const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
+            throw Error(`Setup command ${cmd} failed due to: ${io}`);
+          }
+          dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
+
+          // Automatically parse json results
+          if (cmd.includes('--json')) {
+            try {
+              const jsonOutput = parseJson(rv.stdout);
+              // keep track of all org creates
+              if (cmd.includes('org:create')) {
+                const username = getString(jsonOutput, 'result.username');
+                if (username) {
+                  dbug(`Saving org username: ${username} from ${cmd}`);
+                  this.orgs.push(username);
+                }
+                this.setup.push(jsonOutput);
+              }
+            } catch (err: unknown) {
+              dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
+              this.setup.push(rv);
+            }
+          } else {
             this.setup.push(rv);
           }
-        } else {
-          this.setup.push(rv);
         }
       }
+    };
+
+    let attempts = 0;
+    let completed = false;
+    const timeout = new Duration(env.getNumber('TESTKIT_SETUP_RETRIES_TIMEOUT') || 5000, Duration.Unit.MILLISECONDS);
+
+    while (!completed && attempts <= this.setupRetries) {
+      try {
+        dbug(`Executing setup commands (attempt ${attempts + 1} of ${this.setupRetries + 1})`);
+        setup();
+        completed = true;
+      } catch (err) {
+        attempts += 1;
+        if (attempts > this.setupRetries) {
+          throw err;
+        }
+        dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);
+        this.sleepSync(timeout.milliseconds);
+      }
     }
+  }
+
+  private sleepSync(milliseconds: number): void {
+    const waitTill = new Date(new Date().getTime() + milliseconds);
+    // eslint-disable-next-line no-empty
+    while (waitTill > new Date()) {}
   }
 }
