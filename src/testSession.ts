@@ -303,7 +303,7 @@ export class TestSession {
 
     let attempts = 0;
     let completed = false;
-    const timeout = new Duration(env.getNumber('TESTKIT_SETUP_RETRIES_TIMEOUT') || 5000, Duration.Unit.MILLISECONDS);
+    const timeout = new Duration(env.getNumber('TESTKIT_SETUP_RETRIES_TIMEOUT') ?? 5000, Duration.Unit.MILLISECONDS);
 
     while (!completed && attempts <= this.setupRetries) {
       try {

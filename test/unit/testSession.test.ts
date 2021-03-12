@@ -169,6 +169,34 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
+    it('should create a session with setup commands and retries', () => {
+      // set retry timeout to 0 ms so that the test runs quickly
+      process.env.TESTKIT_SETUP_RETRIES_TIMEOUT = '0';
+      const retries = 2;
+      const setupCommands = ['sfdx foo:bar -r testing'];
+      const execRv = { result: { donuts: 'yum' } };
+      const execStub = stubMethod(sandbox, shelljs, 'exec')
+        .onCall(retries)
+        .callsFake(() => {
+          const shellString = new ShellString(JSON.stringify(execRv));
+          shellString.code = 0;
+          return shellString;
+        })
+        .callsFake(() => {
+          const shellString = new ShellString(JSON.stringify(execRv));
+          shellString.code = 1;
+          return shellString;
+        });
+      const sleepSyncSpy = spyMethod(sandbox, TestSession.prototype, 'sleepSync');
+      const session = TestSession.create({ setupCommands, retries });
+      // expect sleepSync to be called before every retry attempt
+      expect(sleepSyncSpy.callCount).to.equal(retries);
+      // expect exec to be called on every retry attempt AND the initial attempt
+      expect(execStub.callCount).to.equal(setupCommands.length * (retries + 1));
+      expect(session.setup).to.deep.equal([execRv]);
+      expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
+    });
+
     it('should create a session with org creation setup commands', () => {
       const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
       const username = 'hey@ho.org';
