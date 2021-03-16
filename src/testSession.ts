@@ -7,7 +7,7 @@
 import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
-import { Duration, env, parseJson, sleep } from '@salesforce/kit';
+import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
@@ -87,14 +87,12 @@ export class TestSession {
   private sandbox = createSandbox();
   private orgs: string[] = [];
   private zipDir;
-  private sleep;
   private setupRetries: number;
 
   private constructor(options: TestSessionOptions = {}) {
     this.sandbox.resetBehavior();
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
-    this.sleep = sleep;
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
     this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', options.retries) || 0;
@@ -194,36 +192,11 @@ export class TestSession {
     // Always restore the sandbox
     this.sandbox.restore();
 
-    const rmSessionDir = async () => {
-      // Delete the test session unless they overrode the test session dir
-      if (!this.overriddenDir) {
-        this.debug(`Deleting test session dir: ${this.dir}`);
-        // Processes can hang on to files within the test session dir, preventing
-        // removal so we wait a bit before trying.
-        await this.sleep(Duration.seconds(2));
-        const rv = shell.rm('-rf', this.dir);
-        if (rv.code !== 0) {
-          throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
-        }
-      }
-    };
-
     if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
       // Delete the orgs created by the tests unless pointing to a specific org
-      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
-        for (const org of this.orgs) {
-          this.debug(`Deleting test org: ${org}`);
-          const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
-          if (rv.code !== 0) {
-            // Must still delete the session dir if org:delete fails
-            await rmSessionDir();
-            throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
-          }
-          this.debug('Deleted org result=', rv.stdout);
-        }
-      }
+      this.deleteOrgs();
       // Delete the session dir
-      await rmSessionDir();
+      this.rmSessionDir();
     }
   }
 
@@ -240,6 +213,37 @@ export class TestSession {
       name ??= `${path.basename(this.dir)}.zip`;
       destDir ??= path.dirname(this.dir);
       return this.zipDir({ name, sourceDir: this.dir, destDir });
+    }
+  }
+
+  private deleteOrgs(): void {
+    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
+      const orgs = this.orgs.slice();
+      for (const org of orgs) {
+        this.debug(`Deleting test org: ${org}`);
+        const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
+        this.orgs = this.orgs.filter((o) => o !== org);
+        if (rv.code !== 0) {
+          // Must still delete the session dir if org:delete fails
+          this.rmSessionDir();
+          throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
+        }
+        this.debug('Deleted org result=', rv.stdout);
+      }
+    }
+  }
+
+  private rmSessionDir(): void {
+    // Delete the test session unless they overrode the test session dir
+    if (!this.overriddenDir) {
+      this.debug(`Deleting test session dir: ${this.dir}`);
+      // Processes can hang on to files within the test session dir, preventing
+      // removal so we wait a bit before trying.
+      this.sleepSync(Duration.seconds(2).milliseconds);
+      const rv = shell.rm('-rf', this.dir);
+      if (rv.code !== 0) {
+        throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
+      }
     }
   }
 
@@ -316,6 +320,7 @@ export class TestSession {
           throw err;
         }
         dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);
+        this.deleteOrgs();
         this.sleepSync(timeout.milliseconds);
       }
     }
