@@ -7,7 +7,7 @@
 import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
-import { Duration, env, parseJson } from '@salesforce/kit';
+import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
@@ -72,7 +72,7 @@ export interface TestSessionOptions {
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
  */
-export class TestSession {
+export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public id: string;
   public createdDate: Date;
   public dir: string;
@@ -86,27 +86,30 @@ export class TestSession {
   private overriddenDir?: string;
   private sandbox = createSandbox();
   private orgs: string[] = [];
-  private zipDir;
   private setupRetries: number;
+  private zipDir: typeof zipDir;
+  private options: TestSessionOptions;
 
-  private constructor(options: TestSessionOptions = {}) {
-    this.sandbox.resetBehavior();
+  public constructor(options: TestSessionOptions = {}) {
+    super(options);
+    this.options = options;
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
+
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
-    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', options.retries) || 0;
+    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
 
     // Create the test session directory
-    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
+    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || this.options.sessionDir;
     this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
     fsCore.mkdirpSync(this.dir);
 
     // Setup a test project and stub process.cwd to be the project dir
-    if (options.project) {
+    if (this.options.project) {
       let projectDir = env.getString('TESTKIT_PROJECT_DIR');
       if (!projectDir) {
-        this.project = new TestProject({ ...options.project, destinationDir: this.dir });
+        this.project = new TestProject({ ...this.options.project, destinationDir: this.dir });
         projectDir = this.project.dir;
       }
 
@@ -122,9 +125,9 @@ export class TestSession {
     }
 
     // Write the test session options used to create this session
-    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
+    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(this.options)));
 
-    const authStrategy = options.authStrategy ? AuthStrategy[options.authStrategy] : undefined;
+    const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
     // have to grab this before we change the home
     transferExistingAuthToEnv(authStrategy);
 
@@ -133,20 +136,6 @@ export class TestSession {
 
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     testkitHubAuth(this.homeDir, authStrategy);
-    // Run all setup commands
-    this.setupCommands(options.setupCommands);
-
-    this.debug('Created testkit session:');
-    this.debug(`  ID: ${this.id}`);
-    this.debug(`  Created Date: ${this.createdDate}`);
-    this.debug(`  Dir: ${this.dir}`);
-    this.debug(`  Home Dir: ${this.homeDir}`);
-    if (this.orgs?.length) {
-      this.debug('  Orgs: ', this.orgs);
-    }
-    if (this.project) {
-      this.debug(`  Project: ${this.project.dir}`);
-    }
   }
 
   /**
@@ -162,13 +151,6 @@ export class TestSession {
    *   return sessions.get(options) ?? new TestSession(options);
    * }
    */
-
-  /**
-   * Create a test session with the provided options.
-   */
-  public static create(options: TestSessionOptions = {}): TestSession {
-    return new TestSession(options);
-  }
 
   /**
    * Stub process.cwd() to return the provided directory path.
@@ -194,9 +176,9 @@ export class TestSession {
 
     if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
       // Delete the orgs created by the tests unless pointing to a specific org
-      this.deleteOrgs();
+      await this.deleteOrgs();
       // Delete the session dir
-      this.rmSessionDir();
+      await this.rmSessionDir();
     }
   }
 
@@ -216,7 +198,24 @@ export class TestSession {
     }
   }
 
-  private deleteOrgs(): void {
+  protected async init(): Promise<void> {
+    // Run all setup commands
+    await this.setupCommands(this.options.setupCommands);
+
+    this.debug('Created testkit session:');
+    this.debug(`  ID: ${this.id}`);
+    this.debug(`  Created Date: ${this.createdDate}`);
+    this.debug(`  Dir: ${this.dir}`);
+    this.debug(`  Home Dir: ${this.homeDir}`);
+    if (this.orgs?.length) {
+      this.debug('  Orgs: ', this.orgs);
+    }
+    if (this.project) {
+      this.debug(`  Project: ${this.project.dir}`);
+    }
+  }
+
+  private async deleteOrgs(): Promise<void> {
     if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
       const orgs = this.orgs.slice();
       for (const org of orgs) {
@@ -225,7 +224,7 @@ export class TestSession {
         this.orgs = this.orgs.filter((o) => o !== org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
-          this.rmSessionDir();
+          await this.rmSessionDir();
           throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
         }
         this.debug('Deleted org result=', rv.stdout);
@@ -233,13 +232,13 @@ export class TestSession {
     }
   }
 
-  private rmSessionDir(): void {
+  private async rmSessionDir(): Promise<void> {
     // Delete the test session unless they overrode the test session dir
     if (!this.overriddenDir) {
       this.debug(`Deleting test session dir: ${this.dir}`);
       // Processes can hang on to files within the test session dir, preventing
       // removal so we wait a bit before trying.
-      this.sleepSync(Duration.seconds(2).milliseconds);
+      await this.sleep(Duration.seconds(2));
       const rv = shell.rm('-rf', this.dir);
       if (rv.code !== 0) {
         throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
@@ -249,7 +248,7 @@ export class TestSession {
 
   // Executes commands and keeps track of any orgs created.
   // Throws if any commands return a non-zero exitCode.
-  private setupCommands(cmds?: string[]): void {
+  private async setupCommands(cmds?: string[]): Promise<void> {
     const dbug = debug('testkit:setupCommands');
     const setup = () => {
       if (cmds) {
@@ -292,8 +291,8 @@ export class TestSession {
                   dbug(`Saving org username: ${username} from ${cmd}`);
                   this.orgs.push(username);
                 }
-                this.setup.push(jsonOutput);
               }
+              this.setup.push(jsonOutput);
             } catch (err: unknown) {
               dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
               this.setup.push(rv);
@@ -320,15 +319,13 @@ export class TestSession {
           throw err;
         }
         dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);
-        this.deleteOrgs();
-        this.sleepSync(timeout.milliseconds);
+        await this.deleteOrgs();
+        await this.sleep(timeout);
       }
     }
   }
 
-  private sleepSync(milliseconds: number): void {
-    const waitTill = new Date(new Date().getTime() + milliseconds);
-    // eslint-disable-next-line no-empty
-    while (waitTill > new Date()) {}
+  private async sleep(duration: Duration): Promise<void> {
+    await sleep(duration);
   }
 }
