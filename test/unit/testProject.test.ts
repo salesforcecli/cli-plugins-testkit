@@ -62,7 +62,7 @@ describe('TestProject', () => {
     expect(whichStub.calledWith('git')).to.equal(true);
     expect(readdirSyncStub.calledWith(destinationDir)).to.equal(true);
     expect(execStub.firstCall.args[0]).to.equal(`git clone ${gitClone}`);
-    expect(execStub.firstCall.args[1]).to.deep.equal({ cwd: destinationDir });
+    expect(execStub.firstCall.args[1]).to.deep.equal({ cwd: destinationDir, silent: true });
   });
 
   it('should error if git not found', () => {

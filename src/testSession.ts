@@ -7,7 +7,7 @@
 import * as path from 'path';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
-import { Duration, env, parseJson, sleep } from '@salesforce/kit';
+import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
@@ -40,6 +40,11 @@ export interface TestSessionOptions {
    * The preferred auth method to use
    */
   authStrategy?: keyof typeof AuthStrategy;
+
+  /**
+   * The number of times to retry the setupCommands after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
+   */
+  retries?: number;
 }
 
 /**
@@ -58,6 +63,8 @@ export interface TestSessionOptions {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
+ *   TESTKIT_SETUP_RETRIES = number of times to retry the setupCommands after the initial attempt before throwing an error
+ *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of setupCommands. Defaults to 5000
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
  *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
@@ -65,7 +72,7 @@ export interface TestSessionOptions {
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
  */
-export class TestSession {
+export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public id: string;
   public createdDate: Date;
   public dir: string;
@@ -79,26 +86,30 @@ export class TestSession {
   private overriddenDir?: string;
   private sandbox = createSandbox();
   private orgs: string[] = [];
-  private zipDir;
-  private sleep;
+  private setupRetries: number;
+  private zipDir: typeof zipDir;
+  private options: TestSessionOptions;
 
-  private constructor(options: TestSessionOptions = {}) {
+  public constructor(options: TestSessionOptions = {}) {
+    super(options);
+    this.options = options;
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
-    this.sleep = sleep;
+
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
+    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
 
     // Create the test session directory
-    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || options.sessionDir;
+    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || this.options.sessionDir;
     this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
     fsCore.mkdirpSync(this.dir);
 
     // Setup a test project and stub process.cwd to be the project dir
-    if (options.project) {
+    if (this.options.project) {
       let projectDir = env.getString('TESTKIT_PROJECT_DIR');
       if (!projectDir) {
-        this.project = new TestProject({ ...options.project, destinationDir: this.dir });
+        this.project = new TestProject({ ...this.options.project, destinationDir: this.dir });
         projectDir = this.project.dir;
       }
 
@@ -114,9 +125,9 @@ export class TestSession {
     }
 
     // Write the test session options used to create this session
-    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(options)));
+    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(this.options)));
 
-    const authStrategy = options.authStrategy ? AuthStrategy[options.authStrategy] : undefined;
+    const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
     // have to grab this before we change the home
     transferExistingAuthToEnv(authStrategy);
 
@@ -125,20 +136,6 @@ export class TestSession {
 
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     testkitHubAuth(this.homeDir, authStrategy);
-    // Run all setup commands
-    this.setupCommands(options.setupCommands);
-
-    this.debug('Created testkit session:');
-    this.debug(`  ID: ${this.id}`);
-    this.debug(`  Created Date: ${this.createdDate}`);
-    this.debug(`  Dir: ${this.dir}`);
-    this.debug(`  Home Dir: ${this.homeDir}`);
-    if (this.orgs?.length) {
-      this.debug('  Orgs: ', this.orgs);
-    }
-    if (this.project) {
-      this.debug(`  Project: ${this.project.dir}`);
-    }
   }
 
   /**
@@ -154,13 +151,6 @@ export class TestSession {
    *   return sessions.get(options) ?? new TestSession(options);
    * }
    */
-
-  /**
-   * Create a test session with the provided options.
-   */
-  public static create(options: TestSessionOptions = {}): TestSession {
-    return new TestSession(options);
-  }
 
   /**
    * Stub process.cwd() to return the provided directory path.
@@ -184,36 +174,11 @@ export class TestSession {
     // Always restore the sandbox
     this.sandbox.restore();
 
-    const rmSessionDir = async () => {
-      // Delete the test session unless they overrode the test session dir
-      if (!this.overriddenDir) {
-        this.debug(`Deleting test session dir: ${this.dir}`);
-        // Processes can hang on to files within the test session dir, preventing
-        // removal so we wait a bit before trying.
-        await this.sleep(Duration.seconds(2));
-        const rv = shell.rm('-rf', this.dir);
-        if (rv.code !== 0) {
-          throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
-        }
-      }
-    };
-
     if (!env.getBoolean('TESTKIT_SAVE_ARTIFACTS')) {
       // Delete the orgs created by the tests unless pointing to a specific org
-      if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
-        for (const org of this.orgs) {
-          this.debug(`Deleting test org: ${org}`);
-          const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
-          if (rv.code !== 0) {
-            // Must still delete the session dir if org:delete fails
-            await rmSessionDir();
-            throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
-          }
-          this.debug('Deleted org result=', rv.stdout);
-        }
-      }
+      await this.deleteOrgs();
       // Delete the session dir
-      await rmSessionDir();
+      await this.rmSessionDir();
     }
   }
 
@@ -233,60 +198,134 @@ export class TestSession {
     }
   }
 
-  // Executes commands and keeps track of any orgs created.
-  // Throws if any commands return a non-zero exitCode.
-  private setupCommands(cmds?: string[]): void {
-    if (cmds) {
-      const dbug = debug('testkit:setupCommands');
-      this.setup = [];
+  protected async init(): Promise<void> {
+    // Run all setup commands
+    await this.setupCommands(this.options.setupCommands);
 
-      for (let cmd of cmds) {
-        if (cmd.includes('org:create')) {
-          // Don't create orgs if we are supposed to reuse one from the env
-          const org = env.getString('TESTKIT_ORG_USERNAME');
-          if (org) {
-            dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
-            this.setup.push({ result: { username: org } });
-            continue;
-          }
-        }
+    this.debug('Created testkit session:');
+    this.debug(`  ID: ${this.id}`);
+    this.debug(`  Created Date: ${this.createdDate}`);
+    this.debug(`  Dir: ${this.dir}`);
+    this.debug(`  Home Dir: ${this.homeDir}`);
+    if (this.orgs?.length) {
+      this.debug('  Orgs: ', this.orgs);
+    }
+    if (this.project) {
+      this.debug(`  Project: ${this.project.dir}`);
+    }
+  }
 
-        // Add the json flag if it looks like an sfdx command so we can return
-        // parsed json in the command return.
-        if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
-          cmd += ' --json';
-        }
-
-        const rv = shell.exec(cmd, { silent: true });
-        rv.stdout = stripAnsi(rv.stdout);
-        rv.stderr = stripAnsi(rv.stderr);
+  private async deleteOrgs(): Promise<void> {
+    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
+      const orgs = this.orgs.slice();
+      for (const org of orgs) {
+        this.debug(`Deleting test org: ${org}`);
+        const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
+        this.orgs = this.orgs.filter((o) => o !== org);
         if (rv.code !== 0) {
-          const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
-          throw Error(`Setup command ${cmd} failed due to: ${io}`);
+          // Must still delete the session dir if org:delete fails
+          await this.rmSessionDir();
+          throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
         }
-        dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
-
-        // Automatically parse json results
-        if (cmd.includes('--json')) {
-          try {
-            const jsonOutput = parseJson(rv.stdout);
-            // keep track of all org creates
-            if (cmd.includes('org:create')) {
-              const username = getString(jsonOutput, 'result.username');
-              if (username) {
-                dbug(`Saving org username: ${username} from ${cmd}`);
-                this.orgs.push(username);
-              }
-            }
-            this.setup.push(jsonOutput);
-          } catch (err: unknown) {
-            dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
-            this.setup.push(rv);
-          }
-        } else {
-          this.setup.push(rv);
-        }
+        this.debug('Deleted org result=', rv.stdout);
       }
     }
+  }
+
+  private async rmSessionDir(): Promise<void> {
+    // Delete the test session unless they overrode the test session dir
+    if (!this.overriddenDir) {
+      this.debug(`Deleting test session dir: ${this.dir}`);
+      // Processes can hang on to files within the test session dir, preventing
+      // removal so we wait a bit before trying.
+      await this.sleep(Duration.seconds(2));
+      const rv = shell.rm('-rf', this.dir);
+      if (rv.code !== 0) {
+        throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
+      }
+    }
+  }
+
+  // Executes commands and keeps track of any orgs created.
+  // Throws if any commands return a non-zero exitCode.
+  private async setupCommands(cmds?: string[]): Promise<void> {
+    const dbug = debug('testkit:setupCommands');
+    const setup = () => {
+      if (cmds) {
+        this.setup = [];
+
+        for (let cmd of cmds) {
+          if (cmd.includes('org:create')) {
+            // Don't create orgs if we are supposed to reuse one from the env
+            const org = env.getString('TESTKIT_ORG_USERNAME');
+            if (org) {
+              dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+              this.setup.push({ result: { username: org } });
+              continue;
+            }
+          }
+
+          // Add the json flag if it looks like an sfdx command so we can return
+          // parsed json in the command return.
+          if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
+            cmd += ' --json';
+          }
+
+          const rv = shell.exec(cmd, { silent: true });
+          rv.stdout = stripAnsi(rv.stdout);
+          rv.stderr = stripAnsi(rv.stderr);
+          if (rv.code !== 0) {
+            const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
+            throw Error(`Setup command ${cmd} failed due to: ${io}`);
+          }
+          dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
+
+          // Automatically parse json results
+          if (cmd.includes('--json')) {
+            try {
+              const jsonOutput = parseJson(rv.stdout);
+              // keep track of all org creates
+              if (cmd.includes('org:create')) {
+                const username = getString(jsonOutput, 'result.username');
+                if (username) {
+                  dbug(`Saving org username: ${username} from ${cmd}`);
+                  this.orgs.push(username);
+                }
+              }
+              this.setup.push(jsonOutput);
+            } catch (err: unknown) {
+              dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
+              this.setup.push(rv);
+            }
+          } else {
+            this.setup.push(rv);
+          }
+        }
+      }
+    };
+
+    let attempts = 0;
+    let completed = false;
+    const timeout = new Duration(env.getNumber('TESTKIT_SETUP_RETRIES_TIMEOUT') ?? 5000, Duration.Unit.MILLISECONDS);
+
+    while (!completed && attempts <= this.setupRetries) {
+      try {
+        dbug(`Executing setup commands (attempt ${attempts + 1} of ${this.setupRetries + 1})`);
+        setup();
+        completed = true;
+      } catch (err) {
+        attempts += 1;
+        if (attempts > this.setupRetries) {
+          throw err;
+        }
+        dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);
+        await this.deleteOrgs();
+        await this.sleep(timeout);
+      }
+    }
+  }
+
+  private async sleep(duration: Duration): Promise<void> {
+    await sleep(duration);
   }
 }

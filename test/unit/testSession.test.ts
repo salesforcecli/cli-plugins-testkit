@@ -40,8 +40,8 @@ describe('TestSession', () => {
   });
 
   describe('create', () => {
-    it('should create a session with no options', () => {
-      const session = TestSession.create();
+    it('should create a session with no options', async () => {
+      const session = await TestSession.create();
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -55,9 +55,9 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with specific dir', () => {
+    it('should create a session with specific dir', async () => {
       const sessionDir = path.join('some', 'other', 'path');
-      const session = TestSession.create({ sessionDir });
+      const session = await TestSession.create({ sessionDir });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -71,7 +71,7 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with specific dir and homedir from env', () => {
+    it('should create a session with specific dir and homedir from env', async () => {
       const sessionDir = path.join('another', 'path');
       const homedir = path.join('some', 'other', 'home');
       stubMethod(sandbox, env, 'getString')
@@ -79,7 +79,7 @@ describe('TestSession', () => {
         .returns(sessionDir)
         .withArgs('TESTKIT_HOMEDIR', sessionDir)
         .returns(homedir);
-      const session = TestSession.create({ sessionDir });
+      const session = await TestSession.create({ sessionDir });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -93,7 +93,7 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with a project', () => {
+    it('should create a session with a project', async () => {
       const testProjName = 'testSessionProj1';
       const sourceDir = path.join(cwd, testProjName);
       const shellString = new ShellString('');
@@ -101,7 +101,7 @@ describe('TestSession', () => {
       stubMethod(sandbox, shelljs, 'cp').returns(shellString);
       const stubCwdStub = stubMethod(sandbox, TestSession.prototype, 'stubCwd');
 
-      const session = TestSession.create({ project: { sourceDir } });
+      const session = await TestSession.create({ project: { sourceDir } });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -117,7 +117,7 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should use an existing project', () => {
+    it('should use an existing project', async () => {
       const projectDir = path.join('existing', 'project', 'path');
       const homedir = path.join('some', 'other', 'home');
       stubMethod(sandbox, env, 'getString')
@@ -132,7 +132,7 @@ describe('TestSession', () => {
       stubMethod(sandbox, shelljs, 'cp').returns(shellString);
       const stubCwdStub = stubMethod(sandbox, TestSession.prototype, 'stubCwd');
 
-      const session = TestSession.create({ project: { sourceDir } });
+      const session = await TestSession.create({ project: { sourceDir } });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -147,14 +147,14 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with setup commands', () => {
+    it('should create a session with setup commands', async () => {
       const setupCommands = ['sfdx foo:bar -r testing'];
       const execRv = { result: { donuts: 'yum' } };
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
-      const session = TestSession.create({ setupCommands });
+      const session = await TestSession.create({ setupCommands });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -169,7 +169,35 @@ describe('TestSession', () => {
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with org creation setup commands', () => {
+    it('should create a session with setup commands and retries', async () => {
+      // set retry timeout to 0 ms so that the test runs quickly
+      process.env.TESTKIT_SETUP_RETRIES_TIMEOUT = '0';
+      const retries = 2;
+      const setupCommands = ['sfdx foo:bar -r testing'];
+      const execRv = { result: { donuts: 'yum' } };
+      const execStub = stubMethod(sandbox, shelljs, 'exec')
+        .onCall(retries)
+        .callsFake(() => {
+          const shellString = new ShellString(JSON.stringify(execRv));
+          shellString.code = 0;
+          return shellString;
+        })
+        .callsFake(() => {
+          const shellString = new ShellString(JSON.stringify(execRv));
+          shellString.code = 1;
+          return shellString;
+        });
+      const sleepSpy = spyMethod(sandbox, TestSession.prototype, 'sleep');
+      const session = await TestSession.create({ setupCommands, retries });
+      // expect sleepSync to be called before every retry attempt
+      expect(sleepSpy.callCount).to.equal(retries);
+      // expect exec to be called on every retry attempt AND the initial attempt
+      expect(execStub.callCount).to.equal(setupCommands.length * (retries + 1));
+      expect(session.setup).to.deep.equal([execRv]);
+      expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
+    });
+
+    it('should create a session with org creation setup commands', async () => {
       const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
       const username = 'hey@ho.org';
       const execRv = { result: { username } };
@@ -177,7 +205,7 @@ describe('TestSession', () => {
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
-      const session = TestSession.create({ setupCommands });
+      const session = await TestSession.create({ setupCommands });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -195,7 +223,7 @@ describe('TestSession', () => {
       expect(session.orgs).to.deep.equal([username]);
     });
 
-    it('should create a session without org creation if TESTKIT_ORG_USERNAME is defined', () => {
+    it('should create a session without org creation if TESTKIT_ORG_USERNAME is defined', async () => {
       const overriddenUsername = 'sherpa@tyrolean.org';
       const homedir = path.join('some', 'other', 'home');
       stubMethod(sandbox, env, 'getString')
@@ -210,7 +238,7 @@ describe('TestSession', () => {
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
-      const session = TestSession.create({ setupCommands });
+      const session = await TestSession.create({ setupCommands });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -228,7 +256,7 @@ describe('TestSession', () => {
       expect(session.orgs).to.deep.equal([]);
     });
 
-    it('should error if setup command fails', () => {
+    it('should error if setup command fails', async () => {
       const setupCommands = ['sfdx foo:bar -r testing'];
       const expectedCmd = `${setupCommands[0]} --json`;
       const execRv = 'Cannot foo before bar';
@@ -237,7 +265,7 @@ describe('TestSession', () => {
       stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
       try {
-        TestSession.create({ setupCommands });
+        await TestSession.create({ setupCommands });
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {
         expect((err as Error).message).to.equal(`Setup command ${expectedCmd} failed due to: ${shellString.stdout}`);
@@ -252,12 +280,12 @@ describe('TestSession', () => {
     let session: TestSession;
     let shellString: ShellString;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       shellString = new ShellString(JSON.stringify(''));
       shellString.code = 0;
       execStub = stubMethod(sandbox, shelljs, 'exec');
       rmStub = stubMethod(sandbox, shelljs, 'rm');
-      session = TestSession.create();
+      session = await TestSession.create();
       stubMethod(sandbox, session, 'sleep').resolves();
       // @ts-ignore session.sandbox is private
       restoreSpy = spyMethod(sandbox, session.sandbox, 'restore');
@@ -366,9 +394,9 @@ describe('TestSession', () => {
   });
 
   describe('stubCwd', () => {
-    it('should stub process.cwd to the provided dir', () => {
+    it('should stub process.cwd to the provided dir', async () => {
       cwdStub.restore();
-      const session = TestSession.create();
+      const session = await TestSession.create();
       const cwdDir = path.join('climb', 'to', 'safety');
       session.stubCwd(cwdDir);
       expect(process.cwd()).to.equal(cwdDir);
@@ -382,7 +410,7 @@ describe('TestSession', () => {
       shellString.code = 0;
       stubMethod(sandbox, env, 'getBoolean').returns(true);
 
-      const session = TestSession.create();
+      const session = await TestSession.create();
       const zipDirStub = stubMethod(sandbox, session, 'zipDir').resolves(expectedRv);
       const rv = await session.zip();
 
@@ -402,7 +430,7 @@ describe('TestSession', () => {
       shellString.code = 0;
       stubMethod(sandbox, env, 'getBoolean').returns(true);
 
-      const session = TestSession.create();
+      const session = await TestSession.create();
       const zipDirStub = stubMethod(sandbox, session, 'zipDir').resolves(expectedRv);
       const rv = await session.zip(zipFileName, destDir);
 
@@ -416,7 +444,7 @@ describe('TestSession', () => {
 
     it('should not zip session when TESTKIT_ENABLE_ZIP !== true', async () => {
       stubMethod(sandbox, env, 'getBoolean').returns(false);
-      const session = TestSession.create();
+      const session = await TestSession.create();
       const zipDirStub = stubMethod(sandbox, session, 'zipDir');
 
       const rv = await session.zip();

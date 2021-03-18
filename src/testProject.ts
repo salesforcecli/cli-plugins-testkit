@@ -59,7 +59,7 @@ export class TestProject {
         throw new Error('git executable not found for creating a project from a git clone');
       }
       this.debug(`Cloning git repo: ${options.gitClone} to: ${destDir}`);
-      const rv = shell.exec(`git clone ${options.gitClone}`, { cwd: destDir });
+      const rv = shell.exec(`git clone ${options.gitClone}`, { cwd: destDir, silent: true });
       if (rv.code !== 0) {
         throw new Error(`git clone failed with error:\n${rv.stderr}`);
       }
