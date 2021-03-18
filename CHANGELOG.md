@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.15](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.14...v0.0.15) (2021-03-18)
+
+
+### Features
+
+* add retry logic to setupCommands ([8cffaf2](https://github.com/salesforcecli/cli-plugins-testkit/commit/8cffaf22f3bf4e3eaae717740d0cd5bf85079eef))
+* use AsyncCreatable ([76c8f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/76c8f221dd8d46298d770aa7ce98b6eb9d526f7c))
+
+
+### Bug Fixes
+
+* delete existing orgs when before retrying setupCommands ([89db509](https://github.com/salesforcecli/cli-plugins-testkit/commit/89db509590eb3a7ee8e9fb15217433f01fa79465))
+
 ### [0.0.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.13...v0.0.14) (2021-03-04)
 
 
