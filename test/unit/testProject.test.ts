@@ -65,7 +65,7 @@ describe('TestProject', () => {
     expect(execStub.firstCall.args[1]).to.deep.equal({ cwd: destinationDir, silent: true });
   });
 
-  it('should error if git not found', () => {
+  it('should error if git clone fails', () => {
     const gitClone = 'https://github.com/testProj.git';
     const shellString = new ShellString('');
     shellString.code = 1;
@@ -80,7 +80,7 @@ describe('TestProject', () => {
     }
   });
 
-  it('should error if git clone fails', () => {
+  it('should error if git not found', () => {
     const gitClone = 'https://github.com/testProj.git';
     stubMethod(sandbox, shelljs, 'which').returns(null);
     try {
@@ -125,6 +125,20 @@ describe('TestProject', () => {
       assert(false, 'TestProject should throw');
     } catch (err: unknown) {
       expect((err as Error).message).to.equal(`force:project:create failed with error:\n${shellString.stderr}`);
+    }
+  });
+
+  it('should error if sfdx not found', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(null);
+    const name = 'MyTestProject';
+    const destinationDir = pathJoin('foo', 'bar');
+    try {
+      new TestProject({ name, destinationDir });
+      assert(false, 'TestProject should throw');
+    } catch (err: unknown) {
+      expect((err as Error).message).to.equal(
+        'sfdx executable not found for creating a project using force:project:create command'
+      );
     }
   });
 
