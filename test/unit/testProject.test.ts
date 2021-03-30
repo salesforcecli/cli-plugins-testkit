@@ -92,6 +92,7 @@ describe('TestProject', () => {
   });
 
   it('should generate from a name', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 0;
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -104,6 +105,7 @@ describe('TestProject', () => {
   });
 
   it('should generate by default', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 0;
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -116,6 +118,7 @@ describe('TestProject', () => {
   });
 
   it('should error if project:create fails', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 1;
     shellString.stderr = 'project:create failed';
@@ -143,6 +146,7 @@ describe('TestProject', () => {
   });
 
   it('should zip project contents with defaults', async () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const expectedRv = 'zip_test';
     const shellString = new ShellString('');
     shellString.code = 0;
@@ -161,6 +165,7 @@ describe('TestProject', () => {
   });
 
   it('should zip project contents with params', async () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const expectedRv = 'zip_test';
     const shellString = new ShellString('');
     shellString.code = 0;

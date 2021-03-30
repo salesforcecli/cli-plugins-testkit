@@ -113,7 +113,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         projectDir = this.project.dir;
       }
 
-      // the default bin/run in execCmd will no longer resolve properly when
+      // The default bin/run in execCmd will no longer resolve properly when
       // a test project is used since process.cwd is changed.  If the
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
       // to use the bin/run from the cwd now.
@@ -265,10 +265,16 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
             }
           }
 
-          // Add the json flag if it looks like an sfdx command so we can return
-          // parsed json in the command return.
-          if (cmd.split(' ')[0].includes('sfdx') && !cmd.includes('--json')) {
-            cmd += ' --json';
+          // Detect when running sfdx cli commands
+          if (cmd.split(' ')[0].includes('sfdx')) {
+            if (!shell.which('sfdx')) {
+              throw new Error('sfdx executable not found for running sfdx setup commands');
+            }
+            // Add the json flag if it looks like an sfdx command so we can return
+            // parsed json in the command return.
+            if (!cmd.includes('--json')) {
+              cmd += ' --json';
+            }
           }
 
           const rv = shell.exec(cmd, { silent: true });
