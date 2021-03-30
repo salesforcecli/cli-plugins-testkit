@@ -148,6 +148,7 @@ describe('TestSession', () => {
     });
 
     it('should create a session with setup commands', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(true);
       const setupCommands = ['sfdx foo:bar -r testing'];
       const execRv = { result: { donuts: 'yum' } };
       const shellString = new ShellString(JSON.stringify(execRv));
@@ -170,6 +171,7 @@ describe('TestSession', () => {
     });
 
     it('should create a session with setup commands and retries', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(true);
       // set retry timeout to 0 ms so that the test runs quickly
       process.env.TESTKIT_SETUP_RETRIES_TIMEOUT = '0';
       const retries = 2;
@@ -198,6 +200,7 @@ describe('TestSession', () => {
     });
 
     it('should create a session with org creation setup commands', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(true);
       const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
       const username = 'hey@ho.org';
       const execRv = { result: { username } };
@@ -224,6 +227,7 @@ describe('TestSession', () => {
     });
 
     it('should create a session without org creation if TESTKIT_ORG_USERNAME is defined', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(true);
       const overriddenUsername = 'sherpa@tyrolean.org';
       const homedir = path.join('some', 'other', 'home');
       stubMethod(sandbox, env, 'getString')
@@ -257,6 +261,7 @@ describe('TestSession', () => {
     });
 
     it('should error if setup command fails', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(true);
       const setupCommands = ['sfdx foo:bar -r testing'];
       const expectedCmd = `${setupCommands[0]} --json`;
       const execRv = 'Cannot foo before bar';
@@ -269,6 +274,22 @@ describe('TestSession', () => {
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {
         expect((err as Error).message).to.equal(`Setup command ${expectedCmd} failed due to: ${shellString.stdout}`);
+      }
+    });
+
+    it('should error if sfdx not found to run setup commands', async () => {
+      stubMethod(sandbox, shelljs, 'which').returns(null);
+      const setupCommands = ['sfdx foo:bar -r testing'];
+      const execRv = 'Cannot foo before bar';
+      const shellString = new ShellString(JSON.stringify(execRv));
+      shellString.code = 1;
+      stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+
+      try {
+        await TestSession.create({ setupCommands });
+        assert(false, 'TestSession.create() should throw');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.equal('sfdx executable not found for running sfdx setup commands');
       }
     });
   });

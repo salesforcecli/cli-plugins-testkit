@@ -70,6 +70,10 @@ export class TestProject {
     }
     // Create a new project using the command.
     else {
+      // verify sfdx is found
+      if (!shell.which('sfdx')) {
+        throw new Error('sfdx executable not found for creating a project using force:project:create command');
+      }
       const name = options.name || genUniqueString('project_%s');
       const rv = shell.exec(`sfdx force:project:create -n ${name} -d ${destDir}`, { silent: true });
       if (rv.code !== 0) {
