@@ -41,7 +41,6 @@ function replaceImports(nut: string): string {
   }
   // Replace the last blank line if it exists to satisfy the .md linter
   if (replacedNut.endsWith(os.EOL)) {
-    console.log('Replacing line ending');
     replacedNut = replacedNut.replace(/[\n]$/g, '');
   }
   return replacedNut;
