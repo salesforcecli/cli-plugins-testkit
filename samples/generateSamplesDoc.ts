@@ -39,6 +39,11 @@ function replaceImports(nut: string): string {
     const libImport = `import { ${imports.join(', ')} } from '@salesforce/cli-plugins-testkit';${os.EOL}`;
     replacedNut = `${libImport}${replacedNut}`;
   }
+  // Replace the last blank line if it exists to satisfy the .md linter
+  if (replacedNut.endsWith(os.EOL)) {
+    console.log('Replacing line ending');
+    replacedNut = replacedNut.replace(/[\n]$/g, '');
+  }
   return replacedNut;
 }
 
@@ -52,8 +57,8 @@ function replaceImports(nut: string): string {
   let sampleContents: string[] = [];
 
   for (let topic of topics) {
-    tableOfContents.push(`### ${topic.name} ###${os.EOL}`);
-    sampleContents.push(`${os.EOL}---${os.EOL}# ${topic.title}${os.EOL}${os.EOL}`);
+    tableOfContents.push(`${os.EOL}### ${topic.name}${os.EOL}${os.EOL}`);
+    sampleContents.push(`---${os.EOL}${os.EOL}# ${topic.title}${os.EOL}${os.EOL}`);
     topic.description && sampleContents.push(`${topic.description}${os.EOL}${os.EOL}`);
 
     if (['typescript', 'bash'].includes(topic.type)) {
@@ -86,7 +91,7 @@ function replaceImports(nut: string): string {
       // Assume inline if not bash or typescript topic type.
       const title = topic.title;
       const titleLink = title.replace(/\s+/g, '-').toLowerCase();
-      tableOfContents.push(`* [${title}](#${titleLink})${os.EOL}`);
+      tableOfContents.push(`- [${title}](#${titleLink})${os.EOL}${os.EOL}`);
       const inlineContent = topic.content as string[];
       for (let line of inlineContent) {
         sampleContents.push(`${line}${os.EOL}`);

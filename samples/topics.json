@@ -3,7 +3,7 @@
     "name": "execCmd Function",
     "title": "Using Testkit’s execCmd function",
     "type": "typescript",
-    "description": "The execCmd function allows plugin commands to execute with a specific CLI executable, defaulting to the plugin’s `./bin/run`.  It can automatically ensure a specific exit code and throw an error when that exit code is not returned.  Commands can be executed synchronously or asynchronously.  All command results exitCode, stdout, and stderr are returned.  If the --json flag was provided the results will have the parsed JSON output.  Command execution time is provided as a Duration object for easy manipulation.",
+    "description": "The execCmd function allows plugin commands to execute with a specific CLI executable, defaulting to the plugin’s `./bin/run`. It can automatically ensure a specific exit code and throw an error when that exit code is not returned. Commands can be executed synchronously or asynchronously. All command results exitCode, stdout, and stderr are returned. If the --json flag was provided the results will have the parsed JSON output. Command execution time is provided as a Duration object for easy manipulation.",
     "content": [
       {
         "header": "Testing plugin commands synchronously",
@@ -152,7 +152,7 @@
       },
       {
         "header": "Reusing projects during test runs",
-        "usecase": "I want the tests to use a specific SFDX project directory and not copy one into a TestSession dir.  Or I kept the test artifacts from a previous run and want to reuse them.",
+        "usecase": "I want the tests to use a specific SFDX project directory and not copy one into a TestSession dir. Or I kept the test artifacts from a previous run and want to reuse them.",
         "script": ["export TESTKIT_PROJECT_DIR=/Users/me/projects/MyTestProject"]
       },
       {
@@ -172,9 +172,9 @@
     "title": "Testkit Best Practices",
     "type": "inline",
     "content": [
-      "1. Clean the TestSession in a code block that always runs (e.g., mocha’s after() ) to keep your plugin clean.  You can always choose to zip a project or test session after tests run or on each test failure.",
-      "1. Point your CI jobs to different CLI executables using the TESTKIT_EXECUTABLE_PATH env var to ensure your plugin works with the various ways the CLI can be installed.  By default it will use your plugin’s `./bin/run` but you can define a local or global npm install path or install from public archives.",
-      "1. Use a naming pattern for test files that use the testkit.  These are not unit tests so we like to refer to them as “NUTs” and have a convention of *.nut.ts so we can run them separately from unit tests.",
+      "1. Clean the TestSession in a code block that always runs (e.g., mocha’s after() ) to keep your plugin clean. You can always choose to zip a project or test session after tests run or on each test failure.",
+      "1. Point your CI jobs to different CLI executables using the TESTKIT_EXECUTABLE_PATH env var to ensure your plugin works with the various ways the CLI can be installed. By default it will use your plugin’s `./bin/run` but you can define a local or global npm install path or install from public archives.",
+      "1. Use a naming pattern for test files that use the testkit. These are not unit tests so we like to refer to them as “NUTs” and have a convention of `*.nut.ts` so we can run them separately from unit tests.",
       "1. Use `SFDX_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.",
       "1. When writing TypeScript NUTs remember to pass the expected type to execCmd so JSON results are typed for you.",
       "1. Take advantage of TestSession's automatic authentication using the appropriate environment variables."
