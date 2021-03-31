@@ -56,7 +56,7 @@ The execCmd function allows plugin commands to execute with a specific CLI execu
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('should run sync commands', () => {
     const rv = execCmd('config:list');
     expect(rv.shellOutput).to.contain('successfully did something');
@@ -72,7 +72,7 @@ describe('Sample NUT', () => {
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('should run async commands', async () => {
     const rv = await execCmd('config:list', { async: true });
     expect(rv.shellOutput).to.contain('successfully did something');
@@ -87,7 +87,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('should ensure a specific exit code', () => {
     execCmd('config:list', { ensureExitCode: 0 });
   });
@@ -101,7 +101,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
   process.env.TESTKIT_EXECUTABLE_PATH = 'sfdx';
 
@@ -126,7 +126,7 @@ type ConfigResult = {
   value: string;
 };
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('should provide typed and parsed JSON output', () => {
     // Simply have your command use the --json flag and provide a type.
     const rv = execCmd<ConfigResult[]>('config:list --json').jsonOutput;
@@ -143,7 +143,7 @@ describe('Sample NUT', () => {
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('config:list should execute in less than 5 seconds', () => {
     const t1 = execCmd(`config:list`).execCmdDuration.milliseconds;
     const t2 = execCmd(`config:list`).execCmdDuration.milliseconds;
@@ -167,7 +167,7 @@ A TestSession provides conveniences to testing plugin commands with options to a
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -196,7 +196,7 @@ describe('Sample NUT', () => {
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import * as path from 'path';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -224,7 +224,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -252,7 +252,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -278,7 +278,7 @@ import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { tmpdir } from 'os';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -307,7 +307,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -331,7 +331,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -357,7 +357,7 @@ describe('Sample NUT', () => {
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -388,7 +388,7 @@ describe('Sample NUT', () => {
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
 import { getString } from '@salesforce/ts-types';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -419,7 +419,7 @@ describe('Sample NUT', () => {
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
 import { getString } from '@salesforce/ts-types';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -451,7 +451,7 @@ import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testk
 import { getString } from '@salesforce/ts-types';
 import * as path from 'path';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -499,7 +499,7 @@ import * as shelljs from 'shelljs';
          scratch orgs in a test file.
 */
 
-describe('Sample NUT 1', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
   const username = 'user@test.org';
 
@@ -517,7 +517,7 @@ describe('Sample NUT 1', () => {
     });
   });
 
-  it('should create a 3rd org and get the username from the json output', () => {
+  it('should use both orgs created as part of setupCommands', () => {
     const firstOrg = getString(testSession.setup[0], 'result.username');
     execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
     execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });
@@ -559,7 +559,7 @@ import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testk
    NOTE: you could also change the cwd for one command by overriding in execCmd options.
 */
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {

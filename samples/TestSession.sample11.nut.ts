@@ -4,7 +4,7 @@ import { TestProject } from '../src/testProject';
 import { getString } from '@salesforce/ts-types';
 import * as path from 'path';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {

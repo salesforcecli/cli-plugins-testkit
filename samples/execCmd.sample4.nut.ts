@@ -1,6 +1,6 @@
 import { execCmd } from '../src/execCmd';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
   process.env.TESTKIT_EXECUTABLE_PATH = 'sfdx';
 

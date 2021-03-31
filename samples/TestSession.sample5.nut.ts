@@ -3,7 +3,7 @@ import { TestSession } from '../src/testSession';
 import { expect } from 'chai';
 import { tmpdir } from 'os';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {

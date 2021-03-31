@@ -5,7 +5,7 @@ import { TestSession } from '../src/testSession';
    NOTE: you could also change the cwd for one command by overriding in execCmd options.
 */
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {

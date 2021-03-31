@@ -70,7 +70,7 @@ npm install sfdx@latest-rc
 # Target the local sfdx
 export TESTKIT_EXECUTABLE_PATH=./node_modules/.bin/sfdx
 
-# Run NUT tests (requires a test:nuts script target in the package.json)
+# Run NUTs (requires a test:nuts script target in the package.json)
 yarn test:nuts
 ```
 

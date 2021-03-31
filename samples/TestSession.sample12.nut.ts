@@ -10,7 +10,7 @@ import * as shelljs from 'shelljs';
          scratch orgs in a test file.
 */
 
-describe('Sample NUT 1', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
   const username = 'user@test.org';
 
@@ -28,7 +28,7 @@ describe('Sample NUT 1', () => {
     });
   });
 
-  it('should create a 3rd org and get the username from the json output', () => {
+  it('should use both orgs created as part of setupCommands', () => {
     const firstOrg = getString(testSession.setup[0], 'result.username');
     execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
     execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });

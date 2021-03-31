@@ -1,7 +1,7 @@
 import { execCmd } from '../src/execCmd';
 import { expect } from 'chai';
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('config:list should execute in less than 5 seconds', () => {
     const t1 = execCmd(`config:list`).execCmdDuration.milliseconds;
     const t2 = execCmd(`config:list`).execCmdDuration.milliseconds;

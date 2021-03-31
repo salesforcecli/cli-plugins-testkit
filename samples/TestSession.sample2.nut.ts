@@ -2,7 +2,7 @@ import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
 import * as path from 'path';
 
-describe('Sample NUT', () => {
+describe('TestSession', () => {
   let testSession: TestSession;
 
   before(async () => {

@@ -8,7 +8,7 @@ type ConfigResult = {
   value: string;
 };
 
-describe('Sample NUT', () => {
+describe('execCmd', () => {
   it('should provide typed and parsed JSON output', () => {
     // Simply have your command use the --json flag and provide a type.
     const rv = execCmd<ConfigResult[]>('config:list --json').jsonOutput;
