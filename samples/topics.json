@@ -1,0 +1,183 @@
+[
+  {
+    "name": "execCmd Function",
+    "title": "Using Testkit’s execCmd function",
+    "type": "typescript",
+    "description": "The execCmd function allows plugin commands to execute with a specific CLI executable, defaulting to the plugin’s `./bin/run`. It can automatically ensure a specific exit code and throw an error when that exit code is not returned. Commands can be executed synchronously or asynchronously. All command results exitCode, stdout, and stderr are returned. If the --json flag was provided the results will have the parsed JSON output. Command execution time is provided as a Duration object for easy manipulation.",
+    "content": [
+      {
+        "header": "Testing plugin commands synchronously",
+        "usecase": "I have a plugin with commands that I want to run within tests synchronously using my plugin’s `./bin/run`.",
+        "file": "execCmd.sample1.nut.ts"
+      },
+      {
+        "header": "Testing plugin commands asynchronously",
+        "usecase": "I have a plugin with commands that I want to run within tests asynchronously.",
+        "file": "execCmd.sample2.nut.ts"
+      },
+      {
+        "header": "Testing plugin commands exit code",
+        "usecase": "I have a plugin with commands that I want to run and throw an error if a certain exit code is not returned automatically.",
+        "file": "execCmd.sample3.nut.ts"
+      },
+      {
+        "header": "Testing plugin commands with a specific Salesforce CLI executable",
+        "usecase": "I have a plugin with commands that I want to run with a specific Salesforce CLI executable rather than my plugin’s `./bin/run`.",
+        "file": "execCmd.sample4.nut.ts"
+      },
+      {
+        "header": "Testing plugin commands JSON output",
+        "usecase": "I have a plugin with commands that I want to run and have parsed JSON output returned for easy verification.",
+        "file": "execCmd.sample5.nut.ts"
+      },
+      {
+        "header": "Getting command execution times",
+        "usecase": "I want to ensure my plugin commands execute within an acceptable duration range.",
+        "file": "execCmd.sample6.nut.ts"
+      }
+    ]
+  },
+  {
+    "name": "TestSession Class",
+    "title": "Using Testkit’s TestSession class",
+    "type": "typescript",
+    "description": "A TestSession provides conveniences to testing plugin commands with options to authenticate to a devhub, create scratch orgs, define SFDX test projects, stub the current working directory of a process, run a list of setup commands, archive the contents of a test session, and use a unique identifier.",
+    "content": [
+      {
+        "header": "Testing with generated sfdx project",
+        "usecase": "I have a plugin with commands that require a SFDX project but the tests don’t care about the contents of the project.",
+        "file": "TestSession.sample1.nut.ts"
+      },
+      {
+        "header": "Testing with local sfdx project",
+        "usecase": "I have a plugin with commands that require a SFDX project and the test project I want to use is in a local directory within my plugin repo.",
+        "file": "TestSession.sample2.nut.ts"
+      },
+      {
+        "header": "Testing with git cloned sfdx project",
+        "usecase": "I have a plugin with commands that require a SFDX project and the test project I want to use is in a git repo.",
+        "file": "TestSession.sample3.nut.ts"
+      },
+      {
+        "header": "Testing with no sfdx project",
+        "usecase": "I have a plugin with commands that do not require a SFDX project but I want other things from a TestSession such as easy authentication to a devhub, setup commands, homedir stub, etc.",
+        "file": "TestSession.sample4.nut.ts"
+      },
+      {
+        "header": "Override the location of a TestSession",
+        "usecase": "I want my tests to control the location of the TestSession.",
+        "file": "TestSession.sample5.nut.ts"
+      },
+      {
+        "header": "Cleaning TestSessions",
+        "usecase": "I want to use TestSessions but clean everything when the tests are done running, including projects, scratch orgs, and the TestSession directory.",
+        "file": "TestSession.sample6.nut.ts"
+      },
+      {
+        "header": "Archiving TestSessions",
+        "usecase": "I want to use TestSessions but zip the test session directory when the tests are done running.",
+        "file": "TestSession.sample7.nut.ts"
+      },
+      {
+        "header": "Archiving TestSessions on test failure",
+        "usecase": "I want to use TestSessions but zip the test session directory when the tests fail.",
+        "file": "TestSession.sample8.nut.ts"
+      },
+      {
+        "header": "Testing with setup commands",
+        "usecase": "I have a plugin with commands and tests require other commands to run for setup, and I want to reference the command results of the setup commands.",
+        "file": "TestSession.sample9.nut.ts"
+      },
+      {
+        "header": "Testing with scratch orgs",
+        "usecase": "I have a plugin with commands that require an org.",
+        "file": "TestSession.sample10.nut.ts"
+      },
+      {
+        "header": "Testing with multiple test projects",
+        "usecase": "Some of my plugin command tests require multiple SFDX test projects.",
+        "file": "TestSession.sample11.nut.ts"
+      },
+      {
+        "header": "Testing with multiple scratch orgs",
+        "usecase": "Some of my plugin command tests require multiple scratch orgs.",
+        "file": "TestSession.sample12.nut.ts"
+      },
+      {
+        "header": "Changing the process.cwd stub",
+        "usecase": "The TestSession stubs process.cwd() to my SFDX project for me, but I want to change it during testing.",
+        "file": "TestSession.sample13.nut.ts"
+      }
+    ]
+  },
+  {
+    "name": "Environment Variables",
+    "title": "Configuring Testkit with Environment Variables",
+    "type": "bash",
+    "content": [
+      {
+        "header": "Testkit Debug output",
+        "usecase": "I want to see all the stuff that the testkit is doing, either because I’m curious or need to troubleshoot.",
+        "script": [
+          "# To see all testkit debug output, in your shell",
+          "export DEBUG=testkit:*",
+          "# To see specific debug output (e.g., project setup), in your shell",
+          "export DEBUG=testkit:project"
+        ]
+      },
+      {
+        "header": "Testing with existing devhub authentication",
+        "usecase": "I have a plugin with commands that require devhub authentication before running, and I want to use my current devhub auth config.",
+        "script": ["export TESTKIT_HUB_USERNAME=test1@scratch.org"]
+      },
+      {
+        "header": "Testing with SFDX Auth URL",
+        "usecase": "I have a plugin with commands that require devhub authentication before running, and I want to use a SFDX auth URL.",
+        "script": ["export TESTKIT_AUTH_URL=test1@scratch.org"]
+      },
+      {
+        "header": "Testing with JWT devhub authentication",
+        "usecase": "I have a plugin with commands that require devhub authentication before running, and I want to use a JWT devhub auth config.",
+        "script": [
+          "# Ensure caution with the JWT key file contents! E.g., Set within protected Circle CI env vars.",
+          "export TESTKIT_HUB_USERNAME=test1@scratch.org",
+          "export TESTKIT_JWT_CLIENT_ID=<clientID>",
+          "export TESTKIT_JWT_KEY=<contents of the jwt key file>"
+        ]
+      },
+      {
+        "header": "Reusing orgs during test runs",
+        "usecase": "I want the tests to use a specific scratch org or reuse one from a previous test run. Tests should not create scratch orgs.",
+        "script": ["export TESTKIT_ORG_USERNAME=test1@scratch.org"]
+      },
+      {
+        "header": "Reusing projects during test runs",
+        "usecase": "I want the tests to use a specific SFDX project directory and not copy one into a TestSession dir. Or I kept the test artifacts from a previous run and want to reuse them.",
+        "script": ["export TESTKIT_PROJECT_DIR=/Users/me/projects/MyTestProject"]
+      },
+      {
+        "header": "Using my actual homedir during test runs",
+        "usecase": "I want to have the tests use my actual home directory, not a temporary stubbed home dir.",
+        "script": ["export TESTKIT_HOMEDIR=/Users/me"]
+      },
+      {
+        "header": "Saving test artifacts after test runs",
+        "usecase": "I want to keep the test project, scratch org, and test session dir after the tests are done running to troubleshoot.",
+        "script": ["export TESTKIT_SAVE_ARTIFACTS=true"]
+      }
+    ]
+  },
+  {
+    "name": "Best Practices",
+    "title": "Testkit Best Practices",
+    "type": "inline",
+    "content": [
+      "1. Clean the TestSession in a code block that always runs (e.g., mocha’s after() ) to keep your plugin clean. You can always choose to zip a project or test session after tests run or on each test failure.",
+      "1. Point your CI jobs to different CLI executables using the TESTKIT_EXECUTABLE_PATH env var to ensure your plugin works with the various ways the CLI can be installed. By default it will use your plugin’s `./bin/run` but you can define a local or global npm install path or install from public archives.",
+      "1. Use a naming pattern for test files that use the testkit. These are not unit tests so we like to refer to them as “NUTs” and have a convention of `*.nut.ts` so we can run them separately from unit tests.",
+      "1. Use `SFDX_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.",
+      "1. When writing TypeScript NUTs remember to pass the expected type to execCmd so JSON results are typed for you.",
+      "1. Take advantage of TestSession's automatic authentication using the appropriate environment variables."
+    ]
+  }
+]
