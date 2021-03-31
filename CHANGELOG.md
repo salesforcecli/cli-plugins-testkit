@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.16](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.15...v0.0.16) (2021-03-31)
+
+
+### Features
+
+* generate a SAMPLES.md doc ([041f172](https://github.com/salesforcecli/cli-plugins-testkit/commit/041f1724df091bacfb7a4a6a42d79641ed59301b))
+
+
+### Bug Fixes
+
+* throw if sfdx is not found ([d6c2632](https://github.com/salesforcecli/cli-plugins-testkit/commit/d6c26326857706d8ca8d88445aa544519923a380))
+* throw when sfdx not found to run setup commands ([a38ee45](https://github.com/salesforcecli/cli-plugins-testkit/commit/a38ee45364d975f0ea89cf94836b12f0628bdace))
+
 ### [0.0.15](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.14...v0.0.15) (2021-03-18)
 
 
