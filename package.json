@@ -8,10 +8,10 @@
   "types": "lib/index.d.ts",
   "repository": "https://github.com/salesforcecli/cli-plugins-testkit",
   "scripts": {
-    "build": "sf-build",
+    "build": "sf-build && yarn samples",
     "ci-docs": "yarn sf-ci-docs",
     "clean": "sf-clean",
-    "clean-all": "-clean all",
+    "clean-all": "sf-clean all",
     "compile": "sf-compile",
     "docs": "sf-docs",
     "format": "sf-format",
@@ -20,7 +20,8 @@
     "prepack": "sf-build",
     "pretest": "sf-compile-test",
     "test": "sf-test --require ts-node/register",
-    "codecov": "codecov --disable=gcov"
+    "codecov": "codecov --disable=gcov",
+    "samples": "tsc -p samples && ts-node samples/generateSamplesDoc.ts"
   },
   "keywords": [
     "force",
