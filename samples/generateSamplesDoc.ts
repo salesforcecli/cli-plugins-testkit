@@ -61,10 +61,10 @@ function replaceImports(nut: string): string {
         const samplesContent = content as SamplesContent;
         const header = samplesContent.header;
         const headerLink = header.replace(/\s+/g, '-').toLowerCase();
-        tableOfContents.push(`* [${header}](#${headerLink})${os.EOL}`);
+        tableOfContents.push(`- [${header}](#${headerLink})${os.EOL}`);
 
         sampleContents.push(`## ${header}${os.EOL}${os.EOL}`);
-        sampleContents.push(`***Usecase: ${samplesContent.usecase}***${os.EOL}${os.EOL}`);
+        sampleContents.push(`**_Usecase: ${samplesContent.usecase}_**${os.EOL}${os.EOL}`);
 
         if (samplesContent.file) {
           sampleContents.push(`\`\`\`${topic.type}${os.EOL}`);
