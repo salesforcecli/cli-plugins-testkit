@@ -65,7 +65,7 @@ describe('TestProject', () => {
     expect(execStub.firstCall.args[1]).to.deep.equal({ cwd: destinationDir, silent: true });
   });
 
-  it('should error if git not found', () => {
+  it('should error if git clone fails', () => {
     const gitClone = 'https://github.com/testProj.git';
     const shellString = new ShellString('');
     shellString.code = 1;
@@ -80,7 +80,7 @@ describe('TestProject', () => {
     }
   });
 
-  it('should error if git clone fails', () => {
+  it('should error if git not found', () => {
     const gitClone = 'https://github.com/testProj.git';
     stubMethod(sandbox, shelljs, 'which').returns(null);
     try {
@@ -92,6 +92,7 @@ describe('TestProject', () => {
   });
 
   it('should generate from a name', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 0;
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -104,6 +105,7 @@ describe('TestProject', () => {
   });
 
   it('should generate by default', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 0;
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -116,6 +118,7 @@ describe('TestProject', () => {
   });
 
   it('should error if project:create fails', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
     shellString.code = 1;
     shellString.stderr = 'project:create failed';
@@ -128,7 +131,22 @@ describe('TestProject', () => {
     }
   });
 
+  it('should error if sfdx not found', () => {
+    stubMethod(sandbox, shelljs, 'which').returns(null);
+    const name = 'MyTestProject';
+    const destinationDir = pathJoin('foo', 'bar');
+    try {
+      new TestProject({ name, destinationDir });
+      assert(false, 'TestProject should throw');
+    } catch (err: unknown) {
+      expect((err as Error).message).to.equal(
+        'sfdx executable not found for creating a project using force:project:create command'
+      );
+    }
+  });
+
   it('should zip project contents with defaults', async () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const expectedRv = 'zip_test';
     const shellString = new ShellString('');
     shellString.code = 0;
@@ -147,6 +165,7 @@ describe('TestProject', () => {
   });
 
   it('should zip project contents with params', async () => {
+    stubMethod(sandbox, shelljs, 'which').returns(true);
     const expectedRv = 'zip_test';
     const shellString = new ShellString('');
     shellString.code = 0;
