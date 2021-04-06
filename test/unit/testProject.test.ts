@@ -12,6 +12,7 @@ import * as sinon from 'sinon';
 import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { stubMethod } from '@salesforce/ts-sinon';
+import { env } from '@salesforce/kit';
 import { fs as fsCore } from '@salesforce/core';
 import { TestProject } from '../../lib/testProject';
 
@@ -93,6 +94,8 @@ describe('TestProject', () => {
 
   it('should generate from a name', () => {
     stubMethod(sandbox, shelljs, 'which').returns(true);
+    const shellOverride = 'powershell.exe';
+    stubMethod(sandbox, env, 'getString').returns(shellOverride);
     const shellString = new ShellString('');
     shellString.code = 0;
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -102,6 +105,7 @@ describe('TestProject', () => {
     expect(testProject.dir).to.equal(pathJoin(destinationDir, name));
     const execArg1 = `sfdx force:project:create -n ${name} -d ${destinationDir}`;
     expect(execStub.firstCall.args[0]).to.equal(execArg1);
+    expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
   });
 
   it('should generate by default', () => {

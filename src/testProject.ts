@@ -11,6 +11,7 @@ import { inspect } from 'util';
 import { debug, Debugger } from 'debug';
 import * as shell from 'shelljs';
 import { fs as fsCore } from '@salesforce/core';
+import { env } from '@salesforce/kit';
 import { genUniqueString } from './genUniqueString';
 import { zipDir, ZipDirConfig } from './zip';
 
@@ -35,6 +36,9 @@ export class TestProject {
   public dir: string;
   private debug: Debugger;
   private zipDir: (config: ZipDirConfig) => Promise<string>;
+  private shelljsExecOptions: shell.ExecOptions = {
+    silent: true,
+  };
 
   public constructor(options: TestProjectOptions) {
     this.debug = debug('testkit:project');
@@ -43,6 +47,11 @@ export class TestProject {
     this.createdDate = new Date();
 
     const destDir = options.destinationDir || tmpdir();
+
+    const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
+    if (shellOverride) {
+      this.shelljsExecOptions.shell = shellOverride;
+    }
 
     // Copy a dir containing a SFDX project to a dir for testing.
     if (options?.sourceDir) {
@@ -59,7 +68,8 @@ export class TestProject {
         throw new Error('git executable not found for creating a project from a git clone');
       }
       this.debug(`Cloning git repo: ${options.gitClone} to: ${destDir}`);
-      const rv = shell.exec(`git clone ${options.gitClone}`, { cwd: destDir, silent: true });
+      const execOpts = { ...this.shelljsExecOptions, ...{ cwd: destDir } };
+      const rv = shell.exec(`git clone ${options.gitClone}`, execOpts) as shell.ShellString;
       if (rv.code !== 0) {
         throw new Error(`git clone failed with error:\n${rv.stderr}`);
       }
@@ -75,7 +85,10 @@ export class TestProject {
         throw new Error('sfdx executable not found for creating a project using force:project:create command');
       }
       const name = options.name || genUniqueString('project_%s');
-      const rv = shell.exec(`sfdx force:project:create -n ${name} -d ${destDir}`, { silent: true });
+      const rv = shell.exec(
+        `sfdx force:project:create -n ${name} -d ${destDir}`,
+        this.shelljsExecOptions
+      ) as shell.ShellString;
       if (rv.code !== 0) {
         throw new Error(`force:project:create failed with error:\n${rv.stderr}`);
       }

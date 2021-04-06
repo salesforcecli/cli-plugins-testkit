@@ -32,6 +32,7 @@ Using a different file extension will help separate your unit tests from your NU
 # Example NUTs
 
 Here are some public github repos for plugins that use this library for NUTs:
+
 - [@salesforce/plugin-alias](https://github.com/salesforcecli/plugin-alias/blob/main/test/commands/alias/set.nut.ts)
 - [@salesforce/plugin-auth](https://github.com/salesforcecli/plugin-auth/blob/main/test/commands/auth/list.nut.ts)
 - [@salesforce/plugin-config](https://github.com/salesforcecli/plugin-config/blob/main/test/commands/config/list.nut.ts)
@@ -96,6 +97,7 @@ const result = await execCmd('mycommand --myflag --json');
 | TESTKIT_ENABLE_ZIP            | Allows zipping the session dir when this is true and `TestSession.zip()` is called during a test.               |
 | TESTKIT_SETUP_RETRIES         | Number of times to retry the setupCommands after the initial attempt before throwing an error.                  |
 | TESTKIT_SETUP_RETRIES_TIMEOUT | Milliseconds to wait before the next retry of setupCommands. Defaults to 5000.                                  |
+| TESTKIT_EXEC_SHELL            | The shell to use for all testkit shell executions rather than the shelljs default.                              |
 | TESTKIT_HUB_USERNAME          | Username of an existing, authenticated devhub org that TestSession will use to auto-authenticate for tests.     |
 | TESTKIT_JWT_CLIENT_ID         | clientId of the connected app that TestSession will use to auto-authenticate for tests.                         |
 | TESTKIT_JWT_KEY               | JWT key file **contents** that TestSession will use to auto-authenticate for tests.                             |

@@ -77,6 +77,12 @@ export const prepareForAuthUrl = (homeDir: string): string => {
  */
 export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = getAuthStrategy()): void => {
   const logger = debug('testkit:authFromStubbedHome');
+  const execOpts: shell.ExecOptions = { silent: true };
+  const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
+  if (shellOverride) {
+    execOpts.shell = shellOverride;
+  }
+
   if (authStrategy === AuthStrategy.JWT) {
     logger('trying jwt auth');
     const jwtKey = prepareForJwt(homeDir);
@@ -86,8 +92,8 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
         'TESTKIT_JWT_CLIENT_ID',
         ''
       )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
-      { silent: true }
-    );
+      execOpts
+    ) as shell.ShellString;
     if (results.code !== 0) {
       throw new Error(
         `jwt:grant for org ${env.getString(
@@ -103,7 +109,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
 
     const tmpUrl = prepareForAuthUrl(homeDir);
 
-    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, { silent: true });
+    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, execOpts) as shell.ShellString;
     logger(shellOutput);
     if (shellOutput.code !== 0) {
       throw new Error(
@@ -153,8 +159,9 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
   if (authStrategy !== AuthStrategy.REUSE) return;
 
   const logger = debug('testkit:AuthReuse');
-  logger(`reading ${env.getString('TESTKIT_HUB_USERNAME', '')}.json`);
-  const authFileName = `${env.getString('TESTKIT_HUB_USERNAME', '')}.json`;
+  const devhub = env.getString('TESTKIT_HUB_USERNAME', '');
+  logger(`reading ${devhub}.json`);
+  const authFileName = `${devhub}.json`;
   const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
   const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFields;
   if (authFileContents.privateKey) {
@@ -167,24 +174,22 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
     return;
   }
   if (authFileContents.refreshToken) {
+    const execOpts: shell.ExecOptions = { silent: true, fatal: true };
+    const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
+    if (shellOverride) {
+      execOpts.shell = shellOverride;
+    }
+
     // this is an org from web:auth or auth:url.  Generate the authUrl and set in the env
     logger('copying variables to env from org:display for AuthUrl');
     const displayContents = JSON.parse(
-      shell.exec(`sfdx force:org:display -u ${env.getString('TESTKIT_HUB_USERNAME', '')} --verbose --json`, {
-        silent: true,
-        fatal: true,
-      }) as string
+      shell.exec(`sfdx force:org:display -u ${devhub} --verbose --json`, execOpts) as string
     ) as OrgDisplayResult;
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
     env.setString('TESTKIT_AUTH_URL', displayContents.result.sfdxAuthUrl);
     return;
   }
-  throw new Error(
-    `Unable to reuse existing hub ${env.getString('TESTKIT_HUB_USERNAME', '')}.  Check file ${env.getString(
-      'TESTKIT_HUB_USERNAME',
-      ''
-    )}.json`
-  );
+  throw new Error(`Unable to reuse existing hub ${devhub}.  Check file ${devhub}.json`);
 };
 
 interface OrgDisplayResult {

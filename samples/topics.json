@@ -164,6 +164,11 @@
         "header": "Saving test artifacts after test runs",
         "usecase": "I want to keep the test project, scratch org, and test session dir after the tests are done running to troubleshoot.",
         "script": ["export TESTKIT_SAVE_ARTIFACTS=true"]
+      },
+      {
+        "header": "Overriding the default shell",
+        "usecase": "I want the testkit to use a different shell rather than the default shelljs shell.",
+        "script": ["export TESTKIT_EXEC_SHELL=powershell.exe"]
       }
     ]
   },

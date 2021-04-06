@@ -37,6 +37,7 @@ WARNING: THIS IS A GENERATED FILE. DO NOT MODIFY DIRECTLY.  USE topics.json
 - [Reusing projects during test runs](#reusing-projects-during-test-runs)
 - [Using my actual homedir during test runs](#using-my-actual-homedir-during-test-runs)
 - [Saving test artifacts after test runs](#saving-test-artifacts-after-test-runs)
+- [Overriding the default shell](#overriding-the-default-shell)
 
 ### Best Practices
 
@@ -658,6 +659,14 @@ export TESTKIT_HOMEDIR=/Users/me
 
 ```bash
 export TESTKIT_SAVE_ARTIFACTS=true
+```
+
+## Overriding the default shell
+
+**_Usecase: I want the testkit to use a different shell rather than the default shelljs shell._**
+
+```bash
+export TESTKIT_EXEC_SHELL=powershell.exe
 ```
 
 ---

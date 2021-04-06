@@ -149,6 +149,13 @@ describe('TestSession', () => {
 
     it('should create a session with setup commands', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
+      const homedir = path.join('some', 'other', 'home');
+      const shellOverride = 'powershell.exe';
+      stubMethod(sandbox, env, 'getString')
+        .withArgs('TESTKIT_EXEC_SHELL')
+        .returns(shellOverride)
+        .withArgs('TESTKIT_HOMEDIR')
+        .returns(homedir);
       const setupCommands = ['sfdx foo:bar -r testing'];
       const execRv = { result: { donuts: 'yum' } };
       const shellString = new ShellString(JSON.stringify(execRv));
@@ -162,10 +169,11 @@ describe('TestSession', () => {
       expect(session.id).to.be.a('string');
       expect(session.createdDate).to.be.a('Date');
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
-      expect(session.homeDir).to.equal(session.dir);
+      expect(session.homeDir).to.equal(homedir);
       expect(session.project).to.equal(undefined);
       expect(session.setup).to.deep.equal([execRv]);
       expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
+      expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });

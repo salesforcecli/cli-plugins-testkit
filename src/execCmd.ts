@@ -53,12 +53,16 @@ export interface ExecCmdResult<T = AnyJson> {
 }
 
 const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
-  const defaults = {
+  const defaults: shelljs.ExecOptions = {
     env: Object.assign({}, process.env),
     cwd: process.cwd(),
     timeout: 300000, // 5 minutes
     silent: true,
   };
+  const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
+  if (shellOverride) {
+    defaults.shell = shellOverride;
+  }
   return { ...defaults, ...options };
 };
 

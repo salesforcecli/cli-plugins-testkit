@@ -131,6 +131,20 @@ describe('execCmd (sync)', () => {
     expect(result.jsonError?.name).to.equal('JsonParseError');
     expect(result.jsonError?.message).to.equal(`Parse error in file unknown on line 1${EOL}try JSON parsing this`);
   });
+
+  it('should override shell default', () => {
+    const shellOverride = 'powershell.exe';
+    stubMethod(sandbox, env, 'getString')
+      .withArgs('TESTKIT_EXECUTABLE_PATH')
+      .returns(null)
+      .withArgs('TESTKIT_EXEC_SHELL')
+      .returns(shellOverride);
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd);
+    expect(execStub.args[0][1]).to.have.property('shell', shellOverride);
+  });
 });
 
 describe('execCmd (async)', () => {
@@ -234,5 +248,19 @@ describe('execCmd (async)', () => {
     expect(result.jsonError).to.be.an('Error');
     expect(result.jsonError?.name).to.equal('JsonParseError');
     expect(result.jsonError?.message).to.equal(`Parse error in file unknown on line 1${EOL}try JSON parsing this`);
+  });
+
+  it('should override shell default', async () => {
+    const shellOverride = 'powershell.exe';
+    stubMethod(sandbox, env, 'getString')
+      .withArgs('TESTKIT_EXECUTABLE_PATH')
+      .returns(null)
+      .withArgs('TESTKIT_EXEC_SHELL')
+      .returns(shellOverride);
+    sandbox.stub(fs, 'fileExistsSync').returns(true);
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
+    await execCmd(cmd, { async: true });
+    expect(execStub.args[0][1]).to.have.property('shell', shellOverride);
   });
 });
