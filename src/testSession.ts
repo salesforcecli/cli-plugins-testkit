@@ -65,6 +65,7 @@ export interface TestSessionOptions {
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
  *   TESTKIT_SETUP_RETRIES = number of times to retry the setupCommands after the initial attempt before throwing an error
  *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of setupCommands. Defaults to 5000
+ *   TESTKIT_EXEC_SHELL = the shell to use for all testkit shell executions rather than the shelljs default.
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
  *   TESTKIT_JWT_CLIENT_ID = clientId of connected app for auth:jwt:grant
@@ -89,6 +90,9 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   private setupRetries: number;
   private zipDir: typeof zipDir;
   private options: TestSessionOptions;
+  private shelljsExecOptions: shell.ExecOptions = {
+    silent: true,
+  };
 
   public constructor(options: TestSessionOptions = {}) {
     super(options);
@@ -99,6 +103,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
     this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
+
+    const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
+    if (shellOverride) {
+      this.shelljsExecOptions.shell = shellOverride;
+    }
 
     // Create the test session directory
     this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || this.options.sessionDir;
@@ -220,7 +229,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       const orgs = this.orgs.slice();
       for (const org of orgs) {
         this.debug(`Deleting test org: ${org}`);
-        const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, { silent: true });
+        const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
         this.orgs = this.orgs.filter((o) => o !== org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
@@ -277,7 +286,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
             }
           }
 
-          const rv = shell.exec(cmd, { silent: true });
+          const rv = shell.exec(cmd, this.shelljsExecOptions) as shell.ShellString;
           rv.stdout = stripAnsi(rv.stdout);
           rv.stderr = stripAnsi(rv.stderr);
           if (rv.code !== 0) {
