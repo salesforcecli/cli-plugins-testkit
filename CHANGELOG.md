@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.27](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.25...v0.0.27) (2021-04-27)
+
+
+### Features
+
+* add the ability to override the default shell used by shelljs.exec ([#69](https://github.com/salesforcecli/cli-plugins-testkit/issues/69)) ([02d09d0](https://github.com/salesforcecli/cli-plugins-testkit/commit/02d09d03e2d5bfd1fbc0f8136b4eb28871b98271))
+* bump version number to 0.0.27 ([ffbd8cf](https://github.com/salesforcecli/cli-plugins-testkit/commit/ffbd8cf5504cf4f24b5848c7a5fddb21eccc05fb))
+
 ### [0.0.25](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.24...v0.0.25) (2021-04-05)
 
 ### [0.0.24](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.23...v0.0.24) (2021-04-05)
