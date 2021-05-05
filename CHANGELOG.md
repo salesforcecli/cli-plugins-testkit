@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.27...v1.0.0) (2021-05-05)
+
+
+### Bug Fixes
+
+* double wait time when deleting dirs ([96d4388](https://github.com/salesforcecli/cli-plugins-testkit/commit/96d4388af8bac53c2a9f83ef6eb292ef93da1aee))
+
 ### [0.0.27](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.25...v0.0.27) (2021-04-27)
 
 
