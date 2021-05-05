@@ -247,7 +247,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       this.debug(`Deleting test session dir: ${this.dir}`);
       // Processes can hang on to files within the test session dir, preventing
       // removal so we wait a bit before trying.
-      await this.sleep(Duration.seconds(2));
+      await this.sleep(Duration.seconds(4));
       const rv = shell.rm('-rf', this.dir);
       if (rv.code !== 0) {
         throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
