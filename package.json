@@ -20,7 +20,6 @@
     "prepack": "sf-build",
     "pretest": "sf-compile-test",
     "test": "sf-test --require ts-node/register",
-    "codecov": "codecov --disable=gcov",
     "samples": "tsc -p samples && ts-node samples/generateSamplesDoc.ts"
   },
   "keywords": [
@@ -70,7 +69,6 @@
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
     "chai": "^4.3.0",
-    "codecov": "^3.8.1",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
