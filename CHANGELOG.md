@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.0.1...v1.1.0) (2021-05-13)
+
+
+### Features
+
+* add access token hub auth strategy ([#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)) ([296df6e](https://github.com/salesforcecli/cli-plugins-testkit/commit/296df6e3b2dbdaf61afaceddf18bb9f89ce7c7a8))
+
 ### [1.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.0.0...v1.0.1) (2021-05-10)
 
 ## [1.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.27...v1.0.0) (2021-05-05)
