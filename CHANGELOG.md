@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.0...v1.1.1) (2021-05-13)
+
+
+### Bug Fixes
+
+* add missed export ([#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91)) ([86084c8](https://github.com/salesforcecli/cli-plugins-testkit/commit/86084c81be7485ccce44eada210fd0dc18647a4f))
+
 ## [1.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.0.1...v1.1.0) (2021-05-13)
 
 
