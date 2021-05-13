@@ -17,6 +17,7 @@ import { env } from '@salesforce/kit';
 export enum AuthStrategy {
   JWT = 'JWT',
   AUTH_URL = 'AUTH_URL',
+  ACCESS_TOKEN = 'ACCESS_TOKEN',
   REUSE = 'REUSE',
   NONE = 'NONE',
 }
@@ -57,6 +58,12 @@ export const prepareForJwt = (homeDir: string): string => {
   return jwtKey;
 };
 
+export const prepareForAccessToken = (homeDir: string): string => {
+  const accessTokenFile = path.join(homeDir, 'accessTokenFile');
+  fs.writeFileSync(accessTokenFile, env.getString('TESTKIT_AUTH_ACCESS_TOKEN', ''));
+  return accessTokenFile;
+};
+
 export const prepareForAuthUrl = (homeDir: string): string => {
   const tmpUrl = path.join(homeDir, 'tmpUrl');
   fs.writeFileSync(tmpUrl, env.getString('TESTKIT_AUTH_URL', ''));
@@ -64,7 +71,7 @@ export const prepareForAuthUrl = (homeDir: string): string => {
 };
 
 /**
- * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
+ * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT, AuthUrl or AccessToken
  * Sets the hub as default for use in tests
  *
  * @param homeDir the testSession directory where credential files will be written
@@ -74,6 +81,7 @@ export const prepareForAuthUrl = (homeDir: string): string => {
  *   for jwt: TESTKIT_HUB_USERNAME, TESTKIT_JWT_CLIENT_ID, TESTKIT_JWT_KEY
  *     optional but recommended: TESTKIT_HUB_INSTANCE
  *   required for AuthUrl: TESTKIT_AUTH_URL
+ *   required for AccessToken: TESTKIT_AUTH_ACCESS_TOKEN, TESTKIT_HUB_INSTANCE
  */
 export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = getAuthStrategy()): void => {
   const logger = debug('testkit:authFromStubbedHome');
@@ -104,6 +112,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     }
     return;
   }
+
   if (authStrategy === AuthStrategy.AUTH_URL) {
     logger('trying to authenticate with AuthUrl');
 
@@ -121,6 +130,29 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
 
     return;
   }
+
+  if (authStrategy === AuthStrategy.ACCESS_TOKEN) {
+    logger('trying to authenticate with Access Token');
+
+    const accessTokenFile = prepareForAccessToken(homeDir);
+
+    const shellOutput = shell.exec(
+      `sfdx auth:accesstoken:store --noprompt -d -f ${accessTokenFile} -r ${env.getString(
+        'TESTKIT_HUB_INSTANCE',
+        DEFAULT_INSTANCE_URL
+      )}`,
+      execOpts
+    ) as shell.ShellString;
+    logger(shellOutput);
+    if (shellOutput.code !== 0) {
+      throw new Error(
+        `auth:sfdxurl for url ${accessTokenFile} failed with exit code: ${shellOutput.code}\n ${
+          shellOutput.stdout + shellOutput.stderr
+        }`
+      );
+    }
+    return;
+  }
   logger('no hub configured');
 };
 
@@ -134,6 +166,9 @@ const getAuthStrategy = (): AuthStrategy => {
   }
   if (env.getString('TESTKIT_AUTH_URL')) {
     return AuthStrategy.AUTH_URL;
+  }
+  if (env.getString('TESTKIT_AUTH_ACCESS_TOKEN') && env.getString('TESTKIT_HUB_INSTANCE')) {
+    return AuthStrategy.ACCESS_TOKEN;
   }
   // none of the above are included, so we want to reuse an already authenticated hub
   if (env.getString('TESTKIT_HUB_USERNAME')) {
