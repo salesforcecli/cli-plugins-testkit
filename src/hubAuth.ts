@@ -71,7 +71,7 @@ export const prepareForAuthUrl = (homeDir: string): string => {
 };
 
 /**
- * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT or AuthUrl
+ * Inspects the environment (via AuthStrategy) and authenticates to a devhub via JWT, AuthUrl or AccessToken
  * Sets the hub as default for use in tests
  *
  * @param homeDir the testSession directory where credential files will be written
@@ -81,6 +81,7 @@ export const prepareForAuthUrl = (homeDir: string): string => {
  *   for jwt: TESTKIT_HUB_USERNAME, TESTKIT_JWT_CLIENT_ID, TESTKIT_JWT_KEY
  *     optional but recommended: TESTKIT_HUB_INSTANCE
  *   required for AuthUrl: TESTKIT_AUTH_URL
+ *   required for AccessToken: TESTKIT_AUTH_ACCESS_TOKEN, TESTKIT_HUB_INSTANCE
  */
 export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = getAuthStrategy()): void => {
   const logger = debug('testkit:authFromStubbedHome');
@@ -136,7 +137,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     const accessTokenFile = prepareForAccessToken(homeDir);
 
     const shellOutput = shell.exec(
-      `sfdx auth:accesstoken:store -d -f ${accessTokenFile} -r ${env.getString(
+      `sfdx auth:accesstoken:store --noprompt -d -f ${accessTokenFile} -r ${env.getString(
         'TESTKIT_HUB_INSTANCE',
         DEFAULT_INSTANCE_URL
       )}`,
