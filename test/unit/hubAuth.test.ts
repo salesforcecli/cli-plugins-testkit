@@ -17,7 +17,6 @@ import {
   prepareForAccessToken,
   prepareForAuthUrl,
   prepareForJwt,
-  testkitHubAuth,
   transferExistingAuthToEnv,
 } from '../../src/hubAuth';
 
