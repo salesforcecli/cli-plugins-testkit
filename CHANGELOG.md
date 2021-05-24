@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.1...v1.1.2) (2021-05-24)
+
+
+### Bug Fixes
+
+* revert access token support ([#94](https://github.com/salesforcecli/cli-plugins-testkit/issues/94)) ([186a94f](https://github.com/salesforcecli/cli-plugins-testkit/commit/186a94fc748b2a8c8a0dadfc894b1bbd4c2f0845)), closes [#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91) [#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)
+
 ### [1.1.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.0...v1.1.1) (2021-05-13)
 
 
