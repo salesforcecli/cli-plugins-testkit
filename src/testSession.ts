@@ -72,7 +72,6 @@ export interface TestSessionOptions {
  *   TESTKIT_JWT_KEY = JWT key (not a filepath, the actual contents of the key)
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
- *   TESTKIT_AUTH_ACCESS_TOKEN = access token to be used with auth:accesstoken:store
  */
 export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public id: string;

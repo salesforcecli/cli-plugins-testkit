@@ -9,8 +9,6 @@ describe('hubAuth', () => {
   it('works with existing defaultdevhub if provided');
   it('auths from authurl in env');
   it('auths from authurl and sets as default');
-  it('auths from access token and sets as default');
-  it('auths from access token');
   it('auths from jwt in env');
   it('auths from jwt with custom hubAlias');
 });
