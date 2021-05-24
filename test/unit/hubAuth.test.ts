@@ -9,7 +9,7 @@ import * as path from 'path';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as chai from 'chai';
 import { AuthFields, fs } from '@salesforce/core';
-import { env } from '@salesforce/kit';
+import { Env, env } from '@salesforce/kit';
 import * as sinon from 'sinon';
 import * as shell from 'shelljs';
 import { AuthStrategy, prepareForAuthUrl, prepareForJwt, transferExistingAuthToEnv } from '../../src/hubAuth';
@@ -36,13 +36,26 @@ const authFields: AuthFields = {
   clientId: sampleAuthData.clientId,
 };
 
+let getStringStub: sinon.SinonStub;
+
 describe('hubAuth', () => {
   const sandbox = sinon.createSandbox();
-
+  type EnvVar = { key: string; value: string };
   let homeDir: string;
+  const stubEnvGet = (envVars: EnvVar[]): void => {
+    getStringStub = stubMethod(sandbox, Env.prototype, 'getString');
+    for (const envVar of envVars) {
+      getStringStub = getStringStub.withArgs(envVar.key).returns(envVar.value);
+    }
+  };
   beforeEach(() => {
     homeDir = `${path.join(tmp, path.sep)}${new Date().getTime()}`;
     fs.mkdirpSync(homeDir);
+    // mock path.join
+    // mock fs.readJsonSync for transferExistingAuthToEnv
+    // mock fs.readFileSync for transferExistingAuthToEnv
+    // mock fs.writeFileSync for prep auth and jwt
+    // mock env getString
   });
   afterEach(() => {
     const testFiles = fs.readdirSync(homeDir);
@@ -52,36 +65,65 @@ describe('hubAuth', () => {
     } catch (e) {
       // no-op
     }
-    env
-      .entries()
-      .filter(([key]) => key.startsWith('TESTKIT'))
-      .forEach(([key]) => env.unset(key));
+    sandbox.restore();
   });
   describe('Prepare For Jwt', () => {
     it('should prepare test env for use with jwt auth that contains header/footer', () => {
-      env.setString('TESTKIT_JWT_KEY', sampleAuthData.jwtKeyWithHeaderFooter);
-      env.setString('TESTKIT_HUB_USERNAME', sampleAuthData.clientId);
-      env.setString('TESTKIT_HUB_INSTANCE', sampleAuthData.instanceUrl);
+      stubEnvGet([
+        { key: 'TESTKIT_JWT_KEY', value: sampleAuthData.jwtKeyWithHeaderFooter },
+        { key: 'TESTKIT_JWT_CLIENT_ID', value: sampleAuthData.clientId },
+        { key: 'TESTKIT_HUB_USERNAME', value: sampleAuthData.devHubUsername },
+        { key: 'TESTKIT_HUB_INSTANCE', value: sampleAuthData.instanceUrl },
+      ]);
+      const writeStub = stubMethod(sandbox, fs, 'writeFileSync').callsFake((...args): void => {
+        return;
+      });
+      stubMethod(sandbox, fs, 'existsSync').callsFake((...args): boolean => {
+        return true;
+      });
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((...args): string => {
+        return sampleAuthData.jwtKeyWithHeaderFooter;
+      });
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
-      const jwtKey: string = fs.readFileSync(jwtKeyFile, 'utf8');
-      expect(jwtKey.split('\n').length).to.be.greaterThan(3);
-      expect(jwtKey).to.include('-----BEGIN RSA PRIVATE KEY-----');
-      expect(jwtKey).to.include('-----END RSA PRIVATE KEY-----');
+      fs.readFileSync(jwtKeyFile, 'utf8');
+      const jwtPassedToWrite = writeStub.args[0][1] as string;
+      expect(writeStub.args[0][0]).to.be.equal(jwtKeyFile);
+      expect((writeStub.args[0][1] as string).replace(/\n/g, '')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
+      expect(readStub.args[0][0]).to.be.equal(jwtKeyFile);
+      expect(jwtPassedToWrite.split('\n').length).to.be.greaterThan(3);
+      expect(jwtPassedToWrite).to.include('-----BEGIN RSA PRIVATE KEY-----');
+      expect(jwtPassedToWrite).to.include('-----END RSA PRIVATE KEY-----');
     });
 
     it('should prepare test env for use with jwt auth that does not contain header/footer', () => {
-      env.setString('TESTKIT_JWT_KEY', sampleAuthData.jwtKeyWithOutHeaderFooter);
-      env.setString('TESTKIT_HUB_USERNAME', sampleAuthData.clientId);
-      env.setString('TESTKIT_HUB_INSTANCE', sampleAuthData.instanceUrl);
+      stubEnvGet([
+        { key: 'TESTKIT_JWT_KEY', value: sampleAuthData.jwtKeyWithOutHeaderFooter },
+        { key: 'TESTKIT_JWT_CLIENT_ID', value: sampleAuthData.clientId },
+        { key: 'TESTKIT_HUB_USERNAME', value: sampleAuthData.devHubUsername },
+        { key: 'TESTKIT_HUB_INSTANCE', value: sampleAuthData.instanceUrl },
+      ]);
+      const writeStub = stubMethod(sandbox, fs, 'writeFileSync').callsFake((...args): void => {
+        return;
+      });
+      stubMethod(sandbox, fs, 'existsSync').callsFake((...args): boolean => {
+        return true;
+      });
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((...args): string => {
+        return sampleAuthData.jwtKeyWithHeaderFooter;
+      });
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
-      const jwtKey: string = fs.readFileSync(jwtKeyFile, 'utf8');
-      expect(jwtKey.split('\n').length).to.be.greaterThan(3);
-      expect(jwtKey).to.include('-----BEGIN RSA PRIVATE KEY-----');
-      expect(jwtKey).to.include('-----END RSA PRIVATE KEY-----');
+      fs.readFileSync(jwtKeyFile, 'utf8');
+      const jwtPassedToWrite = writeStub.args[0][1] as string;
+      expect(writeStub.args[0][0]).to.be.equal(jwtKeyFile);
+      expect((writeStub.args[0][1] as string).replace(/\n/g, '')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
+      expect(readStub.args[0][0]).to.be.equal(jwtKeyFile);
+      expect(jwtPassedToWrite.split('\n').length).to.be.greaterThan(3);
+      expect(jwtPassedToWrite).to.include('-----BEGIN RSA PRIVATE KEY-----');
+      expect(jwtPassedToWrite).to.include('-----END RSA PRIVATE KEY-----');
     });
 
     it('should fail to prepare test env for use with jwt when required env var absent', () => {
@@ -95,38 +137,39 @@ describe('hubAuth', () => {
       }
     });
   });
-  describe('Prepare For Access Token', () => {
-    it('should prepare test env for use with access token auth', () => {
-      env.setString('SFDX_ACCESS_TOKEN', sampleAuthData.accessToken);
-      // eslint-disable-next-line no-unused-expressions
-      // expect(accessToken).to.be.equal(sampleAuthData.accessToken);
-    });
-  });
   describe('Prepare For Auth Url', () => {
     it('should prepare test env for use with sfdx auth url', () => {
-      env.setString('TESTKIT_AUTH_URL', sampleAuthData.sfdxAuthUrl);
+      stubEnvGet([{ key: 'TESTKIT_AUTH_URL', value: sampleAuthData.sfdxAuthUrl }]);
+      const writeStub = stubMethod(sandbox, fs, 'writeFileSync').callsFake((...args): void => {
+        return;
+      });
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((...args): string => {
+        return sampleAuthData.sfdxAuthUrl;
+      });
+      stubMethod(sandbox, fs, 'existsSync').callsFake((...args): boolean => {
+        return true;
+      });
       const authUrlFile = prepareForAuthUrl(homeDir);
+
       // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(authUrlFile)).to.be.true;
       const authUrl: string = fs.readFileSync(authUrlFile, 'utf8');
-      expect(authUrl).to.be.equal(sampleAuthData.sfdxAuthUrl);
+      expect(readStub.args[0][0]).to.be.equal(authUrlFile);
+      expect(writeStub.args[0][0]).to.be.equal(authUrlFile);
+      const authUrlPassedToWrite = writeStub.args[0][1] as string;
+      expect(authUrl).to.be.equal(authUrlPassedToWrite);
+      expect(authUrlPassedToWrite).to.be.equal(sampleAuthData.sfdxAuthUrl);
     });
   });
 
   describe('Transfer Existing Auth To Env', () => {
-    const originalHomeDir = env.getString('HOME');
     let shellStub;
     beforeEach(() => {
-      env.setString('HOME', homeDir);
-      env.setString('TESTKIT_HUB_USERNAME', sampleAuthData.devHubUsername);
+      stubEnvGet([
+        { key: 'HOME', value: homeDir },
+        { key: 'TESTKIT_HUB_USERNAME', value: sampleAuthData.devHubUsername },
+      ]);
       stubMethod(sandbox, fs, 'readFileSync').returns(sampleAuthData.jwtKeyWithHeaderFooter);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-      if (originalHomeDir) {
-        env.setString('HOME', originalHomeDir);
-      }
     });
 
     it('should prepare test env for auth using existing username with no refresh token', () => {
@@ -135,6 +178,7 @@ describe('hubAuth', () => {
       transferExistingAuthToEnv(AuthStrategy.REUSE);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
       expect(shellStub.calledOnce).to.be.false;
+      sandbox.restore();
       expect(env.getString('TESTKIT_JWT_KEY')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
       expect(env.getString('TESTKIT_JWT_CLIENT_ID')).to.be.equal(sampleAuthData.clientId);
       expect(env.getString('TESTKIT_HUB_INSTANCE')).to.be.equal(sampleAuthData.instanceUrl);
@@ -148,6 +192,7 @@ describe('hubAuth', () => {
       transferExistingAuthToEnv(AuthStrategy.REUSE);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
       expect(shellStub.calledOnce).to.be.true;
+      sandbox.restore();
       expect(env.getString('TESTKIT_AUTH_URL')).to.be.equal(sampleAuthData.sfdxAuthUrl);
     });
   });
