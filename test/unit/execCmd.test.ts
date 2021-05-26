@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { EOL } from 'os';
 import { join } from 'path';
 import { expect, assert } from 'chai';
 import * as sinon from 'sinon';
@@ -29,11 +28,12 @@ describe('execCmd (sync)', () => {
   });
 
   it('should default to bin/run executable', () => {
+    const binPath = join('bin', 'run');
     sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -129,7 +129,7 @@ describe('execCmd (sync)', () => {
     expect(result.jsonOutput).to.deep.equal(undefined);
     expect(result.jsonError).to.be.an('Error');
     expect(result.jsonError?.name).to.equal('JsonParseError');
-    expect(result.jsonError?.message).to.equal(`Parse error in file unknown on line 1${EOL}try JSON parsing this`);
+    expect(result.jsonError?.message).to.match(/Parse error in file unknown on line 1\n\r?try JSON parsing this/);
   });
 
   it('should override shell default', () => {
@@ -160,11 +160,12 @@ describe('execCmd (async)', () => {
   });
 
   it('should default to bin/run executable', async () => {
+    const binPath = join('bin', 'run');
     sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', async () => {
@@ -247,7 +248,7 @@ describe('execCmd (async)', () => {
     expect(result.jsonOutput).to.deep.equal(undefined);
     expect(result.jsonError).to.be.an('Error');
     expect(result.jsonError?.name).to.equal('JsonParseError');
-    expect(result.jsonError?.message).to.equal(`Parse error in file unknown on line 1${EOL}try JSON parsing this`);
+    expect(result.jsonError?.message).to.match(/Parse error in file unknown on line 1\n\r?try JSON parsing this/);
   });
 
   it('should override shell default', async () => {
