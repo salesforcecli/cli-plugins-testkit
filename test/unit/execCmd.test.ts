@@ -29,11 +29,12 @@ describe('execCmd (sync)', () => {
   });
 
   it('should default to bin/run executable', () => {
+    const binPath = join('bin', 'run');
     sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -160,11 +161,12 @@ describe('execCmd (async)', () => {
   });
 
   it('should default to bin/run executable', async () => {
+    const binPath = join('bin', 'run');
     sandbox.stub(fs, 'fileExistsSync').returns(true);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`bin/run ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', async () => {
