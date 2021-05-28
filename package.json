@@ -54,7 +54,7 @@
     "archiver": "^5.2.0",
     "debug": "^4.3.1",
     "shelljs": "^0.8.4",
-    "sinon": "^10.0.0",
+    "sinon": "10.0.0",
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
