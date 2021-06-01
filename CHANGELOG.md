@@ -10,41 +10,36 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.1.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.1...v1.1.2) (2021-05-24)
 
-
 ### Bug Fixes
 
-* revert access token support ([#94](https://github.com/salesforcecli/cli-plugins-testkit/issues/94)) ([186a94f](https://github.com/salesforcecli/cli-plugins-testkit/commit/186a94fc748b2a8c8a0dadfc894b1bbd4c2f0845)), closes [#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91) [#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)
+- revert access token support ([#94](https://github.com/salesforcecli/cli-plugins-testkit/issues/94)) ([186a94f](https://github.com/salesforcecli/cli-plugins-testkit/commit/186a94fc748b2a8c8a0dadfc894b1bbd4c2f0845)), closes [#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91) [#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)
 
 ### [1.1.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.0...v1.1.1) (2021-05-13)
 
-
 ### Bug Fixes
 
-* add missed export ([#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91)) ([86084c8](https://github.com/salesforcecli/cli-plugins-testkit/commit/86084c81be7485ccce44eada210fd0dc18647a4f))
+- add missed export ([#91](https://github.com/salesforcecli/cli-plugins-testkit/issues/91)) ([86084c8](https://github.com/salesforcecli/cli-plugins-testkit/commit/86084c81be7485ccce44eada210fd0dc18647a4f))
 
 ## [1.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.0.1...v1.1.0) (2021-05-13)
 
-
 ### Features
 
-* add access token hub auth strategy ([#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)) ([296df6e](https://github.com/salesforcecli/cli-plugins-testkit/commit/296df6e3b2dbdaf61afaceddf18bb9f89ce7c7a8))
+- add access token hub auth strategy ([#90](https://github.com/salesforcecli/cli-plugins-testkit/issues/90)) ([296df6e](https://github.com/salesforcecli/cli-plugins-testkit/commit/296df6e3b2dbdaf61afaceddf18bb9f89ce7c7a8))
 
 ### [1.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.0.0...v1.0.1) (2021-05-10)
 
 ## [1.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.27...v1.0.0) (2021-05-05)
 
-
 ### Bug Fixes
 
-* double wait time when deleting dirs ([96d4388](https://github.com/salesforcecli/cli-plugins-testkit/commit/96d4388af8bac53c2a9f83ef6eb292ef93da1aee))
+- double wait time when deleting dirs ([96d4388](https://github.com/salesforcecli/cli-plugins-testkit/commit/96d4388af8bac53c2a9f83ef6eb292ef93da1aee))
 
 ### [0.0.27](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.25...v0.0.27) (2021-04-27)
 
-
 ### Features
 
-* add the ability to override the default shell used by shelljs.exec ([#69](https://github.com/salesforcecli/cli-plugins-testkit/issues/69)) ([02d09d0](https://github.com/salesforcecli/cli-plugins-testkit/commit/02d09d03e2d5bfd1fbc0f8136b4eb28871b98271))
-* bump version number to 0.0.27 ([ffbd8cf](https://github.com/salesforcecli/cli-plugins-testkit/commit/ffbd8cf5504cf4f24b5848c7a5fddb21eccc05fb))
+- add the ability to override the default shell used by shelljs.exec ([#69](https://github.com/salesforcecli/cli-plugins-testkit/issues/69)) ([02d09d0](https://github.com/salesforcecli/cli-plugins-testkit/commit/02d09d03e2d5bfd1fbc0f8136b4eb28871b98271))
+- bump version number to 0.0.27 ([ffbd8cf](https://github.com/salesforcecli/cli-plugins-testkit/commit/ffbd8cf5504cf4f24b5848c7a5fddb21eccc05fb))
 
 ### [0.0.25](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.24...v0.0.25) (2021-04-05)
 
@@ -66,69 +61,59 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.16](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.15...v0.0.16) (2021-03-31)
 
-
 ### Features
 
-* generate a SAMPLES.md doc ([041f172](https://github.com/salesforcecli/cli-plugins-testkit/commit/041f1724df091bacfb7a4a6a42d79641ed59301b))
-
+- generate a SAMPLES.md doc ([041f172](https://github.com/salesforcecli/cli-plugins-testkit/commit/041f1724df091bacfb7a4a6a42d79641ed59301b))
 
 ### Bug Fixes
 
-* throw if sfdx is not found ([d6c2632](https://github.com/salesforcecli/cli-plugins-testkit/commit/d6c26326857706d8ca8d88445aa544519923a380))
-* throw when sfdx not found to run setup commands ([a38ee45](https://github.com/salesforcecli/cli-plugins-testkit/commit/a38ee45364d975f0ea89cf94836b12f0628bdace))
+- throw if sfdx is not found ([d6c2632](https://github.com/salesforcecli/cli-plugins-testkit/commit/d6c26326857706d8ca8d88445aa544519923a380))
+- throw when sfdx not found to run setup commands ([a38ee45](https://github.com/salesforcecli/cli-plugins-testkit/commit/a38ee45364d975f0ea89cf94836b12f0628bdace))
 
 ### [0.0.15](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.14...v0.0.15) (2021-03-18)
 
-
 ### Features
 
-* add retry logic to setupCommands ([8cffaf2](https://github.com/salesforcecli/cli-plugins-testkit/commit/8cffaf22f3bf4e3eaae717740d0cd5bf85079eef))
-* use AsyncCreatable ([76c8f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/76c8f221dd8d46298d770aa7ce98b6eb9d526f7c))
-
+- add retry logic to setupCommands ([8cffaf2](https://github.com/salesforcecli/cli-plugins-testkit/commit/8cffaf22f3bf4e3eaae717740d0cd5bf85079eef))
+- use AsyncCreatable ([76c8f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/76c8f221dd8d46298d770aa7ce98b6eb9d526f7c))
 
 ### Bug Fixes
 
-* delete existing orgs when before retrying setupCommands ([89db509](https://github.com/salesforcecli/cli-plugins-testkit/commit/89db509590eb3a7ee8e9fb15217433f01fa79465))
+- delete existing orgs when before retrying setupCommands ([89db509](https://github.com/salesforcecli/cli-plugins-testkit/commit/89db509590eb3a7ee8e9fb15217433f01fa79465))
 
 ### [0.0.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.13...v0.0.14) (2021-03-04)
 
-
 ### Features
 
-* add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([14639f7](https://github.com/salesforcecli/cli-plugins-testkit/commit/14639f76d9bba2f15c99f6b80d6e912bfcc176a8))
-
+- add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([14639f7](https://github.com/salesforcecli/cli-plugins-testkit/commit/14639f76d9bba2f15c99f6b80d6e912bfcc176a8))
 
 ### Bug Fixes
 
-* add strip-ansi ([1684979](https://github.com/salesforcecli/cli-plugins-testkit/commit/16849790c12a20d48b4250084b2988fac401f87e))
+- add strip-ansi ([1684979](https://github.com/salesforcecli/cli-plugins-testkit/commit/16849790c12a20d48b4250084b2988fac401f87e))
 
 ### [0.0.13](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.12...v0.0.13) (2021-02-26)
 
-
 ### Features
 
-* add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([7ce118a](https://github.com/salesforcecli/cli-plugins-testkit/commit/7ce118abe02e9128a04f9a80767a32b909ace96c))
+- add type parameter to execCmd ([#34](https://github.com/salesforcecli/cli-plugins-testkit/issues/34)) ([7ce118a](https://github.com/salesforcecli/cli-plugins-testkit/commit/7ce118abe02e9128a04f9a80767a32b909ace96c))
 
 ### [0.0.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.11...v0.0.12) (2021-02-25)
 
-
 ### Features
 
-* specify auth strategy ([7f07f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/7f07f228ba3c4f957a5cbf81e22ffc43189a6413))
+- specify auth strategy ([7f07f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/7f07f228ba3c4f957a5cbf81e22ffc43189a6413))
 
 ### [0.0.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.10...v0.0.11) (2021-02-25)
 
-
 ### Bug Fixes
 
-* windows homedir ([aafc2d2](https://github.com/salesforcecli/cli-plugins-testkit/commit/aafc2d2eea6d8168968916089fe10afc9dcfab73))
+- windows homedir ([aafc2d2](https://github.com/salesforcecli/cli-plugins-testkit/commit/aafc2d2eea6d8168968916089fe10afc9dcfab73))
 
 ### [0.0.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.8...v0.0.10) (2021-02-21)
 
-
 ### Bug Fixes
 
-* move sinon to dependencies from devDependencies ([b13189d](https://github.com/salesforcecli/cli-plugins-testkit/commit/b13189d9fb0054bdc5732b75e74928dac39227be))
+- move sinon to dependencies from devDependencies ([b13189d](https://github.com/salesforcecli/cli-plugins-testkit/commit/b13189d9fb0054bdc5732b75e74928dac39227be))
 
 ### [0.0.8](https://github.com/salesforcecli/cli-plugins-testkit/compare/v0.0.7...v0.0.8) (2021-02-18)
 
