@@ -163,7 +163,7 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
   logger(`reading ${devhub}.json`);
   const authFileName = `${devhub}.json`;
   const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
-  const authFileContents = (fs.readJsonSync(hubAuthFileSource) as unknown) as AuthFields;
+  const authFileContents = fs.readJsonSync(hubAuthFileSource) as AuthFields;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
     // this is jwt.  set the appropriate env vars
