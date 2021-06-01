@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@salesforce/core": "^2.20.3",
-    "@salesforce/kit": "^1.4.5",
+    "@salesforce/kit": "^1.5.8",
     "@salesforce/ts-types": "^1.5.5",
     "archiver": "^5.2.0",
     "debug": "^4.3.1",
