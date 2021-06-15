@@ -4,6 +4,12 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
+/*
+ * NOTE on chosen file name for these tests. When this test runs before testSession.test.ts
+ * a number of the testSession fail. Running these tests after testSession tests seems to work,
+ * so chose a file name that guarantees these will be run last.
+ */
 import * as os from 'os';
 import * as path from 'path';
 import { stubMethod } from '@salesforce/ts-sinon';
