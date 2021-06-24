@@ -1,0 +1,9 @@
+{
+  "jwtKeyWithHeaderFooter": "-----BEGIN RSA PRIVATE KEY-----MIIJJwIBAAKCAgEAvDt02gSZwhwsyhhkcks8qjiTtB5qs188zMJ0S+rzSriJSQNXX0G2I+di39CNeiEgf1vrIowFh29FHUtQX6aCeBLW8+ONJJSxvgAa5LnaYjvJTiZbjRYzRil6YVF/didK+LfNU7E94u9We/wX3jzSIteswoxZqKQLhk+km+x40fpTwHwRWPc771JNucVDsqpKt+9Q2/W8SUNa33H+5ROgLG4y/uUNuvFyWYYqTfngdYZGXmALF1LVRITa9pyVZCXT1Hsi9w2ufTYNYTULmdz6D6JyBTnZH3/RQNxhc6bf9kEWVeo04ZkuxDpVxGoTA9GVYLGW/P/QOY8P3uY0s9r8x+UUASF+OX49hhUc78y/Vqo5ekJve/+HV56Ikzgt4PF1DfR6zLFZAA4TznB/6h/fnnFZczlKQgYN3r8ZHca2LA==-----END RSA PRIVATE KEY-----",
+  "jwtKeyWithOutHeaderFooter": "MIIJJwIBAAKCAgEAvDt02gSZwhwsyhhkcks8qjiTtB5qs188zMJ0S+rzSriJSQNXX0G2I+di39CNeiEgf1vrIowFh29FHUtQX6aCeBLW8+ONJJSxvgAa5LnaYjvJTiZbjRYzRil6YVF/didK+LfNU7E94u9We/wX3jzSIteswoxZqKQLhk+km+x40fpTwHwRWPc771JNucVDsqpKt+9Q2/W8SUNa33H+5ROgLG4y/uUNuvFyWYYqTfngdYZGXmALF1LVRITa9pyVZCXT1Hsi9w2ufTYNYTULmdz6D6JyBTnZH3/RQNxhc6bf9kEWVeo04ZkuxDpVxGoTA9GVYLGW/P/QOY8P3uY0s9r8x+UUASF+OX49hhUc78y/Vqo5ekJve/+HV56Ikzgt4PF1DfR6zLFZAA4TznB/6h/fnnFZczlKQgYN3r8ZHca2LA==",
+  "devHubUsername": "somedevhub@salesforce.com",
+  "clientId": "PlatformCLI",
+  "sfdxAuthUrl": "force://PlatformCLI::5Aajsgdfjasgfkjashfjasgfkjashfjkashgfds.oweljflakdutp8qoiyhtoalksfnkadjhgewxoljqoiwefgkjtoeijhtb@somedevhub.my.salesforce.com",
+  "accessToken": "00D00000000xxxx!AQQAQEhasdfjhgashgaslkerhkasjhfjaksdhfladjgrjkasjfkasgfkalsjdfakgrkashfdjasdhbf.",
+  "instanceUrl": "https://somedevhub.my.salesforce.com"
+}
