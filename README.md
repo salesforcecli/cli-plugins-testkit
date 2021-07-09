@@ -10,7 +10,7 @@ The @salesforce/cli-plugins-testkit library provides test utilities to assist Sa
 Add this library as a dev dependencies to your project.
 
 ```bash
-yarn add @salesforcecli/cli-plugins-testkit --dev
+yarn add salesforcecli/cli-plugins-testkit --dev
 ```
 
 Create a test file and import the utilities from this library that you'd like to use.
