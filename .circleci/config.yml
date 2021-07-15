@@ -40,3 +40,13 @@ workflows:
                 - main
     jobs:
       - release-management/test-ts-update
+  dependabot-automerge:
+    triggers:
+      - schedule:
+          cron: '0 2,5,8,11 * * *'
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - release-management/dependabot-automerge
