@@ -6,7 +6,7 @@
   "license": "BSD-3-Clause",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "repository": "https://github.com/salesforcecli/cli-plugins-testkit",
+  "repository": "salesforcecli/cli-plugins-testkit",
   "scripts": {
     "build": "sf-build && yarn samples",
     "ci-docs": "yarn sf-ci-docs",
