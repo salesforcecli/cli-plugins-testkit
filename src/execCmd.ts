@@ -9,26 +9,29 @@ import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { fs } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
-import { AnyJson, Dictionary, isNumber } from '@salesforce/ts-types';
+import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 import stripAnsi = require('strip-ansi');
 
+type Collection = Record<string, AnyJson> | Array<Record<string, AnyJson>>;
+
 export interface ExecCmdOptions extends ExecOptions {
   /**
    * Throws if this exit code is not returned by the child process.
    */
   ensureExitCode?: number;
+
+  /**
+   * The base CLI that the plugin is used in. This is used primarily for changing the behavior
+   * of JSON parsing and types.
+   */
+  cli?: 'sfdx' | 'sf';
 }
 
-type JsonOutput<T> = Dictionary<AnyJson> & {
-  status: number;
-  result: T;
-};
-
-export interface ExecCmdResult<T = AnyJson> {
+export interface ExecCmdResult {
   /**
    * Command output from the shell.
    *
@@ -36,10 +39,7 @@ export interface ExecCmdResult<T = AnyJson> {
    */
   shellOutput: ShellString;
 
-  /**
-   * Command output parsed as JSON, if `--json` param present.
-   */
-  jsonOutput?: JsonOutput<T>;
+  jsonOutput?: unknown;
 
   /**
    * The JsonParseError if parsing failed.
@@ -51,6 +51,24 @@ export interface ExecCmdResult<T = AnyJson> {
    */
   execCmdDuration: Duration;
 }
+
+export interface SfdxExecCmdResult<T = Collection> extends ExecCmdResult {
+  /**
+   * Command output parsed as JSON, if `--json` param present.
+   */
+  jsonOutput?: { status: number; result: T };
+}
+
+export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
+  /**
+   * Command output parsed as JSON, if `--json` param present.
+   */
+  jsonOutput?: T;
+}
+
+const DEFAULT_EXEC_OPTIONS: ExecCmdOptions = {
+  cli: 'sfdx',
+};
 
 const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
   const defaults: shelljs.ExecOptions = {
@@ -71,10 +89,10 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
   Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
 
 // Add JSON output if json flag is set
-const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
+const addJsonOutput = <T extends ExecCmdResult, U>(cmd: string, result: T): T => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as JsonOutput<T>;
+      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as unknown as U;
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
@@ -117,7 +135,7 @@ const buildCmd = (cmdArgs: string): string => {
   return `${bin} ${cmdArgs}`;
 };
 
-const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T> => {
+const execCmdSync = <T extends ExecCmdResult, U = Collection>(cmd: string, options?: ExecCmdOptions): T => {
   const debug = Debug('testkit:execCmd');
 
   // Add on the bin path
@@ -127,10 +145,10 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
-  const result: ExecCmdResult<T> = {
+  const result = {
     shellOutput: '' as ShellString,
     execCmdDuration: Duration.seconds(0),
-  };
+  } as T;
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
@@ -142,16 +160,19 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  return addJsonOutput<T>(cmd, result);
+  return addJsonOutput<T, U>(cmd, result);
 };
 
-const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
+const execCmdAsync = async <T extends ExecCmdResult, U = Collection>(
+  cmd: string,
+  options: ExecCmdOptions
+): Promise<T> => {
   const debug = Debug('testkit:execCmdAsync');
 
   // Add on the bin path
   cmd = buildCmd(cmd);
 
-  const resultPromise = new Promise<ExecCmdResult<T>>((resolve, reject) => {
+  const resultPromise = new Promise<T>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
 
     debug(`Running cmd: ${cmd}`);
@@ -168,15 +189,15 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         reject(getExitCodeError(cmd, cmdOptions.ensureExitCode, output));
       }
 
-      const result: ExecCmdResult<T> = {
+      const result = {
         shellOutput: new ShellString(stdout),
         execCmdDuration,
-      };
+      } as T;
       result.shellOutput.code = code;
       result.shellOutput.stdout = stripAnsi(stdout);
       result.shellOutput.stderr = stripAnsi(stderr);
 
-      resolve(addJsonOutput<T>(cmd, result));
+      resolve(addJsonOutput<T, U>(cmd, result));
     };
 
     // Execute the command async in a child process
@@ -205,7 +226,15 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
  * @param options The options used to run the command.
  * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
  */
-export function execCmd<T = AnyJson>(cmd: string, options?: ExecCmdOptions & { async?: false }): ExecCmdResult<T>;
+export function execCmd<T = Collection>(
+  cmd: string,
+  options?: ExecCmdOptions & { async?: false; cli?: 'sfdx' }
+): SfdxExecCmdResult<T>;
+
+export function execCmd<T = Collection>(
+  cmd: string,
+  options?: ExecCmdOptions & { async?: false; cli?: 'sf' }
+): SfExecCmdResult<T>;
 
 /**
  * Asynchronously execute a command with the provided options in a child process.
@@ -225,15 +254,31 @@ export function execCmd<T = AnyJson>(cmd: string, options?: ExecCmdOptions & { a
  * @param options The options used to run the command.
  * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
  */
-export function execCmd<T = AnyJson>(cmd: string, options: ExecCmdOptions & { async: true }): Promise<ExecCmdResult<T>>;
-
-export function execCmd<T = AnyJson>(
+export function execCmd<T = Collection>(
   cmd: string,
-  options?: ExecCmdOptions
-): ExecCmdResult<T> | Promise<ExecCmdResult<T>> {
-  if (options?.async) {
-    return execCmdAsync<T>(cmd, options);
+  options: ExecCmdOptions & { async: true; cli?: 'sfdx' }
+): Promise<SfdxExecCmdResult<T>>;
+
+export function execCmd<T = Collection>(
+  cmd: string,
+  options: ExecCmdOptions & { async: true; cli?: 'sf' }
+): Promise<SfExecCmdResult<T>>;
+
+export function execCmd<T = Collection>(
+  cmd: string,
+  options: ExecCmdOptions = DEFAULT_EXEC_OPTIONS
+): SfdxExecCmdResult<T> | Promise<SfdxExecCmdResult<T>> | SfExecCmdResult<T> | Promise<SfExecCmdResult<T>> {
+  if (options.cli === 'sf') {
+    if (options.async) {
+      return execCmdAsync<SfExecCmdResult<T>, T>(cmd, options);
+    } else {
+      return execCmdSync<SfExecCmdResult<T>, T>(cmd, options);
+    }
   } else {
-    return execCmdSync<T>(cmd, options);
+    if (options.async) {
+      return execCmdAsync<SfdxExecCmdResult<T>, T>(cmd, options);
+    } else {
+      return execCmdSync<SfdxExecCmdResult<T>, T>(cmd, options);
+    }
   }
 }
