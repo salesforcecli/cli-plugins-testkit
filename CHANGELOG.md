@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.5...v1.2.0) (2021-07-23)
+
+
+### Features
+
+* support typings for sf ([#157](https://github.com/salesforcecli/cli-plugins-testkit/issues/157)) ([81d2204](https://github.com/salesforcecli/cli-plugins-testkit/commit/81d22040f3506da115d0bfc68c51a80b8a7f6f91))
+
 ### [1.1.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.4...v1.1.5) (2021-05-28)
 
 ### [1.1.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.3...v1.1.4) (2021-05-26)
