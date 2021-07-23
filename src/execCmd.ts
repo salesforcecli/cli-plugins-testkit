@@ -153,6 +153,8 @@ const execCmdSync = <T extends ExecCmdResult, U = Collection>(cmd: string, optio
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
   result.shellOutput = shelljs.exec(cmd, cmdOptions) as ShellString;
+  result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+  result.shellOutput.stderr = stripAnsi(result.shellOutput.stderr);
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
