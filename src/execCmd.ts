@@ -56,7 +56,7 @@ export interface SfdxExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: { status: number; result: T };
+  jsonOutput?: { status: number; result: T; warnings: string[] };
 }
 
 export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
