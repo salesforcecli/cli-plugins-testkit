@@ -29,6 +29,11 @@ export interface ExecCmdOptions extends ExecOptions {
    * of JSON parsing and types.
    */
   cli?: 'sfdx' | 'sf';
+
+  /**
+   * Answers to supply to any prompts. This does NOT work on windows.
+   */
+  answers?: string[];
 }
 
 export interface ExecCmdResult {
@@ -115,7 +120,7 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  * @param cmdArgs The command name, args, and param as a string. E.g., `"force:user:create -a testuser1"`
  * @returns The command string with CLI executable. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
  */
-const buildCmd = (cmdArgs: string): string => {
+const buildCmd = (cmdArgs: string, options?: ExecCmdOptions): string => {
   const debug = Debug('testkit:buildCmd');
 
   const bin = env.getString('TESTKIT_EXECUTABLE_PATH') || pathJoin('bin', 'run');
@@ -131,15 +136,18 @@ const buildCmd = (cmdArgs: string): string => {
 
   debug(`Using executable path: ${bin}`);
   debug(`Resolved executable path: ${resolvedPath}`);
-
-  return `${bin} ${cmdArgs}`;
+  if (options?.answers && process.platform !== 'win32') {
+    return `printf "${options.answers.join('\\n')}" | ${bin} ${cmdArgs}`;
+  } else {
+    return `${bin} ${cmdArgs}`;
+  }
 };
 
 const execCmdSync = <T extends ExecCmdResult, U = Collection>(cmd: string, options?: ExecCmdOptions): T => {
   const debug = Debug('testkit:execCmd');
 
   // Add on the bin path
-  cmd = buildCmd(cmd);
+  cmd = buildCmd(cmd, options);
   const cmdOptions = buildCmdOptions(options);
 
   debug(`Running cmd: ${cmd}`);
@@ -172,7 +180,7 @@ const execCmdAsync = async <T extends ExecCmdResult, U = Collection>(
   const debug = Debug('testkit:execCmdAsync');
 
   // Add on the bin path
-  cmd = buildCmd(cmd);
+  cmd = buildCmd(cmd, options);
 
   const resultPromise = new Promise<T>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
