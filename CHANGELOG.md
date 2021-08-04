@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.12...v1.3.0) (2021-08-04)
+
+
+### Features
+
+* allow option to answer prompts ([#171](https://github.com/salesforcecli/cli-plugins-testkit/issues/171)) ([2a7133e](https://github.com/salesforcecli/cli-plugins-testkit/commit/2a7133e16fcd04619964306af777701772c12720))
+
 ### [1.2.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.11...v1.2.12) (2021-08-04)
 
 ### [1.2.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.10...v1.2.11) (2021-08-03)
