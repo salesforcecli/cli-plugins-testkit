@@ -57,11 +57,14 @@ export interface ExecCmdResult {
   execCmdDuration: Duration;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: any) => any ? never : K }[keyof T]>>;
+
 export interface SfdxExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: { status: number; result: T } & Partial<typeof SfdxError.prototype>;
+  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfdxError>>;
 }
 
 export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
