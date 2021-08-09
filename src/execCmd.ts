@@ -7,7 +7,7 @@
 
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
-import { fs } from '@salesforce/core';
+import { fs, SfdxError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
@@ -61,7 +61,7 @@ export interface SfdxExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: { status: number; result: T };
+  jsonOutput?: { status: number; result: T } & Partial<typeof SfdxError.prototype>;
 }
 
 export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
