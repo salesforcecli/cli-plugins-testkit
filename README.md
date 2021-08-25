@@ -35,7 +35,7 @@ Here are some public github repos for plugins that use this library for NUTs:
 - [@salesforce/plugin-alias](https://github.com/salesforcecli/plugin-alias/blob/main/test/commands/alias/set.nut.ts)
 - [@salesforce/plugin-auth](https://github.com/salesforcecli/plugin-auth/blob/main/test/commands/auth/list.nut.ts)
 - [@salesforce/plugin-config](https://github.com/salesforcecli/plugin-config/blob/main/test/commands/config/list.nut.ts)
-- [@salesforce/plugin-data](https://github.com/salesforcecli/data/blob/main/packages/plugin-data/test/commands/force/data/tree/dataTree.nut.ts)
+- [@salesforce/plugin-data](https://github.com/salesforcecli/plugin-data/blob/main/test/commands/force/data/tree/dataTree.nut.ts)
 - [@salesforce/plugin-org](https://github.com/salesforcecli/plugin-org/blob/main/test/nut/commands/force/org/org.nut.ts)
 - [@salesforce/plugin-user](https://github.com/salesforcecli/plugin-user/blob/main/test/allCommands.nut.ts)
 
