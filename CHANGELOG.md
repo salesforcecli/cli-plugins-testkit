@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.0...v1.3.1) (2021-09-01)
+
+
+### Bug Fixes
+
+* include SfdxError props on SfdxExecCmdResult ([#172](https://github.com/salesforcecli/cli-plugins-testkit/issues/172)) ([9f852e0](https://github.com/salesforcecli/cli-plugins-testkit/commit/9f852e057b4ad22c44cf457b9e415ea0cf7c158e))
+
 ## [1.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.12...v1.3.0) (2021-08-04)
 
 
