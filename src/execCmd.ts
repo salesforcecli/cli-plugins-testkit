@@ -71,7 +71,7 @@ export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: T;
+  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfdxError>>;
 }
 
 const DEFAULT_EXEC_OPTIONS: ExecCmdOptions = {
