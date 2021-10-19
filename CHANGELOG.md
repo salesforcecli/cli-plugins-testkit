@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.11...v1.4.12) (2021-10-19)
+
+
+### Bug Fixes
+
+* format update for lint ([12e3f9a](https://github.com/salesforcecli/cli-plugins-testkit/commit/12e3f9ac8dfa68c3d92c72d0a98dec4af97b7c81))
+* format update for lint ([85838c8](https://github.com/salesforcecli/cli-plugins-testkit/commit/85838c89c6514d19a2ab8e519f9ca7097beb8ac8))
+
 ### [1.4.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.10...v1.4.11) (2021-10-12)
 
 ### [1.4.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.9...v1.4.10) (2021-10-03)
