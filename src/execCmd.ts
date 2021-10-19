@@ -100,7 +100,7 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
 const addJsonOutput = <T extends ExecCmdResult, U>(cmd: string, result: T): T => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as unknown as U;
+      result.jsonOutput = (parseJson(stripAnsi(result.shellOutput.stdout)) as unknown) as U;
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
