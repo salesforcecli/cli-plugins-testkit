@@ -2,6 +2,109 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.13...v1.4.14) (2021-11-01)
+
+### [1.4.13](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.12...v1.4.13) (2021-11-01)
+
+### [1.4.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.11...v1.4.12) (2021-10-19)
+
+
+### Bug Fixes
+
+* format update for lint ([12e3f9a](https://github.com/salesforcecli/cli-plugins-testkit/commit/12e3f9ac8dfa68c3d92c72d0a98dec4af97b7c81))
+* format update for lint ([85838c8](https://github.com/salesforcecli/cli-plugins-testkit/commit/85838c89c6514d19a2ab8e519f9ca7097beb8ac8))
+
+### [1.4.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.10...v1.4.11) (2021-10-12)
+
+### [1.4.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.9...v1.4.10) (2021-10-03)
+
+### [1.4.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.8...v1.4.9) (2021-10-03)
+
+### [1.4.8](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.7...v1.4.8) (2021-10-02)
+
+### [1.4.7](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.6...v1.4.7) (2021-10-02)
+
+### [1.4.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.5...v1.4.6) (2021-10-02)
+
+### [1.4.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.4...v1.4.5) (2021-10-02)
+
+### [1.4.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.3...v1.4.4) (2021-10-01)
+
+### [1.4.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.2...v1.4.3) (2021-10-01)
+
+### [1.4.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.1...v1.4.2) (2021-09-21)
+
+### [1.4.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.0...v1.4.1) (2021-09-10)
+
+## [1.4.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.7...v1.4.0) (2021-09-10)
+
+
+### Features
+
+* update SfExecCmdResult ([#180](https://github.com/salesforcecli/cli-plugins-testkit/issues/180)) ([f5005d9](https://github.com/salesforcecli/cli-plugins-testkit/commit/f5005d9da1fdedbca916dee2e934638003fef454))
+
+### [1.3.7](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.6...v1.3.7) (2021-09-02)
+
+### [1.3.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.5...v1.3.6) (2021-09-02)
+
+### [1.3.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.4...v1.3.5) (2021-09-02)
+
+### [1.3.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.3...v1.3.4) (2021-09-02)
+
+### [1.3.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.2...v1.3.3) (2021-09-01)
+
+### [1.3.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.1...v1.3.2) (2021-09-01)
+
+### [1.3.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.3.0...v1.3.1) (2021-09-01)
+
+
+### Bug Fixes
+
+* include SfdxError props on SfdxExecCmdResult ([#172](https://github.com/salesforcecli/cli-plugins-testkit/issues/172)) ([9f852e0](https://github.com/salesforcecli/cli-plugins-testkit/commit/9f852e057b4ad22c44cf457b9e415ea0cf7c158e))
+
+## [1.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.12...v1.3.0) (2021-08-04)
+
+
+### Features
+
+* allow option to answer prompts ([#171](https://github.com/salesforcecli/cli-plugins-testkit/issues/171)) ([2a7133e](https://github.com/salesforcecli/cli-plugins-testkit/commit/2a7133e16fcd04619964306af777701772c12720))
+
+### [1.2.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.11...v1.2.12) (2021-08-04)
+
+### [1.2.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.10...v1.2.11) (2021-08-03)
+
+### [1.2.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.9...v1.2.10) (2021-08-03)
+
+### [1.2.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.8...v1.2.9) (2021-08-03)
+
+### [1.2.8](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.7...v1.2.8) (2021-08-03)
+
+### [1.2.7](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.6...v1.2.7) (2021-08-02)
+
+### [1.2.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.5...v1.2.6) (2021-08-02)
+
+### [1.2.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.4...v1.2.5) (2021-08-02)
+
+### [1.2.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.3...v1.2.4) (2021-08-02)
+
+### [1.2.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.2...v1.2.3) (2021-08-01)
+
+### [1.2.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.1...v1.2.2) (2021-08-01)
+
+### [1.2.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.2.0...v1.2.1) (2021-07-23)
+
+
+### Bug Fixes
+
+* strip ansi from stdout and stderr ([#158](https://github.com/salesforcecli/cli-plugins-testkit/issues/158)) ([960b201](https://github.com/salesforcecli/cli-plugins-testkit/commit/960b20167beb0ff788934aceec7cf2e10d9b7f1b))
+
+## [1.2.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.5...v1.2.0) (2021-07-23)
+
+
+### Features
+
+* support typings for sf ([#157](https://github.com/salesforcecli/cli-plugins-testkit/issues/157)) ([81d2204](https://github.com/salesforcecli/cli-plugins-testkit/commit/81d22040f3506da115d0bfc68c51a80b8a7f6f91))
+
 ### [1.1.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.4...v1.1.5) (2021-05-28)
 
 ### [1.1.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.1.3...v1.1.4) (2021-05-26)
