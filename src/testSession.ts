@@ -134,7 +134,10 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     }
 
     // Write the test session options used to create this session
-    fsCore.writeJsonSync(path.join(this.dir, 'testSessionOptions.json'), JSON.parse(JSON.stringify(this.options)));
+    fsCore.writeJsonSync(
+      path.join(this.dir, 'testSessionOptions.json'),
+      JSON.parse(JSON.stringify(this.options)) as AnyJson
+    );
 
     const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
     // have to grab this before we change the home
