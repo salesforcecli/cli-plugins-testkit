@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
+import { retry, RetryConfig, RetryError } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
 import { fs as fsCore } from '@salesforce/core';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
@@ -80,6 +81,9 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public homeDir: string;
   public project?: TestProject;
   public setup?: AnyJson[] | shell.ShellString;
+
+  // this is stored on the class so that tests can set it to something much lower than default
+  public rmRetryConfig: Partial<RetryConfig<void>> = { retries: 12, delay: 5000 };
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
@@ -246,16 +250,27 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
   private async rmSessionDir(): Promise<void> {
     // Delete the test session unless they overrode the test session dir
-    if (!this.overriddenDir) {
-      this.debug(`Deleting test session dir: ${this.dir}`);
-      // Processes can hang on to files within the test session dir, preventing
-      // removal so we wait a bit before trying.
-      await this.sleep(Duration.seconds(4));
-      const rv = shell.rm('-rf', this.dir);
-      if (rv.code !== 0) {
-        throw Error(`Deleting the test session failed due to: ${rv.stderr}`);
-      }
+    if (this.overriddenDir) {
+      return;
     }
+    // this is wrapped in a promise because shelljs isn't async/await
+    return await retry(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          this.debug(`Deleting test session dir: ${this.dir}`);
+          const rv = shell.rm('-rf', this.dir);
+          if (rv.code !== 0) {
+            reject(`Deleting the test session failed due to: ${rv.stderr}`);
+          }
+          resolve();
+        }),
+      this.rmRetryConfig
+    ).catch((err) => {
+      if (err instanceof RetryError) {
+        throw err.lastError;
+      }
+      throw err;
+    });
   }
 
   // Executes commands and keeps track of any orgs created.

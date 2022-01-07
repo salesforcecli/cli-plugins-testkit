@@ -378,7 +378,7 @@ describe('TestSession', () => {
       expect(rmStub.called, 'should not have tried to rm TestSession dir').to.equal(false);
     });
 
-    it('should throw when rm -rf fails', async () => {
+    it('should retry and eventually throw when rm -rf fails', async () => {
       execStub.returns(shellString);
       const rmShellString = new ShellString(JSON.stringify(''));
       rmShellString.code = 1;
@@ -388,14 +388,16 @@ describe('TestSession', () => {
       const username = 'me@my.org';
       // @ts-ignore
       session.orgs = [username];
+      session.rmRetryConfig = { retries: 2, delay: 3 };
 
       try {
         await session.clean();
       } catch (err: unknown) {
         expect(restoreSpy.called).to.equal(true);
+        expect(rmStub.callCount).greaterThan(1);
         expect(execStub.firstCall.args[0]).to.equal(`sfdx force:org:delete -u ${username} -p`);
         const msg = `Deleting the test session failed due to: ${rmShellString.stderr}`;
-        expect((err as Error).message).to.equal(msg);
+        expect((err as Error).message).to.include(msg);
       }
     });
 
