@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.33...v1.5.0) (2022-01-07)
+
+### Features
+
+- retries on session rmDir ([8632d5d](https://github.com/salesforcecli/cli-plugins-testkit/commit/8632d5dcde0fb1f2acee33ed26dd96a0983bb938))
+
 ### [1.4.33](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.32...v1.4.33) (2022-01-03)
 
 ### [1.4.32](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.4.31...v1.4.32) (2022-01-03)
