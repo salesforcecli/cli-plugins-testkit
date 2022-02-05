@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.10...v1.5.11) (2022-02-05)
+
 ### [1.5.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.9...v1.5.10) (2022-02-03)
 
 ### [1.5.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.8...v1.5.9) (2022-02-02)
