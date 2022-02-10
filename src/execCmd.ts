@@ -109,8 +109,10 @@ const addJsonOutput = <T extends ExecCmdResult, U>(cmd: string, result: T): T =>
 };
 
 const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString) => {
-  const io = cmd.includes('--json') ? output.stdout : output.stderr;
-  return Error(`Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${output.code}\n${io}`);
+  const errorDetails = `\nstdout=${output.stdout}\nstderr=${output.stderr}`;
+  return Error(
+    `Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${output.code}${errorDetails}`
+  );
 };
 
 /**
