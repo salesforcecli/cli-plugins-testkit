@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.11...v1.5.12) (2022-02-11)
+
+### Bug Fixes
+
+- add both stdout and stderr to getExitCodeError ([49cccd7](https://github.com/salesforcecli/cli-plugins-testkit/commit/49cccd70679614846d106ad4cf210ce0f2a017b8))
+
 ### [1.5.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.10...v1.5.11) (2022-02-05)
 
 ### [1.5.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.9...v1.5.10) (2022-02-03)
