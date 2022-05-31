@@ -126,10 +126,10 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         projectDir = this.project.dir;
       }
 
-      // The default bin/run in execCmd will no longer resolve properly when
+      // The default bin/dev in execCmd will no longer resolve properly when
       // a test project is used since process.cwd is changed.  If the
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
-      // to use the bin/run from the cwd now.
+      // to use the bin/dev from the cwd now.
       if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
         const binDev = path.join(process.cwd(), 'bin', 'dev');
         env.setString(
