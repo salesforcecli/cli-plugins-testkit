@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.35...v2.0.0) (2022-05-31)
+
+### Features
+
+- parking orbit (core3, jsforce2) ([4575f9c](https://github.com/salesforcecli/cli-plugins-testkit/commit/4575f9c330528b1c6b4e6895ccde1fcd3b7d667e))
+
 ### [1.5.35](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.34...v1.5.35) (2022-05-03)
 
 ### [1.5.34](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.33...v1.5.34) (2022-05-02)
