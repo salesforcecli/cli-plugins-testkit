@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as fs from 'fs';
 import * as path from 'path';
-import { retry, RetryConfig, RetryError } from 'ts-retry-promise';
+import { RetryConfig } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
-import { fs as fsCore } from '@salesforce/core';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
@@ -116,7 +116,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     // Create the test session directory
     this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || this.options.sessionDir;
     this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
-    fsCore.mkdirpSync(this.dir);
+    fs.mkdirSync(this.dir, { recursive: true });
 
     // Setup a test project and stub process.cwd to be the project dir
     if (this.options.project) {
@@ -131,16 +131,20 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
       // to use the bin/run from the cwd now.
       if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
-        env.setString('TESTKIT_EXECUTABLE_PATH', path.join(process.cwd(), 'bin', 'run'));
+        const binDev = path.join(process.cwd(), 'bin', 'dev');
+        env.setString(
+          'TESTKIT_EXECUTABLE_PATH',
+          fs.existsSync(binDev) ? binDev : path.join(process.cwd(), 'bin', 'run')
+        );
       }
 
       this.stubCwd(projectDir);
     }
 
     // Write the test session options used to create this session
-    fsCore.writeJsonSync(
+    fs.writeFileSync(
       path.join(this.dir, 'testSessionOptions.json'),
-      JSON.parse(JSON.stringify(this.options)) as AnyJson
+      JSON.stringify(JSON.parse(JSON.stringify(this.options)))
     );
 
     const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
@@ -253,24 +257,8 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     if (this.overriddenDir) {
       return;
     }
-    // this is wrapped in a promise because shelljs isn't async/await
-    return await retry(
-      () =>
-        new Promise<void>((resolve, reject) => {
-          this.debug(`Deleting test session dir: ${this.dir}`);
-          const rv = shell.rm('-rf', this.dir);
-          if (rv.code !== 0) {
-            reject(`Deleting the test session failed due to: ${rv.stderr}`);
-          }
-          resolve();
-        }),
-      this.rmRetryConfig
-    ).catch((err) => {
-      if (err instanceof RetryError) {
-        throw err.lastError;
-      }
-      throw err;
-    });
+    this.debug(`Deleting test session dir: ${this.dir}`);
+    return fs.promises.rm(this.dir, { recursive: true, force: true });
   }
 
   // Executes commands and keeps track of any orgs created.

@@ -7,14 +7,13 @@
 
 // For testing private properties of TestSession
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-
+import * as fs from 'fs';
 import * as path from 'path';
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
-import { fs as fsCore } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 import Sinon = require('sinon');
 import { TestSession } from '../../src/testSession';
@@ -30,8 +29,8 @@ describe('TestSession', () => {
   let cwdStub: sinon.SinonStub;
 
   beforeEach(() => {
-    mkdirpStub = stubMethod(sandbox, fsCore, 'mkdirpSync');
-    writeJsonStub = stubMethod(sandbox, fsCore, 'writeJsonSync');
+    mkdirpStub = stubMethod(sandbox, fs, 'mkdirSync');
+    writeJsonStub = stubMethod(sandbox, fs, 'writeFileSync');
     cwdStub = stubMethod(sandbox, process, 'cwd').returns(cwd);
   });
 
@@ -313,7 +312,7 @@ describe('TestSession', () => {
       shellString = new ShellString(JSON.stringify(''));
       shellString.code = 0;
       execStub = stubMethod(sandbox, shelljs, 'exec');
-      rmStub = stubMethod(sandbox, shelljs, 'rm');
+      rmStub = stubMethod(sandbox, fs.promises, 'rm');
       session = await TestSession.create();
       stubMethod(sandbox, session, 'sleep').resolves();
       // @ts-ignore session.sandbox is private
@@ -326,8 +325,8 @@ describe('TestSession', () => {
 
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.called, 'should not have tried to delete TestSession orgs').to.equal(false);
-      expect(rmStub.firstCall.args[0]).to.equal('-rf');
-      expect(rmStub.firstCall.args[1]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[0]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
     });
 
     it('should not remove the test session dir or orgs when TESTKIT_SAVE_ARTIFACTS === true', async () => {
@@ -351,8 +350,8 @@ describe('TestSession', () => {
 
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.firstCall.args[0]).to.equal(`sfdx force:org:delete -u ${username} -p`);
-      expect(rmStub.firstCall.args[0]).to.equal('-rf');
-      expect(rmStub.firstCall.args[1]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[0]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
     });
 
     it('should not remove orgs when TESTKIT_ORG_USERNAME === true', async () => {
@@ -363,8 +362,8 @@ describe('TestSession', () => {
 
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.called).to.equal(false);
-      expect(rmStub.firstCall.args[0]).to.equal('-rf');
-      expect(rmStub.firstCall.args[1]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[0]).to.equal(session.dir);
+      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
     });
 
     it('should not remove the test session dir when overridden', async () => {
@@ -376,29 +375,6 @@ describe('TestSession', () => {
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.called, 'should not have tried to delete TestSession orgs').to.equal(false);
       expect(rmStub.called, 'should not have tried to rm TestSession dir').to.equal(false);
-    });
-
-    it('should retry and eventually throw when rm -rf fails', async () => {
-      execStub.returns(shellString);
-      const rmShellString = new ShellString(JSON.stringify(''));
-      rmShellString.code = 1;
-      rmShellString.stderr = 'mav wont engage';
-      rmStub.returns(rmShellString);
-
-      const username = 'me@my.org';
-      // @ts-ignore
-      session.orgs = [username];
-      session.rmRetryConfig = { retries: 2, delay: 3 };
-
-      try {
-        await session.clean();
-      } catch (err: unknown) {
-        expect(restoreSpy.called).to.equal(true);
-        expect(rmStub.callCount).greaterThan(1);
-        expect(execStub.firstCall.args[0]).to.equal(`sfdx force:org:delete -u ${username} -p`);
-        const msg = `Deleting the test session failed due to: ${rmShellString.stderr}`;
-        expect((err as Error).message).to.include(msg);
-      }
     });
 
     it('should throw when org delete fails', async () => {
@@ -416,8 +392,8 @@ describe('TestSession', () => {
         await session.clean();
       } catch (err: unknown) {
         expect(restoreSpy.called).to.equal(true);
-        expect(rmStub.firstCall.args[0]).to.equal('-rf');
-        expect(rmStub.firstCall.args[1]).to.equal(session.dir);
+        expect(rmStub.firstCall.args[0]).to.equal(session.dir);
+        expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
         const msg = `Deleting org ${username} failed due to: ${execShellString.stderr}`;
         expect((err as Error).message).to.equal(msg);
       }

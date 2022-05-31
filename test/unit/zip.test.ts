@@ -4,11 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
+import * as fs from 'fs';
 import { join as pathJoin } from 'path';
 import { EventEmitter } from 'events';
 import { assert, expect } from 'chai';
-import { fs as fsCore } from '@salesforce/core';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as sinon from 'sinon';
 import { zipDir } from '../../lib/zip';
@@ -28,7 +27,7 @@ describe('zipDir', () => {
   });
 
   it('should zip a directory', async () => {
-    stubMethod(sandbox, fsCore, 'createWriteStream').returns(new WriteStreamMock());
+    stubMethod(sandbox, fs, 'createWriteStream').returns(new WriteStreamMock());
     const zipName = 'zipTest1.zip';
     const zipPath = await zipDir({
       sourceDir: pathJoin(process.cwd(), 'test', 'unit'),
@@ -39,7 +38,7 @@ describe('zipDir', () => {
   });
 
   it('should fail on error', async () => {
-    stubMethod(sandbox, fsCore, 'createWriteStream').returns(new WriteStreamMock());
+    stubMethod(sandbox, fs, 'createWriteStream').returns(new WriteStreamMock());
     const zipName = 'zipTest2.zip';
 
     try {

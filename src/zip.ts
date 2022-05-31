@@ -4,11 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
+import * as fs from 'fs';
 import * as path from 'path';
 import { create as createArchive } from 'archiver';
 import Debug from 'debug';
-import { fs as fsCore } from '@salesforce/core';
 
 export interface ZipDirConfig {
   /**
@@ -39,7 +38,7 @@ export const zipDir = async (config: ZipDirConfig): Promise<string> => {
   const { sourceDir, destDir, name } = config;
   const zip = createArchive('zip', { zlib: { level: 3 } });
   const zipFilePath = path.join(destDir, name);
-  const output = fsCore.createWriteStream(zipFilePath);
+  const output = fs.createWriteStream(zipFilePath);
   debug(`Zipping contents of ${sourceDir} to ${zipFilePath}`);
 
   return new Promise((resolve, reject) => {

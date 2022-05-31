@@ -4,10 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as fs from 'fs';
 
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
-import { fs, SfdxError } from '@salesforce/core';
+import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
@@ -64,14 +65,14 @@ export interface SfdxExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfdxError>>;
+  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfError>>;
 }
 
 export interface SfExecCmdResult<T = Collection> extends ExecCmdResult {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
-  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfdxError>>;
+  jsonOutput?: { status: number; result: T } & Partial<ExcludeMethods<SfError>>;
 }
 
 const DEFAULT_EXEC_OPTIONS: ExecCmdOptions = {
@@ -120,7 +121,7 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  *
  * The executable preference order is:
  *    2. TESTKIT_EXECUTABLE_PATH env var
- *    3. `bin/run` (default)
+ *    3. `bin/dev` (default)
  *
  * @param cmdArgs The command name, args, and param as a string. E.g., `"force:user:create -a testuser1"`
  * @returns The command string with CLI executable. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
@@ -128,14 +129,14 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
 const buildCmd = (cmdArgs: string, options?: ExecCmdOptions): string => {
   const debug = Debug('testkit:buildCmd');
 
-  const bin = env.getString('TESTKIT_EXECUTABLE_PATH') || pathJoin('bin', 'run');
+  const bin = env.getString('TESTKIT_EXECUTABLE_PATH') ?? pathJoin('bin', 'dev');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
   // If which finds the path in the system path, use that.
   if (which) {
     resolvedPath = which;
-  } else if (!fs.fileExistsSync(bin)) {
+  } else if (!fs.existsSync(bin)) {
     throw new Error(`Cannot find specified executable path: ${bin}`);
   }
 

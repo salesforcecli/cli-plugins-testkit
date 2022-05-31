@@ -4,7 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
+import * as fs from 'fs';
 import { tmpdir } from 'os';
 import { join as pathJoin } from 'path';
 import { assert, expect } from 'chai';
@@ -13,7 +13,6 @@ import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
-import { fs as fsCore } from '@salesforce/core';
 import { TestProject } from '../../lib/testProject';
 
 describe('TestProject', () => {
@@ -57,7 +56,7 @@ describe('TestProject', () => {
     shellString.code = 0;
     const whichStub = stubMethod(sandbox, shelljs, 'which').returns('/usr/bin/git');
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
-    const readdirSyncStub = stubMethod(sandbox, fsCore, 'readdirSync').returns([cloneDir]);
+    const readdirSyncStub = stubMethod(sandbox, fs, 'readdirSync').returns([cloneDir]);
     const testProject = new TestProject({ gitClone, destinationDir });
     expect(testProject.dir).to.equal(pathJoin(destinationDir, cloneDir));
     expect(whichStub.calledWith('git')).to.equal(true);
