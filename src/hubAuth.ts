@@ -6,10 +6,10 @@
  */
 import * as path from 'path';
 import * as os from 'os';
+import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
-
-import { AuthFields, fs } from '@salesforce/core';
+import { AuthFields } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
 // this seems to be a known eslint error for enums
@@ -163,7 +163,7 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
   logger(`reading ${devhub}.json`);
   const authFileName = `${devhub}.json`;
   const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
-  const authFileContents = fs.readJsonSync(hubAuthFileSource) as AuthFields;
+  const authFileContents = JSON.parse(fs.readFileSync(hubAuthFileSource, 'utf-8')) as AuthFields;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
     // this is jwt.  set the appropriate env vars

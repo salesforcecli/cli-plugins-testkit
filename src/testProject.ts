@@ -4,13 +4,12 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
+import * as fs from 'fs';
 import * as path from 'path';
 import { tmpdir } from 'os';
 import { inspect } from 'util';
 import { debug, Debugger } from 'debug';
 import * as shell from 'shelljs';
-import { fs as fsCore } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 import { genUniqueString } from './genUniqueString';
 import { zipDir, ZipDirConfig } from './zip';
@@ -75,7 +74,7 @@ export class TestProject {
       }
       // the git clone will fail if the destination dir is not empty, so after
       // a successful clone the only contents should be the cloned repo dir.
-      const cloneDirName = fsCore.readdirSync(destDir)[0];
+      const cloneDirName = fs.readdirSync(destDir)[0];
       this.dir = path.join(destDir, cloneDirName);
     }
     // Create a new project using the command.

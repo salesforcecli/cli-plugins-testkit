@@ -10,11 +10,12 @@
  * a number of the testSession fail. Running these tests after testSession tests seems to work,
  * so chose a file name that guarantees these will be run last.
  */
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as chai from 'chai';
-import { AuthFields, fs as fsCore } from '@salesforce/core';
+import { AuthFields } from '@salesforce/core';
 import { Env, env } from '@salesforce/kit';
 import * as sinon from 'sinon';
 import * as shell from 'shelljs';
@@ -48,6 +49,7 @@ describe('hubAuth', () => {
   const sandbox = sinon.createSandbox();
   type EnvVar = { key: string; value: string };
   let homeDir: string;
+  let writeStub: sinon.SinonStub;
   const stubEnvGet = (envVars: EnvVar[]): void => {
     getStringStub = stubMethod(sandbox, Env.prototype, 'getString');
     for (const envVar of envVars) {
@@ -56,8 +58,8 @@ describe('hubAuth', () => {
   };
   beforeEach(() => {
     homeDir = `${path.join(tmp, path.sep)}${new Date().getTime()}`;
-    stubMethod(sandbox, fsCore, 'mkdirpSync');
-    stubMethod(sandbox, fsCore, 'writeJsonSync');
+    stubMethod(sandbox, fs, 'mkdir');
+    writeStub = stubMethod(sandbox, fs, 'writeFileSync');
     stubMethod(sandbox, process, 'cwd').returns(homeDir);
   });
   afterEach(() => {
@@ -72,19 +74,19 @@ describe('hubAuth', () => {
         { key: 'TESTKIT_HUB_INSTANCE', value: sampleAuthData.instanceUrl },
       ]);
 
-      const writeStub = stubMethod(sandbox, fsCore, 'writeFileSync').callsFake((): void => {
+      writeStub.callsFake((): void => {
         return;
       });
-      stubMethod(sandbox, fsCore, 'existsSync').callsFake((): boolean => {
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
         return true;
       });
-      const readStub = stubMethod(sandbox, fsCore, 'readFileSync').callsFake((): string => {
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
         return sampleAuthData.jwtKeyWithHeaderFooter;
       });
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
-      expect(fsCore.existsSync(jwtKeyFile)).to.be.true;
-      fsCore.readFileSync(jwtKeyFile, 'utf8');
+      expect(fs.existsSync(jwtKeyFile)).to.be.true;
+      fs.readFileSync(jwtKeyFile, 'utf8');
       const jwtPassedToWrite = writeStub.args[0][1] as string;
       expect(writeStub.args[0][0]).to.be.equal(jwtKeyFile);
       expect((writeStub.args[0][1] as string).replace(/\n/g, '')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
@@ -101,19 +103,19 @@ describe('hubAuth', () => {
         { key: 'TESTKIT_HUB_USERNAME', value: sampleAuthData.devHubUsername },
         { key: 'TESTKIT_HUB_INSTANCE', value: sampleAuthData.instanceUrl },
       ]);
-      const writeStub = stubMethod(sandbox, fsCore, 'writeFileSync').callsFake((): void => {
+      writeStub.callsFake((): void => {
         return;
       });
-      stubMethod(sandbox, fsCore, 'existsSync').callsFake((): boolean => {
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
         return true;
       });
-      const readStub = stubMethod(sandbox, fsCore, 'readFileSync').callsFake((): string => {
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
         return sampleAuthData.jwtKeyWithHeaderFooter;
       });
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
-      expect(fsCore.existsSync(jwtKeyFile)).to.be.true;
-      fsCore.readFileSync(jwtKeyFile, 'utf8');
+      expect(fs.existsSync(jwtKeyFile)).to.be.true;
+      fs.readFileSync(jwtKeyFile, 'utf8');
       const jwtPassedToWrite = writeStub.args[0][1] as string;
       expect(writeStub.args[0][0]).to.be.equal(jwtKeyFile);
       expect((writeStub.args[0][1] as string).replace(/\n/g, '')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
@@ -137,20 +139,20 @@ describe('hubAuth', () => {
   describe('Prepare For Auth Url', () => {
     it('should prepare test env for use with sfdx auth url', () => {
       stubEnvGet([{ key: 'TESTKIT_AUTH_URL', value: sampleAuthData.sfdxAuthUrl }]);
-      const writeStub = stubMethod(sandbox, fsCore, 'writeFileSync').callsFake((): void => {
+      writeStub.callsFake((): void => {
         return;
       });
-      const readStub = stubMethod(sandbox, fsCore, 'readFileSync').callsFake((): string => {
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
         return sampleAuthData.sfdxAuthUrl;
       });
-      stubMethod(sandbox, fsCore, 'existsSync').callsFake((): boolean => {
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
         return true;
       });
       const authUrlFile = prepareForAuthUrl(homeDir);
 
       // eslint-disable-next-line no-unused-expressions
-      expect(fsCore.existsSync(authUrlFile)).to.be.true;
-      const authUrl: string = fsCore.readFileSync(authUrlFile, 'utf8');
+      expect(fs.existsSync(authUrlFile)).to.be.true;
+      const authUrl: string = fs.readFileSync(authUrlFile, 'utf8');
       expect(readStub.args[0][0]).to.be.equal(authUrlFile);
       expect(writeStub.args[0][0]).to.be.equal(authUrlFile);
       const authUrlPassedToWrite = writeStub.args[0][1] as string;
@@ -161,16 +163,21 @@ describe('hubAuth', () => {
 
   describe('Transfer Existing Auth To Env', () => {
     let shellStub;
+    let readStub: sinon.SinonStub;
     beforeEach(() => {
       stubEnvGet([
         { key: 'HOME', value: homeDir },
         { key: 'TESTKIT_HUB_USERNAME', value: sampleAuthData.devHubUsername },
       ]);
-      stubMethod(sandbox, fsCore, 'readFileSync').returns(sampleAuthData.jwtKeyWithHeaderFooter);
+      readStub = stubMethod(sandbox, fs, 'readFileSync');
     });
 
     it('should prepare test env for auth using existing username with no refresh token', () => {
-      stubMethod(sandbox, fsCore, 'readJsonSync').returns(authFields);
+      readStub
+        .withArgs(authFields.privateKey, 'utf-8')
+        .returns(sampleAuthData.jwtKeyWithHeaderFooter)
+        .withArgs(sinon.match.any)
+        .returns(JSON.stringify(authFields));
       shellStub = stubMethod(sandbox, shell, 'exec').returns({});
       transferExistingAuthToEnv(AuthStrategy.REUSE);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
@@ -182,7 +189,11 @@ describe('hubAuth', () => {
     });
 
     it('should prepare test env for auth using existing username with refresh token', () => {
-      stubMethod(sandbox, fsCore, 'readJsonSync').returns({ refreshToken: 'some-refresh-token' });
+      readStub
+        .withArgs(authFields.privateKey, 'utf-8')
+        .returns(sampleAuthData.jwtKeyWithHeaderFooter)
+        .withArgs(sinon.match.any)
+        .returns(JSON.stringify({ refreshToken: 'some-refresh-token' }));
       shellStub = stubMethod(sandbox, shell, 'exec').returns(
         JSON.stringify({ result: { sfdxAuthUrl: sampleAuthData.sfdxAuthUrl } })
       );

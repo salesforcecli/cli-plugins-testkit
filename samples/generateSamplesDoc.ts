@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as os from 'os';
-import { fs as fsCore } from '@salesforce/core';
-
+import * as fs from 'fs';
 // The structure of topic content in topics.json.
 type SamplesContent = {
   header: string;
@@ -48,7 +47,7 @@ function replaceImports(nut: string): string {
 
 // Reads topics.json for configuration and doc structure. Writes SAMPLES.md.
 (function generateSamples() {
-  const topics = fsCore.readJsonSync(path.join(__dirname, 'topics.json')) as SamplesTopic[];
+  const topics = JSON.parse(fs.readFileSync(path.join(__dirname, 'topics.json'), 'utf8')) as SamplesTopic[];
 
   const fileModificationWarning = `<!--${os.EOL}WARNING: THIS IS A GENERATED FILE. DO NOT MODIFY DIRECTLY.  USE topics.json${os.EOL}-->${os.EOL}`;
 
@@ -72,7 +71,7 @@ function replaceImports(nut: string): string {
 
         if (samplesContent.file) {
           sampleContents.push(`\`\`\`${topic.type}${os.EOL}`);
-          const nut = fsCore.readFileSync(path.join(__dirname, samplesContent.file)).toString();
+          const nut = fs.readFileSync(path.join(__dirname, samplesContent.file)).toString();
           const replacedNut = replaceImports(nut);
           sampleContents.push(`${replacedNut}${os.EOL}`);
           sampleContents.push(`\`\`\`${os.EOL}${os.EOL}`);
@@ -100,5 +99,5 @@ function replaceImports(nut: string): string {
 
   const samplesFileContent = [...tableOfContents, ...sampleContents];
   const samplesFilePath = path.join(process.cwd(), 'SAMPLES.md');
-  fsCore.writeFileSync(samplesFilePath, samplesFileContent.join(''));
+  fs.writeFileSync(samplesFilePath, samplesFileContent.join(''));
 })();
