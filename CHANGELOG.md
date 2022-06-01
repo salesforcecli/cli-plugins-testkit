@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.0.1...v2.1.0) (2022-06-01)
+
+### Features
+
+- native node delete retries ([e4b336f](https://github.com/salesforcecli/cli-plugins-testkit/commit/e4b336f78f57ec1b43daa302c5b4eb2c1fe685c5))
+
 ### [2.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.0.0...v2.0.1) (2022-06-01)
 
 ## [2.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v1.5.35...v2.0.0) (2022-05-31)
