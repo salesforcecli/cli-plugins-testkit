@@ -258,7 +258,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       return;
     }
     this.debug(`Deleting test session dir: ${this.dir}`);
-    return fs.promises.rm(this.dir, { recursive: true, force: true });
+    return fs.promises.rm(this.dir, { recursive: true, force: true, maxRetries: 100, retryDelay: 2000 });
   }
 
   // Executes commands and keeps track of any orgs created.

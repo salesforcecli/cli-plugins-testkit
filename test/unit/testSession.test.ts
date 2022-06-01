@@ -307,6 +307,7 @@ describe('TestSession', () => {
     let restoreSpy: Sinon.SinonSpy;
     let session: TestSession;
     let shellString: ShellString;
+    const rmOptions = { recursive: true, force: true, maxRetries: 100, retryDelay: 2000 };
 
     beforeEach(async () => {
       shellString = new ShellString(JSON.stringify(''));
@@ -326,7 +327,7 @@ describe('TestSession', () => {
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.called, 'should not have tried to delete TestSession orgs').to.equal(false);
       expect(rmStub.firstCall.args[0]).to.equal(session.dir);
-      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
+      expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
     });
 
     it('should not remove the test session dir or orgs when TESTKIT_SAVE_ARTIFACTS === true', async () => {
@@ -351,7 +352,7 @@ describe('TestSession', () => {
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.firstCall.args[0]).to.equal(`sfdx force:org:delete -u ${username} -p`);
       expect(rmStub.firstCall.args[0]).to.equal(session.dir);
-      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
+      expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
     });
 
     it('should not remove orgs when TESTKIT_ORG_USERNAME === true', async () => {
@@ -363,7 +364,7 @@ describe('TestSession', () => {
       expect(restoreSpy.called).to.equal(true);
       expect(execStub.called).to.equal(false);
       expect(rmStub.firstCall.args[0]).to.equal(session.dir);
-      expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
+      expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
     });
 
     it('should not remove the test session dir when overridden', async () => {
@@ -393,7 +394,7 @@ describe('TestSession', () => {
       } catch (err: unknown) {
         expect(restoreSpy.called).to.equal(true);
         expect(rmStub.firstCall.args[0]).to.equal(session.dir);
-        expect(rmStub.firstCall.args[1]).to.deep.equal({ recursive: true, force: true });
+        expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
         const msg = `Deleting org ${username} failed due to: ${execShellString.stderr}`;
         expect((err as Error).message).to.equal(msg);
       }
