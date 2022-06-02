@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { RetryConfig } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
+import { GlobalInfo } from '@salesforce/core';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { AnyJson, getString, Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
@@ -249,6 +250,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         }
         this.debug('Deleted org result=', rv.stdout);
       }
+      GlobalInfo.clearInstance();
     }
   }
 
@@ -344,6 +346,8 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         await this.sleep(timeout);
       }
     }
+    // there may be globalInfo touches from org:create or other setup commands run
+    GlobalInfo.clearInstance();
   }
 
   private async sleep(duration: Duration): Promise<void> {

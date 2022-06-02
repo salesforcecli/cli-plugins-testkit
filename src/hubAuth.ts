@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
-import { AuthFields } from '@salesforce/core';
+import { AuthFields, GlobalInfo } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
 // this seems to be a known eslint error for enums
@@ -94,6 +94,8 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
       )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       execOpts
     ) as shell.ShellString;
+    GlobalInfo.clearInstance();
+
     if (results.code !== 0) {
       throw new Error(
         `jwt:grant for org ${env.getString(
@@ -110,6 +112,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     const tmpUrl = prepareForAuthUrl(homeDir);
 
     const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, execOpts) as shell.ShellString;
+    GlobalInfo.clearInstance();
     logger(shellOutput);
     if (shellOutput.code !== 0) {
       throw new Error(
@@ -185,6 +188,8 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
     const displayContents = JSON.parse(
       shell.exec(`sfdx force:org:display -u ${devhub} --verbose --json`, execOpts) as string
     ) as OrgDisplayResult;
+    GlobalInfo.clearInstance();
+
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
     env.setString('TESTKIT_AUTH_URL', displayContents.result.sfdxAuthUrl);
     return;
