@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.1...v2.1.2) (2022-06-02)
+
+### Bug Fixes
+
+- clear globalInfo instance after every possible touchpoint ([ca7dc01](https://github.com/salesforcecli/cli-plugins-testkit/commit/ca7dc012496ec207649e0ef48a6d1fef2ec94f8d))
+
 ### [2.1.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.0...v2.1.1) (2022-06-02)
 
 ## [2.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.0.1...v2.1.0) (2022-06-01)
