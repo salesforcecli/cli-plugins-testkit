@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { debug } from 'debug';
-import { AuthFields, StateAggregator } from '@salesforce/core';
+import { AuthFields } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
 // this seems to be a known eslint error for enums
@@ -94,7 +94,6 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
       )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       execOpts
     ) as shell.ShellString;
-    StateAggregator.clearInstance();
 
     if (results.code !== 0) {
       throw new Error(
@@ -112,7 +111,6 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     const tmpUrl = prepareForAuthUrl(homeDir);
 
     const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, execOpts) as shell.ShellString;
-    StateAggregator.clearInstance();
     logger(shellOutput);
     if (shellOutput.code !== 0) {
       throw new Error(
@@ -135,12 +133,13 @@ const getAuthStrategy = (): AuthStrategy => {
   ) {
     return AuthStrategy.JWT;
   }
+  // you provided a username but not an auth url, so you must already have an auth that you want to re-use
+  if (env.getString('TESTKIT_HUB_USERNAME') && !env.getString('TESTKIT_AUTH_URL')) {
+    return AuthStrategy.REUSE;
+  }
+  // auth url alone
   if (env.getString('TESTKIT_AUTH_URL')) {
     return AuthStrategy.AUTH_URL;
-  }
-  // none of the above are included, so we want to reuse an already authenticated hub
-  if (env.getString('TESTKIT_HUB_USERNAME')) {
-    return AuthStrategy.REUSE;
   }
   return AuthStrategy.NONE;
 };
@@ -188,7 +187,6 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
     const displayContents = JSON.parse(
       shell.exec(`sfdx force:org:display -u ${devhub} --verbose --json`, execOpts) as string
     ) as OrgDisplayResult;
-    StateAggregator.clearInstance();
 
     logger(`found ${displayContents.result.sfdxAuthUrl}`);
     env.setString('TESTKIT_AUTH_URL', displayContents.result.sfdxAuthUrl);
