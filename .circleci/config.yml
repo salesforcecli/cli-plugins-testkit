@@ -32,7 +32,6 @@ workflows:
             branches:
               only: main
           context:
-            - CLI_CTC
             - release
   test-ts-update:
     triggers:
