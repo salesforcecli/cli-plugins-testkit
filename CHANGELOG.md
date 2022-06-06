@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.2...v2.1.3) (2022-06-06)
+
+### Bug Fixes
+
+- globalinfo -> stateAggregator ([6638739](https://github.com/salesforcecli/cli-plugins-testkit/commit/66387396d6aba5276cbadeb2d40fcc98182cd034))
+
 ### [2.1.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.1...v2.1.2) (2022-06-02)
 
 ### Bug Fixes
