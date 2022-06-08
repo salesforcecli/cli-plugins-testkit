@@ -110,9 +110,14 @@ const addJsonOutput = <T extends ExecCmdResult, U>(cmd: string, result: T): T =>
 };
 
 const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString) => {
-  const errorDetails = `\nstdout=${output.stdout}\nstderr=${output.stderr}`;
+  const errorDetails =
+    output.stdout || output.stderr
+      ? // return details if they exist
+        `\nstdout=${output.stdout}\nstderr=${output.stderr}`
+      : // or the raw string if there are no details
+        `\n${output}`;
   return Error(
-    `Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${output.code}${errorDetails}`
+    `Unexpected exit code for command: ${cmd}. Expected: ${expectedCode} Actual: ${output.code} ${errorDetails}`
   );
 };
 
