@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.3...v2.1.4) (2022-06-06)
+
+### Bug Fixes
+
+- remove StateAgg, handle when username and authurl are provided ([522ff33](https://github.com/salesforcecli/cli-plugins-testkit/commit/522ff33237e4d918343963d195ac3a298589ff0e))
+
 ### [2.1.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.2...v2.1.3) (2022-06-06)
 
 ### Bug Fixes
