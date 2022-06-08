@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.2.0...v2.3.0) (2022-06-08)
+
+### Features
+
+- raw exec output when stdout/stderr are empty ([b93e8bc](https://github.com/salesforcecli/cli-plugins-testkit/commit/b93e8bcc0e0d926a3956350e648f4a8d886933e1))
+
 ## [2.2.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.1.4...v2.2.0) (2022-06-08)
 
 ### Features
