@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.3.10...v2.3.11) (2022-08-29)
+
+### Bug Fixes
+
+- move shelljs types from devDep to dep ([#274](https://github.com/salesforcecli/cli-plugins-testkit/issues/274)) ([a5b5b16](https://github.com/salesforcecli/cli-plugins-testkit/commit/a5b5b16364b807dabcfe0d5de28e5945a431c629))
+
 ### [2.3.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.3.9...v2.3.10) (2022-08-02)
 
 ### [2.3.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/v2.3.8...v2.3.9) (2022-08-02)
