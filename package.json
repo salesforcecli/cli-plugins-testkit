@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/cli-plugins-testkit",
   "description": "Provides test utilities to assist Salesforce CLI plug-in authors with writing non-unit tests (NUT).",
-  "version": "2.3.11",
+  "version": "2.3.12",
   "author": "Salesforce",
   "license": "BSD-3-Clause",
   "main": "lib/index.js",
