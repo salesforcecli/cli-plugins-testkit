@@ -12,8 +12,7 @@ import { Duration, env } from '@salesforce/kit';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
-import { execCmd } from '../../src/execCmd';
-
+import { execCmd, getWaitTime } from '../../src/execCmd';
 describe('execCmd (sync)', () => {
   const sandbox = sinon.createSandbox();
   const cmd = 'force:user:create -a testuser1';
@@ -286,5 +285,53 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][1]).to.have.property('shell', shellOverride);
+  });
+});
+describe('getWaitTime', () => {
+  it('should return a the default timeout', () => {
+    const waitTime = getWaitTime('foo');
+    expect(waitTime).to.be.to.equal(Duration.minutes(30).milliseconds);
+  });
+  it('should return timeout of 5 minutes', () => {
+    const waitTime = getWaitTime('foo --wait 5');
+    expect(waitTime).to.be.to.equal(Duration.minutes(5).milliseconds);
+  });
+  it('should return timeout of 5 minutes with flag --wait=5', () => {
+    const waitTime = getWaitTime('foo --wait 5');
+    expect(waitTime).to.be.to.equal(Duration.minutes(5).milliseconds);
+  });
+  it('should throw with negative wait', () => {
+    // eslint-disable-next-line no-unused-expressions
+    expect(() => getWaitTime('foo --wait -42')).to.throw(
+      /The given wait time on the command, "-42", cannot be negative./
+    );
+  });
+  it('should return command wait using short flag -w 42', () => {
+    const waitTime = getWaitTime('foo -w42');
+    expect(waitTime).to.be.to.equal(Duration.minutes(42).milliseconds);
+  });
+  it('should return command wait using short flag -w=42', () => {
+    const waitTime = getWaitTime('foo -w=42');
+    expect(waitTime).to.be.to.equal(Duration.minutes(42).milliseconds);
+  });
+  it('should return command wait using short flag with lots of spaces -w                              42', () => {
+    const waitTime = getWaitTime('foo -w                              42');
+    expect(waitTime).to.be.to.equal(Duration.minutes(42).milliseconds);
+  });
+  it('should return command default wait when wait flag has no value -w', () => {
+    const waitTime = getWaitTime('foo -w');
+    expect(waitTime).to.be.to.equal(Duration.minutes(30).milliseconds);
+  });
+  it('should return timeout of 5 minutes when other parameters present', () => {
+    const waitTime = getWaitTime('foo --baz --wait 5 --foo bar');
+    expect(waitTime).to.be.to.equal(Duration.minutes(5).milliseconds);
+  });
+  it('should return timeout of 5 minutes when wait followed by numeric varargs', () => {
+    const waitTime = getWaitTime('foo --baz --wait 5 123456');
+    expect(waitTime).to.be.to.equal(Duration.minutes(5).milliseconds);
+  });
+  it('should return default timeout of 30 minutes when wait value is not numeric', () => {
+    const waitTime = getWaitTime('foo --baz --wait forever');
+    expect(waitTime).to.be.to.equal(Duration.minutes(30).milliseconds);
   });
 });

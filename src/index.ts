@@ -6,7 +6,7 @@
  */
 
 export * from './genUniqueString';
-export * from './execCmd';
+export { ExecCmdOptions, ExecCmdResult, SfdxExecCmdResult, SfExecCmdResult, execCmd } from './execCmd';
 export { prepareForAuthUrl, prepareForJwt } from './hubAuth';
 export * from './testProject';
 export * from './testSession';

@@ -8,7 +8,7 @@ import * as fs from 'fs';
 
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
-import { SfError } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber } from '@salesforce/ts-types';
 import Debug from 'debug';
@@ -16,6 +16,11 @@ import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 import stripAnsi = require('strip-ansi');
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.load('@salesforce/cli-plugins-testkit', 'exec_cmd', ['waitTimeNegative']);
+
+const DEFAULT_WAIT_TIME = 30;
 
 type Collection = Record<string, AnyJson> | Array<Record<string, AnyJson>>;
 
@@ -79,11 +84,21 @@ const DEFAULT_EXEC_OPTIONS: ExecCmdOptions = {
   cli: 'sfdx',
 };
 
-const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
+/**
+ * Build options for the command
+ * The timeout for the command is set to 30 minutes by default and is overridden
+ * by a --wait flag if present.
+ *
+ * @param cmd
+ * @param options
+ */
+const buildCmdOptions = (cmd: string, options?: ExecCmdOptions): ExecCmdOptions => {
+  const timeout = getWaitTime(cmd);
+
   const defaults: shelljs.ExecOptions = {
     env: Object.assign({}, process.env),
     cwd: process.cwd(),
-    timeout: 300000, // 5 minutes
+    timeout,
     silent: true,
   };
   const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
@@ -159,7 +174,7 @@ const execCmdSync = <T extends ExecCmdResult, U = Collection>(cmd: string, optio
 
   // Add on the bin path
   cmd = buildCmd(cmd, options);
-  const cmdOptions = buildCmdOptions(options);
+  const cmdOptions = buildCmdOptions(cmd, options);
 
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -194,7 +209,7 @@ const execCmdAsync = async <T extends ExecCmdResult, U = Collection>(
   cmd = buildCmd(cmd, options);
 
   const resultPromise = new Promise<T>((resolve, reject) => {
-    const cmdOptions = buildCmdOptions(options);
+    const cmdOptions = buildCmdOptions(cmd, options);
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
@@ -302,4 +317,16 @@ export function execCmd<T = Collection>(
       return execCmdSync<SfdxExecCmdResult<T>, T>(cmd, options);
     }
   }
+}
+
+export function getWaitTime(cmd: string): number {
+  const waitTimeRegex = /(?:(-w=?\s*?)|(--wait=?\s*?))([-+]?\d+)/;
+  const waitTimeMatch = cmd.match(waitTimeRegex)?.[3] ?? DEFAULT_WAIT_TIME;
+  const timeout = Duration.minutes(
+    typeof waitTimeMatch === 'string' ? Number(waitTimeMatch) : waitTimeMatch
+  ).milliseconds;
+  if (timeout < 0) {
+    throw messages.createError('waitTimeNegative', [waitTimeMatch]);
+  }
+  return timeout;
 }
