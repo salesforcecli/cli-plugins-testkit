@@ -83,7 +83,7 @@ const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
   const defaults: shelljs.ExecOptions = {
     env: Object.assign({}, process.env),
     cwd: process.cwd(),
-    timeout: 300000, // 5 minutes
+    timeout: Duration.hours(1).milliseconds, // 1 hour
     silent: true,
   };
   const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
@@ -234,7 +234,7 @@ const execCmdAsync = async <T extends ExecCmdResult, U = Collection>(
  *
  * Option defaults:
  *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
+ *    2. `timeout` = 3,600,000 (1 hour)
  *    3. `env` = process.env
  *    4. `silent` = true (child process output not written to the console)
  *
@@ -262,7 +262,7 @@ export function execCmd<T = Collection>(
  *
  * Option defaults:
  *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
+ *    2. `timeout` = 3,600,000 (1 hour)
  *    3. `env` = process.env
  *    4. `silent` = true (child process output not written to the console)
  *
