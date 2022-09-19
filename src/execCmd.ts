@@ -252,7 +252,7 @@ const execCmdAsync = async <T extends ExecCmdResult, U = Collection>(
  *
  * Option defaults:
  *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
+ *    2. `timeout` = 1800000 (30 minutes)
  *    3. `env` = process.env
  *    4. `silent` = true (child process output not written to the console)
  *
@@ -280,7 +280,7 @@ export function execCmd<T = Collection>(
  *
  * Option defaults:
  *    1. `cwd` = process.cwd()
- *    2. `timeout` = 300000 (5 minutes)
+ *    2. `timeout` = 1800000 (30 minutes)
  *    3. `env` = process.env
  *    4. `silent` = true (child process output not written to the console)
  *
