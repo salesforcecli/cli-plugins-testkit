@@ -18,7 +18,10 @@ import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 import stripAnsi = require('strip-ansi');
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/cli-plugins-testkit', 'exec_cmd', ['waitTimeNegative']);
+const messages = Messages.load('@salesforce/cli-plugins-testkit', 'exec_cmd', [
+  'waitTimeNegative',
+  'callTimeoutNegative',
+]);
 
 const DEFAULT_WAIT_TIME = 30;
 
@@ -93,7 +96,7 @@ const DEFAULT_EXEC_OPTIONS: ExecCmdOptions = {
  * @param options
  */
 const buildCmdOptions = (cmd: string, options?: ExecCmdOptions): ExecCmdOptions => {
-  const timeout = getWaitTime(cmd);
+  const timeout = getWaitTime(cmd, options?.timeout);
 
   const defaults: shelljs.ExecOptions = {
     env: Object.assign({}, process.env),
@@ -319,14 +322,28 @@ export function execCmd<T = Collection>(
   }
 }
 
-export function getWaitTime(cmd: string): number {
+/**
+ * Determines the execCmd timeout value using the following logic:
+ *  1. Examine the command to be executed and determine if it contains a `--wait` param.
+ *  2. If `--wait` param is present, use the value as the timeout.
+ *  3. If `--wait` param is not present, use the value from the `callTimeout` param.
+ *  4. Neither `--wait` param nor `callTimeout` param can be negative.
+ *
+ * @param cmd
+ * @param callTimeout
+ */
+export function getWaitTime(cmd: string, callTimeout = Duration.minutes(DEFAULT_WAIT_TIME).milliseconds): number {
   const waitTimeRegex = /(?:(-w=?\s*?)|(--wait=?\s*?))([-+]?\d+)/;
-  const waitTimeMatch = cmd.match(waitTimeRegex)?.[3] ?? DEFAULT_WAIT_TIME;
-  const timeout = Duration.minutes(
-    typeof waitTimeMatch === 'string' ? Number(waitTimeMatch) : waitTimeMatch
-  ).milliseconds;
-  if (timeout < 0) {
-    throw messages.createError('waitTimeNegative', [waitTimeMatch]);
+  const waitTimeText = cmd.match(waitTimeRegex)?.[3];
+  if (waitTimeText) {
+    const waitMilliseconds = Duration.minutes(Number(waitTimeText || '0')).milliseconds;
+    if (waitMilliseconds < 0) {
+      throw messages.createError('waitTimeNegative', [waitTimeText]);
+    }
+    return waitMilliseconds;
   }
-  return timeout;
+  if (callTimeout < 0) {
+    throw messages.createError('callTimeoutNegative', [callTimeout]);
+  }
+  return callTimeout;
 }
