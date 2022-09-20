@@ -5,12 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as fs from 'fs';
-
+import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
-import { AnyJson, isNumber } from '@salesforce/ts-types';
+import { AnyJson, isNumber, Many } from '@salesforce/ts-types';
 import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
@@ -302,4 +302,104 @@ export function execCmd<T = Collection>(
       return execCmdSync<SfdxExecCmdResult<T>, T>(cmd, options);
     }
   }
+}
+
+function toString(arrOrString: string | string[]): string {
+  if (Array.isArray(arrOrString)) {
+    return arrOrString.join('');
+  }
+  return arrOrString;
+}
+
+export enum Interaction {
+  DOWN = '\x1B\x5B\x42',
+  UP = '\x1B\x5B\x41',
+  ENTER = '\x0D',
+  SELECT = ' ',
+  Yes = 'Y' + '\x0D',
+  No = 'N' + '\x0D',
+}
+
+export type InteractiveCommandExecutionResult = {
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  duration: Duration;
+};
+
+export type InteractiveCommandExecutionOptions = {
+  ensureExitCode?: number;
+} & SpawnOptionsWithoutStdio;
+
+/**
+ * A map of questions and answers to be used in an interactive command.
+ *
+ * The questions are strings that will be used to match the question asked by the command.
+ */
+export type PromptAnswers = Record<string, Many<string>>;
+
+export async function execInteractiveCmd(
+  command: string,
+  answers: PromptAnswers,
+  options: InteractiveCommandExecutionOptions = {}
+): Promise<InteractiveCommandExecutionResult> {
+  const debug = Debug('testkit:execInteractiveCmd');
+
+  return new Promise((resolve, reject) => {
+    const bin = buildCmd('').trim();
+    const startTime = process.hrtime();
+    const proc = spawn(bin, command.split(' '), options);
+
+    const seen = new Set<string>();
+
+    const stdout: string[] = [];
+    const stderr: string[] = [];
+
+    proc.stdout.on('data', (data: Buffer) => {
+      const current = data.toString();
+      debug(`stdout: ${current}`);
+      stdout.push(current);
+
+      if (current.startsWith('?')) {
+        const matchingQuestion = Object.keys(answers).find((key) => new RegExp(key).test(current));
+        if (matchingQuestion) {
+          if (seen.has(matchingQuestion)) return;
+
+          seen.add(matchingQuestion);
+          const answer = toString(answers[matchingQuestion]);
+          proc.stdin.write(answer, 'utf-8');
+        }
+      }
+    });
+
+    proc.stderr.on('data', (data: Buffer) => {
+      const current = data.toString();
+      stderr.push(current);
+      debug(`stderr: ${current}`);
+    });
+
+    proc.on('close', (code) => {
+      debug(`child process exited with code ${code}`);
+      proc.stdin.end();
+
+      const result = {
+        code,
+        stdout: stripAnsi(stdout.join('\n')),
+        stderr: stripAnsi(stderr.join('\n')),
+        duration: hrtimeToMillisDuration(process.hrtime(startTime)),
+      };
+
+      if (isNumber(options.ensureExitCode) && code !== options.ensureExitCode) {
+        reject(
+          getExitCodeError(command, options.ensureExitCode, {
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code,
+          } as ShellString)
+        );
+      }
+
+      resolve(result);
+    });
+  });
 }
