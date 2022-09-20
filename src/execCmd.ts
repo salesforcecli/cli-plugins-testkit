@@ -338,6 +338,28 @@ export type InteractiveCommandExecutionOptions = {
  */
 export type PromptAnswers = Record<string, Many<string>>;
 
+/**
+ * Execute an interactive command.
+ *
+ * @example
+ * ```
+ * const result = await execInteractiveCmd(
+ *    'dev generate plugin',
+ *    {
+ *      'internal Salesforce team': Interaction.Yes,
+ *      'name of your new plugin': ['plugin-awesome', Interaction.ENTER],
+ *      'description for your plugin': ['a description', Interaction.ENTER],
+ *      'Select the existing "sf" commands you plan to extend': [
+ *        Interaction.SELECT,
+ *        Interaction.DOWN,
+ *        Interaction.SELECT,
+ *        Interaction.ENTER,
+ *      ],
+ *    },
+ *    { cwd: session.dir, ensureExitCode: 0 }
+ *  );
+ * ```
+ */
 export async function execInteractiveCmd(
   command: string,
   answers: PromptAnswers,
