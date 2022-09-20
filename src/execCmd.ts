@@ -343,6 +343,8 @@ export type PromptAnswers = Record<string, Many<string>>;
  *
  * @example
  * ```
+ * import { TestSession, execInteractiveCmd, Interaction } from '@salesforce/cli-plugins-testkit';
+ *
  * const result = await execInteractiveCmd(
  *    'dev generate plugin',
  *    {
@@ -370,39 +372,37 @@ export async function execInteractiveCmd(
   return new Promise((resolve, reject) => {
     const bin = buildCmd('').trim();
     const startTime = process.hrtime();
-    const proc = spawn(bin, command.split(' '), options);
+    const child = spawn(bin, command.split(' '), options);
 
     const seen = new Set<string>();
 
     const stdout: string[] = [];
     const stderr: string[] = [];
 
-    proc.stdout.on('data', (data: Buffer) => {
+    child.stdout.on('data', (data: Buffer) => {
       const current = data.toString();
       debug(`stdout: ${current}`);
       stdout.push(current);
 
-      if (current.startsWith('?')) {
-        const matchingQuestion = Object.keys(answers).find((key) => new RegExp(key).test(current));
-        if (matchingQuestion) {
-          if (seen.has(matchingQuestion)) return;
+      const matchingQuestion = Object.keys(answers)
+        .filter((key) => !seen.has(key))
+        .find((key) => new RegExp(key).test(current));
 
-          seen.add(matchingQuestion);
-          const answer = toString(answers[matchingQuestion]);
-          proc.stdin.write(answer, 'utf-8');
-        }
+      if (matchingQuestion) {
+        seen.add(matchingQuestion);
+        child.stdin.write(toString(answers[matchingQuestion]), 'utf-8');
       }
     });
 
-    proc.stderr.on('data', (data: Buffer) => {
+    child.stderr.on('data', (data: Buffer) => {
       const current = data.toString();
       stderr.push(current);
       debug(`stderr: ${current}`);
     });
 
-    proc.on('close', (code) => {
+    child.on('close', (code) => {
       debug(`child process exited with code ${code}`);
-      proc.stdin.end();
+      child.stdin.end();
 
       const result = {
         code,
