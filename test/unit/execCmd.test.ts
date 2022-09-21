@@ -27,7 +27,7 @@ describe('execCmd (sync)', () => {
   });
 
   it('should default to bin/dev executable', () => {
-    const binPath = join('bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', 'dev');
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
     const shellString = new ShellString(JSON.stringify(output));
@@ -58,7 +58,7 @@ describe('execCmd (sync)', () => {
   });
 
   it('should error when executable path not found', () => {
-    const binPath = join('bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', 'dev');
     try {
       execCmd(cmd);
       assert(false, 'Expected an error to be thrown');
@@ -171,7 +171,7 @@ describe('execCmd (async)', () => {
   });
 
   it('should default to bin/dev executable', async () => {
-    const binPath = join('bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', 'dev');
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
     const shellString = new ShellString(JSON.stringify(output));
@@ -203,7 +203,7 @@ describe('execCmd (async)', () => {
   });
 
   it('should error when executable path not found', async () => {
-    const binPath = join('bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', 'dev');
     try {
       await execCmd(cmd, { async: true });
       assert(false, 'Expected an error to be thrown');
