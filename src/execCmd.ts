@@ -304,7 +304,7 @@ export function execCmd<T = Collection>(
   }
 }
 
-function toString(arrOrString: string | string[]): string {
+function toString(arrOrString: Many<string>): string {
   if (Array.isArray(arrOrString)) {
     return arrOrString.join('');
   }
