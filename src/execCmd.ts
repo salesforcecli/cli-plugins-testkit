@@ -388,7 +388,7 @@ export async function execInteractiveCmd(
     const stdout: string[] = [];
     const stderr: string[] = [];
 
-    const scrollLimit = env.getNumber('TESTKIT_SCROLL_LIMIT', 5000) ?? 5000;
+    const scrollLimit = env.getNumber('TESTKIT_SCROLL_LIMIT', 1000) ?? 1000;
     let scrollCount = 0;
 
     child.stdout.on('data', (data: Buffer) => {
@@ -425,6 +425,7 @@ export async function execInteractiveCmd(
         }
       } else {
         seen.add(matchingQuestion);
+        scrollCount = 0;
         child.stdin.write(answerString);
       }
     });
