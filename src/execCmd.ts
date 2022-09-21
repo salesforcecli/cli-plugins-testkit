@@ -393,7 +393,7 @@ export async function execInteractiveCmd(
 
     child.stdout.on('data', (data: Buffer) => {
       if (scrollCount > scrollLimit) {
-        throw new Error(`Scroll limit of ${scrollLimit} reached`);
+        reject(new Error(`Scroll limit of ${scrollLimit} reached`));
       }
 
       const current = data.toString();
