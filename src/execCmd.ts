@@ -311,6 +311,13 @@ function toString(arrOrString: Many<string>): string {
   return arrOrString;
 }
 
+function toArray(arrOrString: Many<string>): string[] {
+  if (Array.isArray(arrOrString)) {
+    return arrOrString;
+  }
+  return [arrOrString];
+}
+
 export enum Interaction {
   DOWN = '\x1B\x5B\x42',
   UP = '\x1B\x5B\x41',
@@ -318,6 +325,7 @@ export enum Interaction {
   SELECT = ' ',
   Yes = 'Y' + '\x0D',
   No = 'N' + '\x0D',
+  BACKSPACE = '\x08',
 }
 
 export type InteractiveCommandExecutionResult = {
@@ -373,13 +381,21 @@ export async function execInteractiveCmd(
     const bin = buildCmd('').trim();
     const startTime = process.hrtime();
     const child = spawn(bin, command.split(' '), options);
+    child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
 
     const stdout: string[] = [];
     const stderr: string[] = [];
 
+    const scrollLimit = env.getNumber('TESTKIT_SCROLL_LIMIT', 5000) ?? 5000;
+    let scrollCount = 0;
+
     child.stdout.on('data', (data: Buffer) => {
+      if (scrollCount > scrollLimit) {
+        throw new Error(`Scroll limit of ${scrollLimit} reached`);
+      }
+
       const current = data.toString();
       debug(`stdout: ${current}`);
       stdout.push(current);
@@ -388,9 +404,28 @@ export async function execInteractiveCmd(
         .filter((key) => !seen.has(key))
         .find((key) => new RegExp(key).test(current));
 
-      if (matchingQuestion) {
+      if (!matchingQuestion) return;
+
+      const answerString = toString(answers[matchingQuestion]);
+      const answerArray = toArray(answers[matchingQuestion]);
+
+      // If the answer includes a string that's NOT an Interactive enum value, then we need to scroll to it.
+      const scrollTarget = answerArray.find((answer) => !(Object.values(Interaction) as string[]).includes(answer));
+      const shouldScrollForAnswer = current.includes('❯') && scrollTarget;
+
+      if (shouldScrollForAnswer) {
+        const regex = /(?<=❯\s)(.*)/g;
+        const selected = (current.match(regex) ?? [''])[0].trim();
+        if (selected === scrollTarget) {
+          seen.add(matchingQuestion);
+          child.stdin.write(Interaction.ENTER);
+        } else {
+          scrollCount += 1;
+          child.stdin.write(Interaction.DOWN);
+        }
+      } else {
         seen.add(matchingQuestion);
-        child.stdin.write(toString(answers[matchingQuestion]), 'utf-8');
+        child.stdin.write(answerString);
       }
     });
 
