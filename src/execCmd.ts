@@ -384,21 +384,22 @@ export async function execInteractiveCmd(
     child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
-
-    const stdout: string[] = [];
-    const stderr: string[] = [];
+    const output = {
+      stdout: [] as string[],
+      stderr: [] as string[],
+    };
 
     const scrollLimit = env.getNumber('TESTKIT_SCROLL_LIMIT', 1000) ?? 1000;
     let scrollCount = 0;
 
-    child.stdout.on('data', (data: Buffer) => {
+    const handleData = (data: Buffer, stream: 'stdout' | 'stderr') => {
       if (scrollCount > scrollLimit) {
         reject(new Error(`Scroll limit of ${scrollLimit} reached`));
       }
 
       const current = data.toString();
-      debug(`stdout: ${current}`);
-      stdout.push(current);
+      debug(`${stream}: ${current}`);
+      output[stream].push(current);
 
       const matchingQuestion = Object.keys(answers)
         .filter((key) => !seen.has(key))
@@ -428,13 +429,10 @@ export async function execInteractiveCmd(
         scrollCount = 0;
         child.stdin.write(answerString);
       }
-    });
+    };
 
-    child.stderr.on('data', (data: Buffer) => {
-      const current = data.toString();
-      stderr.push(current);
-      debug(`stderr: ${current}`);
-    });
+    child.stdout.on('data', (data: Buffer) => handleData(data, 'stdout'));
+    child.stderr.on('data', (data: Buffer) => handleData(data, 'stderr'));
 
     child.on('close', (code) => {
       debug(`child process exited with code ${code}`);
@@ -442,8 +440,8 @@ export async function execInteractiveCmd(
 
       const result = {
         code,
-        stdout: stripAnsi(stdout.join('\n')),
-        stderr: stripAnsi(stderr.join('\n')),
+        stdout: stripAnsi(output.stdout.join('\n')),
+        stderr: stripAnsi(output.stderr.join('\n')),
         duration: hrtimeToMillisDuration(process.hrtime(startTime)),
       };
 
