@@ -17,7 +17,7 @@ import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
-import { AuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
 export interface TestSessionOptions {
   /**
@@ -40,7 +40,7 @@ export interface TestSessionOptions {
   /**
    * The preferred auth method to use
    */
-  authStrategy?: keyof typeof AuthStrategy;
+  devhubAuthStrategy?: DevhubAuthStrategy;
 
   /**
    * The number of times to retry the setupCommands after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
@@ -147,8 +147,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       JSON.stringify(JSON.parse(JSON.stringify(this.options)))
     );
 
-    const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
-    // have to grab this before we change the home
+    const authStrategy =
+      !this.options.devhubAuthStrategy || this.options.devhubAuthStrategy === DevhubAuthStrategy.AUTO
+        ? getAuthStrategy()
+        : this.options.devhubAuthStrategy;
+
     transferExistingAuthToEnv(authStrategy);
 
     // Set the homedir used by this test, on the TestSession and the process
