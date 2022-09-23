@@ -124,7 +124,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
   logger('no hub configured');
 };
 
-const getAuthStrategy = (): DevhubAuthStrategy => {
+export const getAuthStrategy = (): DevhubAuthStrategy => {
   if (
     env.getString('TESTKIT_JWT_CLIENT_ID') &&
     env.getString('TESTKIT_HUB_USERNAME') &&
@@ -156,9 +156,7 @@ const getAuthStrategy = (): DevhubAuthStrategy => {
  *
  */
 export const transferExistingAuthToEnv = (authStrategy: DevhubAuthStrategy): void => {
-  const strategy = authStrategy === DevhubAuthStrategy.AUTO ? getAuthStrategy() : authStrategy;
-  // nothing to do if the variables are already provided
-  if (strategy !== DevhubAuthStrategy.REUSE) return;
+  if (authStrategy !== DevhubAuthStrategy.REUSE) return;
 
   const logger = debug('testkit:transferExistingAuthToEnv');
   const devhub = env.getString('TESTKIT_HUB_USERNAME', '');
