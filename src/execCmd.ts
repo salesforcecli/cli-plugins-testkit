@@ -134,7 +134,9 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
 const buildCmd = (cmdArgs: string, options?: ExecCmdOptions): string => {
   const debug = Debug('testkit:buildCmd');
 
-  const bin = env.getString('TESTKIT_EXECUTABLE_PATH') ?? pathJoin(process.cwd(), 'bin', 'dev');
+  const bin =
+    env.getString('TESTKIT_EXECUTABLE_PATH') ??
+    pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
@@ -380,7 +382,7 @@ export async function execInteractiveCmd(
   return new Promise((resolve, reject) => {
     const bin = buildCmd('').trim();
     const startTime = process.hrtime();
-    const child = spawn(bin, command.split(' '), { ...options, cwd: process.cwd() });
+    const child = spawn(bin, command.split(' '), { cwd: process.cwd(), ...options });
     child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
