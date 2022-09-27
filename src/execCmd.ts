@@ -134,7 +134,9 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
 const buildCmd = (cmdArgs: string, options?: ExecCmdOptions): string => {
   const debug = Debug('testkit:buildCmd');
 
-  const bin = env.getString('TESTKIT_EXECUTABLE_PATH') ?? pathJoin(process.cwd(), 'bin', 'dev');
+  const bin =
+    env.getString('TESTKIT_EXECUTABLE_PATH') ??
+    pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
