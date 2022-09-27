@@ -33,7 +33,7 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -63,7 +63,7 @@ describe('execCmd (sync)', () => {
       execCmd(cmd);
       assert(false, 'Expected an error to be thrown');
     } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`Cannot find specified executable path: ${binPath}`);
+      expect((err as Error).message).to.include(`Cannot find specified executable path: ${binPath}`);
     }
   });
 
@@ -177,7 +177,7 @@ describe('execCmd (async)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', async () => {
@@ -208,7 +208,7 @@ describe('execCmd (async)', () => {
       await execCmd(cmd, { async: true });
       assert(false, 'Expected an error to be thrown');
     } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`Cannot find specified executable path: ${binPath}`);
+      expect((err as Error).message).to.include(`Cannot find specified executable path: ${binPath}`);
     }
   });
 
