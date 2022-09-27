@@ -5,12 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as fs from 'fs';
-
+import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
 import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
-import { AnyJson, isNumber } from '@salesforce/ts-types';
+import { AnyJson, isNumber, Many } from '@salesforce/ts-types';
 import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
@@ -302,4 +302,160 @@ export function execCmd<T = Collection>(
       return execCmdSync<SfdxExecCmdResult<T>, T>(cmd, options);
     }
   }
+}
+
+function toString(arrOrString: Many<string>): string {
+  if (Array.isArray(arrOrString)) {
+    return arrOrString.join('');
+  }
+  return arrOrString;
+}
+
+function toArray(arrOrString: Many<string>): string[] {
+  if (Array.isArray(arrOrString)) {
+    return arrOrString;
+  }
+  return [arrOrString];
+}
+
+export enum Interaction {
+  DOWN = '\x1B\x5B\x42',
+  UP = '\x1B\x5B\x41',
+  ENTER = '\x0D',
+  SELECT = ' ',
+  Yes = 'Y' + '\x0D',
+  No = 'N' + '\x0D',
+  BACKSPACE = '\x08',
+}
+
+export type InteractiveCommandExecutionResult = {
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  duration: Duration;
+};
+
+export type InteractiveCommandExecutionOptions = {
+  ensureExitCode?: number;
+} & SpawnOptionsWithoutStdio;
+
+/**
+ * A map of questions and answers to be used in an interactive command.
+ *
+ * The questions are strings that will be used to match the question asked by the command.
+ */
+export type PromptAnswers = Record<string, Many<string>>;
+
+/**
+ * Execute an interactive command.
+ *
+ * @example
+ * ```
+ * import { TestSession, execInteractiveCmd, Interaction } from '@salesforce/cli-plugins-testkit';
+ *
+ * const result = await execInteractiveCmd(
+ *    'dev generate plugin',
+ *    {
+ *      'internal Salesforce team': Interaction.Yes,
+ *      'name of your new plugin': ['plugin-awesome', Interaction.ENTER],
+ *      'description for your plugin': ['a description', Interaction.ENTER],
+ *      'Select the existing "sf" commands you plan to extend': [
+ *        Interaction.SELECT,
+ *        Interaction.DOWN,
+ *        Interaction.SELECT,
+ *        Interaction.ENTER,
+ *      ],
+ *    },
+ *    { cwd: session.dir, ensureExitCode: 0 }
+ *  );
+ * ```
+ */
+export async function execInteractiveCmd(
+  command: string,
+  answers: PromptAnswers,
+  options: InteractiveCommandExecutionOptions = {}
+): Promise<InteractiveCommandExecutionResult> {
+  const debug = Debug('testkit:execInteractiveCmd');
+
+  return new Promise((resolve, reject) => {
+    const bin = buildCmd('').trim();
+    const startTime = process.hrtime();
+    const child = spawn(bin, command.split(' '), { ...options, cwd: process.cwd() });
+    child.stdin.setDefaultEncoding('utf-8');
+
+    const seen = new Set<string>();
+    const output = {
+      stdout: [] as string[],
+      stderr: [] as string[],
+    };
+
+    const scrollLimit = env.getNumber('TESTKIT_SCROLL_LIMIT', 1000) ?? 1000;
+    let scrollCount = 0;
+
+    const handleData = (data: Buffer, stream: 'stdout' | 'stderr') => {
+      if (scrollCount > scrollLimit) {
+        reject(new Error(`Scroll limit of ${scrollLimit} reached`));
+      }
+
+      const current = data.toString();
+      debug(`${stream}: ${current}`);
+      output[stream].push(current);
+
+      const matchingQuestion = Object.keys(answers)
+        .filter((key) => !seen.has(key))
+        .find((key) => new RegExp(key).test(current));
+
+      if (!matchingQuestion) return;
+
+      const answerString = toString(answers[matchingQuestion]);
+      const answerArray = toArray(answers[matchingQuestion]);
+
+      // If the answer includes a string that's NOT an Interactive enum value, then we need to scroll to it.
+      const scrollTarget = answerArray.find((answer) => !(Object.values(Interaction) as string[]).includes(answer));
+      const shouldScrollForAnswer = current.includes('❯') && scrollTarget;
+
+      if (shouldScrollForAnswer) {
+        const regex = /(?<=❯\s)(.*)/g;
+        const selected = (current.match(regex) ?? [''])[0].trim();
+        if (selected === scrollTarget) {
+          seen.add(matchingQuestion);
+          child.stdin.write(Interaction.ENTER);
+        } else {
+          scrollCount += 1;
+          child.stdin.write(Interaction.DOWN);
+        }
+      } else {
+        seen.add(matchingQuestion);
+        scrollCount = 0;
+        child.stdin.write(answerString);
+      }
+    };
+
+    child.stdout.on('data', (data: Buffer) => handleData(data, 'stdout'));
+    child.stderr.on('data', (data: Buffer) => handleData(data, 'stderr'));
+
+    child.on('close', (code) => {
+      debug(`child process exited with code ${code}`);
+      child.stdin.end();
+
+      const result = {
+        code,
+        stdout: stripAnsi(output.stdout.join('\n')),
+        stderr: stripAnsi(output.stderr.join('\n')),
+        duration: hrtimeToMillisDuration(process.hrtime(startTime)),
+      };
+
+      if (isNumber(options.ensureExitCode) && code !== options.ensureExitCode) {
+        reject(
+          getExitCodeError(command, options.ensureExitCode, {
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code,
+          } as ShellString)
+        );
+      }
+
+      resolve(result);
+    });
+  });
 }
