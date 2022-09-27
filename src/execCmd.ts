@@ -380,7 +380,7 @@ export async function execInteractiveCmd(
   return new Promise((resolve, reject) => {
     const bin = buildCmd('').trim();
     const startTime = process.hrtime();
-    const child = spawn(bin, command.split(' '), options);
+    const child = spawn(bin, command.split(' '), { ...options, cwd: process.cwd() });
     child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
