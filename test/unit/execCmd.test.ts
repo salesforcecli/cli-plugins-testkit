@@ -27,13 +27,13 @@ describe('execCmd (sync)', () => {
   });
 
   it('should default to bin/dev executable', () => {
-    const binPath = join(process.cwd(), 'bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev');
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -171,13 +171,13 @@ describe('execCmd (async)', () => {
   });
 
   it('should default to bin/dev executable', async () => {
-    const binPath = join(process.cwd(), 'bin', 'dev');
+    const binPath = join(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev');
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
   it('should accept valid sfdx path in env var', async () => {
