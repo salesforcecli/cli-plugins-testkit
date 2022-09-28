@@ -179,7 +179,7 @@ describe('TestSession', () => {
       // expect exec to be called on every retry attempt AND the initial attempt
       expect(execStub.callCount).to.equal(scratchOrgs.length * (retries + 1));
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
-      expect(execStub.firstCall.args[0]).to.equal('sf env create scratch -f config/project-scratch-def.json --json');
+      expect(execStub.firstCall.args[0]).to.equal('sf env create scratch --json -f config/project-scratch-def.json');
     });
 
     it('should create a session with org creation', async () => {
@@ -198,6 +198,7 @@ describe('TestSession', () => {
             alias: 'my-org',
             setDefault: true,
             duration: 1,
+            edition: 'developer',
           },
         ],
       });
@@ -210,8 +211,9 @@ describe('TestSession', () => {
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
+      expect(session.orgs.get('default')).to.deep.equal({ username, orgId: '12345' });
       expect(execStub.firstCall.args[0]).to.equal(
-        'sf env create scratch -f config/project-scratch-def.json --json -a my-org -y 1 -d'
+        'sf env create scratch --json -f config/project-scratch-def.json -a my-org -y 1 -d -e developer'
       );
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
@@ -252,7 +254,7 @@ describe('TestSession', () => {
 
     it('should error if setup command fails', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
-      const expectedCmd = 'sf env create scratch -f config/project-scratch-def.json --json';
+      const expectedCmd = 'sf env create scratch --json -f config/project-scratch-def.json';
       const execRv = 'Cannot foo before bar';
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 1;

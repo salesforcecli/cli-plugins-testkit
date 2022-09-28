@@ -21,11 +21,21 @@ import { TestProject, TestProjectOptions } from './testProject';
 import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
 export type ScratchOrgConfig = {
-  executable: 'sfdx' | 'sf';
-  config: string;
+  executable?: 'sfdx' | 'sf';
+  config?: string;
   duration?: number;
   alias?: string;
   setDefault?: boolean;
+  edition?:
+    | 'developer'
+    | 'enterprise'
+    | 'group'
+    | 'professional'
+    | 'partner-developer'
+    | 'partner-enterprise'
+    | 'partner-group'
+    | 'partner-professional';
+  username?: string;
 };
 
 export interface TestSessionOptions {
@@ -293,9 +303,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         }
 
         let baseCmd =
-          executable === 'sf'
-            ? `${executable} env create scratch -f ${org.config} --json`
-            : `${executable} force:org:create -f ${org.config} --json`;
+          executable === 'sf' ? `${executable} env create scratch --json` : `${executable} force:org:create --json`;
+
+        if (org.config) {
+          baseCmd += ` -f ${org.config}`;
+        }
 
         if (org.alias) {
           baseCmd += ` -a ${org.alias}`;
@@ -307,6 +319,15 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
         if (org.setDefault) {
           baseCmd += executable === 'sf' ? ' -d' : ' -s';
+        }
+
+        if (org.username) {
+          if (org.executable === 'sfdx') baseCmd += ` username=${org.username}`;
+          else throw new Error('username property is not supported by sf env create scratch');
+        }
+
+        if (org.edition) {
+          baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
@@ -324,6 +345,9 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         const username = jsonOutput.result.username;
         dbug(`Saving org username: ${username} from ${baseCmd}`);
         this.orgs.set(username, jsonOutput.result.authFields);
+        if (org.setDefault) {
+          this.orgs.set('default', jsonOutput.result.authFields);
+        }
       }
     };
 

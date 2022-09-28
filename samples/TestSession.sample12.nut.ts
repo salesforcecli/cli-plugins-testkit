@@ -1,6 +1,5 @@
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
-import { getString } from '@salesforce/ts-types';
 import * as shelljs from 'shelljs';
 
 /*
@@ -19,25 +18,26 @@ describe('TestSession', () => {
       project: {
         name: 'TestProj1',
       },
-      setupCommands: [
+      scratchOrgs: [
         // rely on defaultusername
-        'sfdx force:org:create -f config/project-scratch-def.json -s',
+        { executable: 'sfdx', config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        `sfdx force:org:create -f config/project-scratch-def.json username=${username}`,
+        { executable: 'sfdx', config: 'config/project-scratch-def.json', username },
       ],
     });
   });
 
   it('should use both orgs created as part of setupCommands', () => {
-    const firstOrg = getString(testSession.setup[0], 'result.username');
+    const firstOrg = testSession.orgs.get('default');
     execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
     execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });
   });
 
   it('should create a 3rd org and get the username from the json output', () => {
     // Note that this org will not be deleted for you by TestSession.
-    const rv = shelljs.exec('sfdx force:org:create -f config/project-scratch-def.json --json');
-    const jsonOutput = JSON.parse(rv.stdout);
+    const jsonOutput = execCmd<{ username: string }>('force:org:create -f config/project-scratch-def.json --json', {
+      cli: 'sfdx',
+    }).jsonOutput;
     const thirdOrg = jsonOutput.result.username;
     execCmd(`force:source:pull -u ${thirdOrg}`);
   });

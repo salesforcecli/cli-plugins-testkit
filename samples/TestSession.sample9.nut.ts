@@ -1,6 +1,5 @@
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
-import { getString } from '@salesforce/ts-types';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -10,12 +9,14 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      setupCommands: ['sfdx force:org:create edition=Developer', 'sfdx force:source:push'],
+      scratchOrgs: [{ executable: 'sfdx', edition: 'developer' }],
     });
+
+    execCmd('force:source:push', { cli: 'sfdx' });
   });
 
   it('using testkit to run commands with an org', () => {
-    const username = getString(testSession.setup[0], 'result.username');
+    const username = [...testSession.orgs.keys()][0];
     execCmd(`user:create -u ${username}`, { ensureExitCode: 0 });
   });
 
