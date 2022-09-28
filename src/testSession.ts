@@ -13,23 +13,19 @@ import { Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
 import stripAnsi = require('strip-ansi');
+import { AuthFields } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
 import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
 
-type ScratchOrgConfig = {
+export type ScratchOrgConfig = {
   executable: 'sfdx' | 'sf';
   config: string;
   duration?: number;
   alias?: string;
-  setDefault?: string;
-};
-
-type OrgResult = {
-  username: string;
-  orgId: string;
+  setDefault?: boolean;
 };
 
 export interface TestSessionOptions {
@@ -56,7 +52,7 @@ export interface TestSessionOptions {
   devhubAuthStrategy?: DevhubAuthStrategy;
 
   /**
-   * The number of times to retry the setupCommands after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
+   * The number of times to retry the scratch org create after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
    */
   retries?: number;
 }
@@ -77,8 +73,8 @@ export interface TestSessionOptions {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
- *   TESTKIT_SETUP_RETRIES = number of times to retry the setupCommands after the initial attempt before throwing an error
- *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of setupCommands. Defaults to 5000
+ *   TESTKIT_SETUP_RETRIES = number of times to retry the org creates after the initial attempt before throwing an error
+ *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of scratch org creations. Defaults to 5000
  *   TESTKIT_EXEC_SHELL = the shell to use for all testkit shell executions rather than the shelljs default.
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
@@ -97,12 +93,13 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   // this is stored on the class so that tests can set it to something much lower than default
   public rmRetryConfig: Partial<RetryConfig<void>> = { retries: 12, delay: 5000 };
 
+  public orgs: Map<string, AuthFields> = new Map<string, AuthFields>();
+
   private debug: Debugger;
   private cwdStub?: SinonStub;
 
   private overriddenDir?: string;
   private sandbox = createSandbox();
-  private orgs: Record<string, OrgResult> = {};
   private retries: number;
   private zipDir: typeof zipDir;
   private options: TestSessionOptions;
@@ -242,8 +239,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     this.debug(`  Created Date: ${this.createdDate}`);
     this.debug(`  Dir: ${this.dir}`);
     this.debug(`  Home Dir: ${this.homeDir}`);
-    if (this.orgs) {
-      // TODO: test formatting on this
+    if (this.orgs.size > 0) {
       this.debug('  Orgs: ', this.orgs);
     }
     if (this.project) {
@@ -252,12 +248,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   }
 
   private async deleteOrgs(): Promise<void> {
-    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
-      const orgs = Object.keys(this.orgs);
-      for (const org of orgs) {
+    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs.size > 0) {
+      for (const org of [...this.orgs.keys()]) {
         this.debug(`Deleting test org: ${org}`);
         const rv = shell.exec(`sf env delete scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
-        delete this.orgs[org];
+        this.orgs.delete(org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
           await this.rmSessionDir();
@@ -280,20 +275,21 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   // Executes commands and keeps track of any orgs created.
   // Throws if any commands return a non-zero exitCode.
   private async createOrgs(orgs: ScratchOrgConfig[] = []): Promise<void> {
-    const dbug = debug('testkit:setupCommands');
+    const dbug = debug('testkit:createOrgs');
     const setup = () => {
       for (const org of orgs) {
         // Don't create orgs if we are supposed to reuse one from the env
         const orgUsername = env.getString('TESTKIT_ORG_USERNAME');
         if (orgUsername) {
           dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+          this.orgs.set(orgUsername, { username: orgUsername });
           continue;
         }
 
         const executable = org.executable ?? 'sf';
 
         if (!shell.which(executable)) {
-          throw new Error(`${executable} executable not found for running sfdx setup commands`);
+          throw new Error(`${executable} executable not found for creating scratch orgs`);
         }
 
         let baseCmd =
@@ -317,14 +313,17 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         rv.stdout = stripAnsi(rv.stdout);
         rv.stderr = stripAnsi(rv.stderr);
         if (rv.code !== 0) {
-          throw Error(`${org} failed due to: ${rv.stdout}`);
+          throw Error(`${baseCmd} failed due to: ${rv.stdout}`);
         }
-        dbug(`Output for ${org} is:\n${rv.stdout}`);
+        dbug(`Output for ${baseCmd} is:\n${rv.stdout}`);
 
-        const jsonOutput = parseJson(rv.stdout) as { status: number; result: { username: string; orgId: string } };
+        const jsonOutput = parseJson(rv.stdout) as {
+          status: number;
+          result: { username: string; authFields: AuthFields };
+        };
         const username = jsonOutput.result.username;
-        dbug(`Saving org username: ${username} from ${org}`);
-        this.orgs[username] = { username, orgId: jsonOutput.result.orgId };
+        dbug(`Saving org username: ${username} from ${baseCmd}`);
+        this.orgs.set(username, jsonOutput.result.authFields);
       }
     };
 
