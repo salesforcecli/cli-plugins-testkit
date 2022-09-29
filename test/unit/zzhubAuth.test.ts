@@ -19,7 +19,7 @@ import { AuthFields } from '@salesforce/core';
 import { Env, env } from '@salesforce/kit';
 import * as sinon from 'sinon';
 import * as shell from 'shelljs';
-import { DevhubAuthStrategy, prepareForAuthUrl, prepareForJwt, transferExistingAuthToEnv } from '../../src/hubAuth';
+import { prepareForAuthUrl, prepareForJwt, transferExistingAuthToEnv } from '../../src/hubAuth';
 
 const { expect } = chai;
 const tmp = os.tmpdir();
@@ -179,7 +179,7 @@ describe('hubAuth', () => {
         .withArgs(sinon.match.any)
         .returns(JSON.stringify(authFields));
       shellStub = stubMethod(sandbox, shell, 'exec').returns({});
-      transferExistingAuthToEnv(DevhubAuthStrategy.REUSE);
+      transferExistingAuthToEnv('REUSE');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
       expect(shellStub.calledOnce).to.be.false;
       sandbox.restore();
@@ -197,7 +197,7 @@ describe('hubAuth', () => {
       shellStub = stubMethod(sandbox, shell, 'exec').returns(
         JSON.stringify({ result: { sfdxAuthUrl: sampleAuthData.sfdxAuthUrl } })
       );
-      transferExistingAuthToEnv(DevhubAuthStrategy.REUSE);
+      transferExistingAuthToEnv('REUSE');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
       expect(shellStub.calledOnce).to.be.true;
       sandbox.restore();

@@ -12,13 +12,7 @@ import { debug } from 'debug';
 import { AuthFields } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
-export enum DevhubAuthStrategy {
-  AUTO = 'AUTO',
-  JWT = 'JWT',
-  AUTH_URL = 'AUTH_URL',
-  REUSE = 'REUSE',
-  NONE = 'NONE',
-}
+export type DevhubAuthStrategy = 'AUTO' | 'JWT' | 'AUTH_URL' | 'REUSE' | 'NONE';
 
 const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
 
@@ -82,7 +76,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     execOpts.shell = shellOverride;
   }
 
-  if (authStrategy === DevhubAuthStrategy.JWT) {
+  if (authStrategy === 'JWT') {
     logger('trying jwt auth');
     const jwtKey = prepareForJwt(homeDir);
 
@@ -104,7 +98,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     }
     return;
   }
-  if (authStrategy === DevhubAuthStrategy.AUTH_URL) {
+  if (authStrategy === 'AUTH_URL') {
     logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = prepareForAuthUrl(homeDir);
@@ -130,17 +124,17 @@ export const getAuthStrategy = (): DevhubAuthStrategy => {
     env.getString('TESTKIT_HUB_USERNAME') &&
     env.getString('TESTKIT_JWT_KEY')
   ) {
-    return DevhubAuthStrategy.JWT;
+    return 'JWT';
   }
   // you provided a username but not an auth url, so you must already have an auth that you want to re-use
   if (env.getString('TESTKIT_HUB_USERNAME') && !env.getString('TESTKIT_AUTH_URL')) {
-    return DevhubAuthStrategy.REUSE;
+    return 'REUSE';
   }
   // auth url alone
   if (env.getString('TESTKIT_AUTH_URL')) {
-    return DevhubAuthStrategy.AUTH_URL;
+    return 'AUTH_URL';
   }
-  return DevhubAuthStrategy.NONE;
+  return 'NONE';
 };
 
 /**
@@ -156,7 +150,7 @@ export const getAuthStrategy = (): DevhubAuthStrategy => {
  *
  */
 export const transferExistingAuthToEnv = (authStrategy: DevhubAuthStrategy): void => {
-  if (authStrategy !== DevhubAuthStrategy.REUSE) return;
+  if (authStrategy !== 'REUSE') return;
 
   const logger = debug('testkit:transferExistingAuthToEnv');
   const devhub = env.getString('TESTKIT_HUB_USERNAME', '');

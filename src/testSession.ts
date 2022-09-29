@@ -167,7 +167,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     );
 
     const authStrategy =
-      !this.options.devhubAuthStrategy || this.options.devhubAuthStrategy === DevhubAuthStrategy.AUTO
+      !this.options.devhubAuthStrategy || this.options.devhubAuthStrategy === 'AUTO'
         ? getAuthStrategy()
         : this.options.devhubAuthStrategy;
 

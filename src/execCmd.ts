@@ -67,7 +67,7 @@ export interface ExecCmdResult<T extends Collection> {
 
 const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
   const defaults: ExecCmdOptions = {
-    env: { ...process.env },
+    env: { ...process.env, ...options?.env },
     cwd: process.cwd(),
     timeout: Duration.hours(1).milliseconds, // 1 hour
     silent: true,
