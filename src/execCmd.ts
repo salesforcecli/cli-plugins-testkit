@@ -297,13 +297,11 @@ export function execCmd<T = Collection>(
     } else {
       return execCmdSync<SfExecCmdResult<T>, T>(cmd, options);
     }
-  } else {
-    if (options.async) {
+  } else if (options.async) {
       return execCmdAsync<SfdxExecCmdResult<T>, T>(cmd, options);
     } else {
       return execCmdSync<SfdxExecCmdResult<T>, T>(cmd, options);
     }
-  }
 }
 
 function toString(arrOrString: Many<string>): string {
