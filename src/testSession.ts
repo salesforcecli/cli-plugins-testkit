@@ -334,7 +334,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         }
 
         if (org.wait) {
-          baseCmd += `-w ${org.wait}`;
+          baseCmd += ` -w ${org.wait}`;
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
