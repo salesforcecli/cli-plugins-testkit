@@ -36,6 +36,7 @@ export type ScratchOrgConfig = {
     | 'partner-group'
     | 'partner-professional';
   username?: string;
+  wait?: number;
 };
 
 export interface TestSessionOptions {
@@ -330,6 +331,10 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
         if (org.edition) {
           baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
+        }
+
+        if (org.wait) {
+          baseCmd += `-w ${org.wait}`;
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
