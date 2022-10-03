@@ -17,9 +17,7 @@ import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 import stripAnsi = require('strip-ansi');
 
-type Collection = Record<string, AnyJson> | Array<Record<string, AnyJson>>;
-
-type CLI = 'inherit' | 'sfdx' | 'sf';
+export type CLI = 'inherit' | 'sfdx' | 'sf';
 
 type BaseExecOptions = {
   /**
@@ -41,9 +39,9 @@ export type ExecCmdOptions = ExecOptions & BaseExecOptions;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: any) => any ? never : K }[keyof T]>>;
 
-type JsonOutput<T extends Collection> = { status: number; result: T } & Partial<ExcludeMethods<SfError>>;
+type JsonOutput<T> = { status: number; result: T } & Partial<ExcludeMethods<SfError>>;
 
-export interface ExecCmdResult<T extends Collection> {
+export interface ExecCmdResult<T> {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
@@ -85,7 +83,7 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
   Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
 
 // Add JSON output if json flag is set
-const addJsonOutput = <T extends Collection>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
+const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
       result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as unknown as JsonOutput<T>;
@@ -145,7 +143,7 @@ const buildCmd = (cmdArgs: string, options?: ExecCmdOptions): string => {
   return `${bin} ${cmdArgs}`;
 };
 
-const execCmdSync = <T extends Collection>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T> => {
+const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T> => {
   const debug = Debug('testkit:execCmd');
 
   // Add on the bin path
@@ -175,7 +173,7 @@ const execCmdSync = <T extends Collection>(cmd: string, options?: ExecCmdOptions
   return addJsonOutput<T>(cmd, result);
 };
 
-const execCmdAsync = async <T extends Collection>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
+const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
   const debug = Debug('testkit:execCmdAsync');
 
   // Add on the bin path
@@ -236,17 +234,11 @@ const execCmdAsync = async <T extends Collection>(cmd: string, options: ExecCmdO
  * @param options The options used to run the command.
  * @returns The child process exit code, stdout, stderr, cmd run time, and the parsed JSON if `--json` param present.
  */
-export function execCmd<T extends Collection = Collection>(
-  cmd: string,
-  options?: ExecCmdOptions & { async?: false }
-): ExecCmdResult<T>;
+export function execCmd<T = AnyJson>(cmd: string, options?: ExecCmdOptions & { async?: false }): ExecCmdResult<T>;
 
-export function execCmd<T extends Collection = Collection>(
-  cmd: string,
-  options: ExecCmdOptions & { async: true }
-): Promise<ExecCmdResult<T>>;
+export function execCmd<T = AnyJson>(cmd: string, options: ExecCmdOptions & { async: true }): Promise<ExecCmdResult<T>>;
 
-export function execCmd<T extends Collection = Collection>(
+export function execCmd<T = AnyJson>(
   cmd: string,
   options?: ExecCmdOptions
 ): ExecCmdResult<T> | Promise<ExecCmdResult<T>> {

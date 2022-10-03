@@ -260,6 +260,8 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   private async deleteOrgs(): Promise<void> {
     if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs.size > 0) {
       for (const org of [...this.orgs.keys()]) {
+        if (org === 'default') continue;
+
         this.debug(`Deleting test org: ${org}`);
         const rv = shell.exec(`sf env delete scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
         this.orgs.delete(org);
