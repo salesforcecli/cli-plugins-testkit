@@ -36,6 +36,34 @@ describe('execCmd (sync)', () => {
     expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
   });
 
+  it('should default to bin/dev executable when cli = inherit', () => {
+    const binPath = join(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev');
+    sandbox.stub(fs, 'existsSync').returns(true);
+    sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd, { cli: 'inherit' });
+    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+  });
+
+  it('should default to sfdx when cli = sfdx', () => {
+    sandbox.stub(fs, 'existsSync').returns(true);
+    sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd, { cli: 'sfdx' });
+    expect(execStub.args[0][0]).to.equal(`sfdx ${cmd}`);
+  });
+
+  it('should default to sf when cli = sf', () => {
+    sandbox.stub(fs, 'existsSync').returns(true);
+    sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
+    const shellString = new ShellString(JSON.stringify(output));
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    execCmd(cmd, { cli: 'sf' });
+    expect(execStub.args[0][0]).to.equal(`sf ${cmd}`);
+  });
+
   it('should accept valid sfdx path in env var', () => {
     const binPath = join('sfdx-cli', 'bin', 'sfdx');
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));

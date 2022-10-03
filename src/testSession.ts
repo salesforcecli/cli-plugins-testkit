@@ -9,15 +9,35 @@ import * as path from 'path';
 import { RetryConfig } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
-import { AnyJson, getString, Optional } from '@salesforce/ts-types';
+import { Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
 import stripAnsi = require('strip-ansi');
+import { AuthFields } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
-import { AuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+
+export type ScratchOrgConfig = {
+  executable?: 'sfdx' | 'sf';
+  config?: string;
+  duration?: number;
+  alias?: string;
+  setDefault?: boolean;
+  edition?:
+    | 'developer'
+    | 'enterprise'
+    | 'group'
+    | 'professional'
+    | 'partner-developer'
+    | 'partner-enterprise'
+    | 'partner-group'
+    | 'partner-professional';
+  username?: string;
+  wait?: number;
+};
 
 export interface TestSessionOptions {
   /**
@@ -31,19 +51,19 @@ export interface TestSessionOptions {
   project?: TestProjectOptions;
 
   /**
-   * Commands to run as setup for tests.  All must have exitCode == 0 or session
-   * creation will throw.  Any org:create commands run as setup commands will
-   * be deleted as part of `TestSession.clean()`.
+   * Scratch orgs to create as part of setup.  All must be created successfully or session
+   * create will throw.  Scratch orgs created as part of setup will be deleted as part of
+   * `TestSession.clean()`.
    */
-  setupCommands?: string[];
+  scratchOrgs?: ScratchOrgConfig[];
 
   /**
    * The preferred auth method to use
    */
-  authStrategy?: keyof typeof AuthStrategy;
+  devhubAuthStrategy?: DevhubAuthStrategy;
 
   /**
-   * The number of times to retry the setupCommands after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
+   * The number of times to retry the scratch org create after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
    */
   retries?: number;
 }
@@ -64,8 +84,8 @@ export interface TestSessionOptions {
  *   TESTKIT_PROJECT_DIR = a SFDX project to use for testing. the tests will use this project directly.
  *   TESTKIT_SAVE_ARTIFACTS = prevents a test session from deleting orgs, projects, and test sessions.
  *   TESTKIT_ENABLE_ZIP = allows zipping the session dir when this is true
- *   TESTKIT_SETUP_RETRIES = number of times to retry the setupCommands after the initial attempt before throwing an error
- *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of setupCommands. Defaults to 5000
+ *   TESTKIT_SETUP_RETRIES = number of times to retry the org creates after the initial attempt before throwing an error
+ *   TESTKIT_SETUP_RETRIES_TIMEOUT = milliseconds to wait before the next retry of scratch org creations. Defaults to 5000
  *   TESTKIT_EXEC_SHELL = the shell to use for all testkit shell executions rather than the shelljs default.
  *
  *   TESTKIT_HUB_USERNAME = username of an existing hub (authenticated before creating a session)
@@ -80,18 +100,18 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public dir: string;
   public homeDir: string;
   public project?: TestProject;
-  public setup?: AnyJson[] | shell.ShellString;
 
   // this is stored on the class so that tests can set it to something much lower than default
   public rmRetryConfig: Partial<RetryConfig<void>> = { retries: 12, delay: 5000 };
+
+  public orgs: Map<string, AuthFields> = new Map<string, AuthFields>();
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
 
   private overriddenDir?: string;
   private sandbox = createSandbox();
-  private orgs: string[] = [];
-  private setupRetries: number;
+  private retries: number;
   private zipDir: typeof zipDir;
   private options: TestSessionOptions;
   private shelljsExecOptions: shell.ExecOptions = {
@@ -106,7 +126,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
-    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
+    this.retries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
 
     const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
     if (shellOverride) {
@@ -147,8 +167,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       JSON.stringify(JSON.parse(JSON.stringify(this.options)))
     );
 
-    const authStrategy = this.options.authStrategy ? AuthStrategy[this.options.authStrategy] : undefined;
-    // have to grab this before we change the home
+    const authStrategy =
+      !this.options.devhubAuthStrategy || this.options.devhubAuthStrategy === 'AUTO'
+        ? getAuthStrategy()
+        : this.options.devhubAuthStrategy;
+
     transferExistingAuthToEnv(authStrategy);
 
     // Set the homedir used by this test, on the TestSession and the process
@@ -220,14 +243,14 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
   protected async init(): Promise<void> {
     // Run all setup commands
-    await this.setupCommands(this.options.setupCommands);
+    await this.createOrgs(this.options.scratchOrgs);
 
     this.debug('Created testkit session:');
     this.debug(`  ID: ${this.id}`);
     this.debug(`  Created Date: ${this.createdDate}`);
     this.debug(`  Dir: ${this.dir}`);
     this.debug(`  Home Dir: ${this.homeDir}`);
-    if (this.orgs?.length) {
+    if (this.orgs.size > 0) {
       this.debug('  Orgs: ', this.orgs);
     }
     if (this.project) {
@@ -236,12 +259,13 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   }
 
   private async deleteOrgs(): Promise<void> {
-    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs?.length) {
-      const orgs = this.orgs.slice();
-      for (const org of orgs) {
+    if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs.size > 0) {
+      for (const org of [...this.orgs.keys()]) {
+        if (org === 'default') continue;
+
         this.debug(`Deleting test org: ${org}`);
-        const rv = shell.exec(`sfdx force:org:delete -u ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
-        this.orgs = this.orgs.filter((o) => o !== org);
+        const rv = shell.exec(`sf env delete scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
+        this.orgs.delete(org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
           await this.rmSessionDir();
@@ -263,64 +287,73 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
   // Executes commands and keeps track of any orgs created.
   // Throws if any commands return a non-zero exitCode.
-  private async setupCommands(cmds?: string[]): Promise<void> {
-    const dbug = debug('testkit:setupCommands');
+  private async createOrgs(orgs: ScratchOrgConfig[] = []): Promise<void> {
+    const dbug = debug('testkit:createOrgs');
     const setup = () => {
-      if (cmds) {
-        this.setup = [];
+      for (const org of orgs) {
+        // Don't create orgs if we are supposed to reuse one from the env
+        const orgUsername = env.getString('TESTKIT_ORG_USERNAME');
+        if (orgUsername) {
+          dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+          this.orgs.set(orgUsername, { username: orgUsername });
+          continue;
+        }
 
-        for (let cmd of cmds) {
-          if (cmd.includes('org:create')) {
-            // Don't create orgs if we are supposed to reuse one from the env
-            const org = env.getString('TESTKIT_ORG_USERNAME');
-            if (org) {
-              dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
-              this.setup.push({ result: { username: org } });
-              continue;
-            }
-          }
+        const executable = org.executable ?? 'sf';
 
-          // Detect when running sfdx cli commands
-          if (cmd.split(' ')[0].includes('sfdx')) {
-            if (!shell.which('sfdx')) {
-              throw new Error('sfdx executable not found for running sfdx setup commands');
-            }
-            // Add the json flag if it looks like an sfdx command so we can return
-            // parsed json in the command return.
-            if (!cmd.includes('--json')) {
-              cmd += ' --json';
-            }
-          }
+        if (!shell.which(executable)) {
+          throw new Error(`${executable} executable not found for creating scratch orgs`);
+        }
 
-          const rv = shell.exec(cmd, this.shelljsExecOptions) as shell.ShellString;
-          rv.stdout = stripAnsi(rv.stdout);
-          rv.stderr = stripAnsi(rv.stderr);
-          if (rv.code !== 0) {
-            const io = cmd.includes('--json') ? rv.stdout : rv.stderr;
-            throw Error(`Setup command ${cmd} failed due to: ${io}`);
-          }
-          dbug(`Output for setup cmd ${cmd} is:\n${rv.stdout}`);
+        let baseCmd =
+          executable === 'sf' ? `${executable} env create scratch --json` : `${executable} force:org:create --json`;
 
-          // Automatically parse json results
-          if (cmd.includes('--json')) {
-            try {
-              const jsonOutput = parseJson(rv.stdout);
-              // keep track of all org creates
-              if (cmd.includes('org:create')) {
-                const username = getString(jsonOutput, 'result.username');
-                if (username) {
-                  dbug(`Saving org username: ${username} from ${cmd}`);
-                  this.orgs.push(username);
-                }
-              }
-              this.setup.push(jsonOutput);
-            } catch (err: unknown) {
-              dbug(`Failed command output JSON parsing due to:\n${(err as Error).message}`);
-              this.setup.push(rv);
-            }
-          } else {
-            this.setup.push(rv);
-          }
+        if (org.config) {
+          baseCmd += ` -f ${org.config}`;
+        }
+
+        if (org.alias) {
+          baseCmd += ` -a ${org.alias}`;
+        }
+
+        if (org.duration) {
+          baseCmd += executable === 'sf' ? ` -y ${org.duration}` : ` -d ${org.duration}`;
+        }
+
+        if (org.setDefault) {
+          baseCmd += executable === 'sf' ? ' -d' : ' -s';
+        }
+
+        if (org.username) {
+          if (org.executable === 'sfdx') baseCmd += ` username=${org.username}`;
+          else throw new Error('username property is not supported by sf env create scratch');
+        }
+
+        if (org.edition) {
+          baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
+        }
+
+        if (org.wait) {
+          baseCmd += `-w ${org.wait}`;
+        }
+
+        const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
+        rv.stdout = stripAnsi(rv.stdout);
+        rv.stderr = stripAnsi(rv.stderr);
+        if (rv.code !== 0) {
+          throw Error(`${baseCmd} failed due to: ${rv.stdout}`);
+        }
+        dbug(`Output for ${baseCmd} is:\n${rv.stdout}`);
+
+        const jsonOutput = parseJson(rv.stdout) as {
+          status: number;
+          result: { username: string; authFields: AuthFields };
+        };
+        const username = jsonOutput.result.username;
+        dbug(`Saving org username: ${username} from ${baseCmd}`);
+        this.orgs.set(username, jsonOutput.result.authFields);
+        if (org.setDefault) {
+          this.orgs.set('default', jsonOutput.result.authFields);
         }
       }
     };
@@ -329,14 +362,14 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     let completed = false;
     const timeout = new Duration(env.getNumber('TESTKIT_SETUP_RETRIES_TIMEOUT') ?? 5000, Duration.Unit.MILLISECONDS);
 
-    while (!completed && attempts <= this.setupRetries) {
+    while (!completed && attempts <= this.retries) {
       try {
-        dbug(`Executing setup commands (attempt ${attempts + 1} of ${this.setupRetries + 1})`);
+        dbug(`Executing org create(s) (attempt ${attempts + 1} of ${this.retries + 1})`);
         setup();
         completed = true;
       } catch (err) {
         attempts += 1;
-        if (attempts > this.setupRetries) {
+        if (attempts > this.retries) {
           throw err;
         }
         dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);

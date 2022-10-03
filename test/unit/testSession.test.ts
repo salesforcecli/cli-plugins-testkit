@@ -16,7 +16,8 @@ import { ShellString } from 'shelljs';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
 import Sinon = require('sinon');
-import { TestSession } from '../../src/testSession';
+import { AuthFields } from '@salesforce/core';
+import { ScratchOrgConfig, TestSession } from '../../src/testSession';
 import { TestProject } from '../../src/testProject';
 
 describe('TestSession', () => {
@@ -49,7 +50,7 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.equal(undefined);
+      expect(session.orgs.size).to.equal(0);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
@@ -65,7 +66,7 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(sessionDir);
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.equal(undefined);
+      expect(session.orgs.size).to.equal(0);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
@@ -87,7 +88,7 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(sessionDir);
       expect(session.homeDir).to.equal(homedir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.equal(undefined);
+      expect(session.orgs.size).to.equal(0);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
@@ -111,7 +112,7 @@ describe('TestSession', () => {
       expect(session.project).to.be.instanceOf(TestProject);
       expect(session.project?.dir).to.equal(path.join(session.dir, testProjName));
       expect(stubCwdStub.firstCall.args[0]).to.equal(session.project?.dir);
-      expect(session.setup).to.equal(undefined);
+      expect(session.orgs.size).to.equal(0);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
@@ -141,49 +142,18 @@ describe('TestSession', () => {
       expect(session.homeDir).to.equal(homedir);
       expect(session.project).to.equal(undefined);
       expect(stubCwdStub.firstCall.args[0]).to.equal(projectDir);
-      expect(session.setup).to.equal(undefined);
+      expect(session.orgs.size).to.equal(0);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
     });
 
-    it('should create a session with setup commands', async () => {
-      stubMethod(sandbox, shelljs, 'which').returns(true);
-      const homedir = path.join('some', 'other', 'home');
-      const shellOverride = 'powershell.exe';
-      stubMethod(sandbox, env, 'getString')
-        .withArgs('TESTKIT_EXEC_SHELL')
-        .returns(shellOverride)
-        .withArgs('TESTKIT_HOMEDIR')
-        .returns(homedir);
-      const setupCommands = ['sfdx foo:bar -r testing'];
-      const execRv = { result: { donuts: 'yum' } };
-      const shellString = new ShellString(JSON.stringify(execRv));
-      shellString.code = 0;
-      const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
-
-      const session = await TestSession.create({ setupCommands });
-
-      expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
-      expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
-      expect(session.id).to.be.a('string');
-      expect(session.createdDate).to.be.a('Date');
-      expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
-      expect(session.homeDir).to.equal(homedir);
-      expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([execRv]);
-      expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
-      expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
-      expect(process.env.HOME).to.equal(session.homeDir);
-      expect(process.env.USERPROFILE).to.equal(session.homeDir);
-    });
-
-    it('should create a session with setup commands and retries', async () => {
+    it('should create a session with scratch orgs and retries', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
       // set retry timeout to 0 ms so that the test runs quickly
       process.env.TESTKIT_SETUP_RETRIES_TIMEOUT = '0';
       const retries = 2;
-      const setupCommands = ['sfdx foo:bar -r testing'];
-      const execRv = { result: { donuts: 'yum' } };
+      const username = 'hey@ho.org';
+      const execRv = { result: { username, authFields: { username, orgId: '12345' } } };
       const execStub = stubMethod(sandbox, shelljs, 'exec')
         .onCall(retries)
         .callsFake(() => {
@@ -197,25 +167,41 @@ describe('TestSession', () => {
           return shellString;
         });
       const sleepSpy = spyMethod(sandbox, TestSession.prototype, 'sleep');
-      const session = await TestSession.create({ setupCommands, retries });
+
+      const scratchOrgs = [{ executable: 'sf', config: 'config/project-scratch-def.json' }] as ScratchOrgConfig[];
+
+      const session = await TestSession.create({
+        scratchOrgs,
+        retries,
+      });
       // expect sleepSync to be called before every retry attempt
       expect(sleepSpy.callCount).to.equal(retries);
       // expect exec to be called on every retry attempt AND the initial attempt
-      expect(execStub.callCount).to.equal(setupCommands.length * (retries + 1));
-      expect(session.setup).to.deep.equal([execRv]);
-      expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
+      expect(execStub.callCount).to.equal(scratchOrgs.length * (retries + 1));
+      expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
+      expect(execStub.firstCall.args[0]).to.equal('sf env create scratch --json -f config/project-scratch-def.json');
     });
 
-    it('should create a session with org creation setup commands', async () => {
+    it('should create a session with org creation', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
-      const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
       const username = 'hey@ho.org';
-      const execRv = { result: { username } };
+      const execRv = { result: { username, authFields: { username, orgId: '12345' } } };
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
-      const session = await TestSession.create({ setupCommands });
+      const session = await TestSession.create({
+        scratchOrgs: [
+          {
+            executable: 'sf',
+            config: 'config/project-scratch-def.json',
+            alias: 'my-org',
+            setDefault: true,
+            duration: 1,
+            edition: 'developer',
+          },
+        ],
+      });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -224,13 +210,13 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(session.dir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([execRv]);
-      expect(execStub.firstCall.args[0]).to.equal(`${setupCommands[0]} --json`);
+      expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
+      expect(session.orgs.get('default')).to.deep.equal({ username, orgId: '12345' });
+      expect(execStub.firstCall.args[0]).to.equal(
+        'sf env create scratch --json -f config/project-scratch-def.json -a my-org -y 1 -d -e developer'
+      );
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
-
-      // @ts-ignore session.orgs is private
-      expect(session.orgs).to.deep.equal([username]);
     });
 
     it('should create a session without org creation if TESTKIT_ORG_USERNAME is defined', async () => {
@@ -243,13 +229,15 @@ describe('TestSession', () => {
         .withArgs('TESTKIT_HOMEDIR')
         .returns(homedir);
       const username = 'hey@ho.org';
-      const setupCommands = ['sfdx org:create -f config/project-scratch-def.json'];
-      const execRv = { result: { username } };
+
+      const execRv = { result: { username, orgId: '12345' } };
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 0;
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
-      const session = await TestSession.create({ setupCommands });
+      const session = await TestSession.create({
+        scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
+      });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
       expect(writeJsonStub.firstCall.args[0]).to.equal(path.join(session.dir, optionsFileName));
@@ -258,45 +246,44 @@ describe('TestSession', () => {
       expect(session.dir).to.equal(path.join(cwd, `test_session_${session.id}`));
       expect(session.homeDir).to.equal(homedir);
       expect(session.project).to.equal(undefined);
-      expect(session.setup).to.deep.equal([{ result: { username: overriddenUsername } }]);
+      expect(session.orgs.get(overriddenUsername)).to.deep.equal({ username: overriddenUsername });
       expect(execStub.called).to.equal(false);
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
-
-      // @ts-ignore session.orgs is private
-      expect(session.orgs).to.deep.equal([]);
     });
 
     it('should error if setup command fails', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
-      const setupCommands = ['sfdx foo:bar -r testing'];
-      const expectedCmd = `${setupCommands[0]} --json`;
+      const expectedCmd = 'sf env create scratch --json -f config/project-scratch-def.json';
       const execRv = 'Cannot foo before bar';
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 1;
       stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
       try {
-        await TestSession.create({ setupCommands });
+        await TestSession.create({
+          scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+        });
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {
-        expect((err as Error).message).to.equal(`Setup command ${expectedCmd} failed due to: ${shellString.stdout}`);
+        expect((err as Error).message).to.equal(`${expectedCmd} failed due to: ${shellString.stdout}`);
       }
     });
 
     it('should error if sfdx not found to run setup commands', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(null);
-      const setupCommands = ['sfdx foo:bar -r testing'];
       const execRv = 'Cannot foo before bar';
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 1;
       stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
       try {
-        await TestSession.create({ setupCommands });
+        await TestSession.create({
+          scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+        });
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {
-        expect((err as Error).message).to.equal('sfdx executable not found for running sfdx setup commands');
+        expect((err as Error).message).to.equal('sf executable not found for creating scratch orgs');
       }
     });
   });
@@ -344,13 +331,13 @@ describe('TestSession', () => {
       execStub.returns(shellString);
       rmStub.returns(shellString);
       const username = 'me@my.org';
-      // @ts-ignore
-      session.orgs = [username];
+
+      session.orgs = new Map<string, AuthFields>().set(username, { username, orgId: '12345' });
 
       await session.clean();
 
       expect(restoreSpy.called).to.equal(true);
-      expect(execStub.firstCall.args[0]).to.equal(`sfdx force:org:delete -u ${username} -p`);
+      expect(execStub.firstCall.args[0]).to.equal(`sf env delete scratch -o ${username} -p`);
       expect(rmStub.firstCall.args[0]).to.equal(session.dir);
       expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
     });
