@@ -271,6 +271,7 @@ export enum Interaction {
   Yes = 'Y' + '\x0D',
   No = 'N' + '\x0D',
   BACKSPACE = '\x08',
+  ALL = 'a',
 }
 
 export type InteractiveCommandExecutionResult = {
