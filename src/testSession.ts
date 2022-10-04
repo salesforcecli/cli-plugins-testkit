@@ -117,6 +117,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   private shelljsExecOptions: shell.ExecOptions = {
     silent: true,
   };
+  private orgsAliases: string[] = ['default'];
 
   public constructor(options: TestSessionOptions = {}) {
     super(options);
@@ -259,7 +260,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   private async deleteOrgs(): Promise<void> {
     if (!env.getString('TESTKIT_ORG_USERNAME') && this.orgs.size > 0) {
       for (const org of [...this.orgs.keys()]) {
-        if (org === 'default') continue;
+        if (this.orgsAliases.includes(org)) continue;
 
         this.debug(`Deleting test org: ${org}`);
         const rv = shell.exec(`sf env delete scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
@@ -352,6 +353,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         this.orgs.set(username, jsonOutput.result.authFields);
         if (org.setDefault) {
           this.orgs.set('default', jsonOutput.result.authFields);
+        }
+
+        if (org.alias) {
+          this.orgsAliases.push(org.alias);
+          this.orgs.set(org.alias, jsonOutput.result.authFields);
         }
       }
     };
