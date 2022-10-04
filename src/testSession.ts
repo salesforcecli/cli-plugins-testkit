@@ -13,12 +13,13 @@ import { Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
 import stripAnsi = require('strip-ansi');
-import { AuthFields } from '@salesforce/core';
+import { AuthFields, OrgAuthorization } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
 import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
+import { JsonOutput } from './execCmd';
 
 export type ScratchOrgConfig = {
   executable?: 'sfdx' | 'sf';
@@ -105,6 +106,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   public rmRetryConfig: Partial<RetryConfig<void>> = { retries: 12, delay: 5000 };
 
   public orgs: Map<string, AuthFields> = new Map<string, AuthFields>();
+  public hubOrg!: AuthFields;
 
   private debug: Debugger;
   private cwdStub?: SinonStub;
@@ -178,6 +180,20 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
     process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     testkitHubAuth(this.homeDir, authStrategy);
+
+    if (authStrategy !== 'NONE') {
+      const config = shell.exec('sf config get target-dev-hub --json', this.shelljsExecOptions) as shell.ShellString;
+      const configResults = JSON.parse(config.stdout) as unknown as JsonOutput<Array<{ name: string; value: string }>>;
+      const usernameOrAlias = configResults.result.find((org) => org.name === 'target-dev-hub')?.value;
+      if (usernameOrAlias) {
+        const displayEnv = shell.exec(
+          `sf env display -e ${usernameOrAlias} --json`,
+          this.shelljsExecOptions
+        ) as shell.ShellString;
+        const displayEnvResults = JSON.parse(displayEnv.stdout) as unknown as JsonOutput<OrgAuthorization>;
+        this.hubOrg = displayEnvResults.result;
+      }
+    }
   }
 
   /**
