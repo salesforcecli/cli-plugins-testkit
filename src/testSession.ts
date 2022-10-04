@@ -303,6 +303,8 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   // Executes commands and keeps track of any orgs created.
   // Throws if any commands return a non-zero exitCode.
   private async createOrgs(orgs: ScratchOrgConfig[] = []): Promise<void> {
+    if (orgs.length === 0) return;
+
     const dbug = debug('testkit:createOrgs');
     const setup = () => {
       for (const org of orgs) {
