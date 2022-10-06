@@ -179,7 +179,9 @@ describe('TestSession', () => {
       // expect exec to be called on every retry attempt AND the initial attempt
       expect(execStub.callCount).to.equal(scratchOrgs.length * (retries + 1));
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
-      expect(execStub.firstCall.args[0]).to.equal('sf env create scratch --json -f config/project-scratch-def.json');
+      expect(execStub.firstCall.args[0]).to.equal(
+        'sf env create scratch --json -f config/project-scratch-def.json -w 60'
+      );
     });
 
     it('should create a session with org creation', async () => {
@@ -213,7 +215,7 @@ describe('TestSession', () => {
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
       expect(session.orgs.get('default')).to.deep.equal({ username, orgId: '12345' });
       expect(execStub.firstCall.args[0]).to.equal(
-        'sf env create scratch --json -f config/project-scratch-def.json -a my-org -y 1 -d -e developer'
+        'sf env create scratch --json -f config/project-scratch-def.json -a my-org -y 1 -d -e developer -w 60'
       );
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
@@ -254,7 +256,7 @@ describe('TestSession', () => {
 
     it('should error if setup command fails', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
-      const expectedCmd = 'sf env create scratch --json -f config/project-scratch-def.json';
+      const expectedCmd = 'sf env create scratch --json -f config/project-scratch-def.json -w 60';
       const execRv = 'Cannot foo before bar';
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 1;
