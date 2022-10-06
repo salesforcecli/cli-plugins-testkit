@@ -106,7 +106,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
-    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) || 0;
+    this.setupRetries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) ?? 0;
 
     const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
     if (shellOverride) {
@@ -114,8 +114,8 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
     }
 
     // Create the test session directory
-    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') || this.options.sessionDir;
-    this.dir = this.overriddenDir || path.join(process.cwd(), `test_session_${this.id}`);
+    this.overriddenDir = env.getString('TESTKIT_SESSION_DIR') ?? this.options.sessionDir;
+    this.dir = this.overriddenDir ?? path.join(process.cwd(), `test_session_${this.id}`);
     fs.mkdirSync(this.dir, { recursive: true });
 
     // Setup a test project and stub process.cwd to be the project dir
@@ -244,6 +244,7 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         this.orgs = this.orgs.filter((o) => o !== org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
+          // eslint-disable-next-line no-await-in-loop
           await this.rmSessionDir();
           throw Error(`Deleting org ${org} failed due to: ${rv.stderr}`);
         }
@@ -340,13 +341,11 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
           throw err;
         }
         dbug(`Setup failed. waiting ${timeout.seconds} seconds before next attempt...`);
+        // eslint-disable-next-line no-await-in-loop
         await this.deleteOrgs();
-        await this.sleep(timeout);
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(timeout);
       }
     }
-  }
-
-  private async sleep(duration: Duration): Promise<void> {
-    await sleep(duration);
   }
 }

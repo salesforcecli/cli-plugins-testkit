@@ -45,7 +45,7 @@ export class TestProject {
     this.zipDir = zipDir;
     this.createdDate = new Date();
 
-    const destDir = options.destinationDir || tmpdir();
+    const destDir = options.destinationDir ?? tmpdir();
 
     const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
     if (shellOverride) {
@@ -83,7 +83,7 @@ export class TestProject {
       if (!shell.which('sfdx')) {
         throw new Error('sfdx executable not found for creating a project using force:project:create command');
       }
-      const name = options.name || genUniqueString('project_%s');
+      const name = options.name ?? genUniqueString('project_%s');
       const rv = shell.exec(
         `sfdx force:project:create -n ${name} -d ${destDir}`,
         this.shelljsExecOptions

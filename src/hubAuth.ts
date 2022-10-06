@@ -164,7 +164,7 @@ export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthSt
   const devhub = env.getString('TESTKIT_HUB_USERNAME', '');
   logger(`reading ${devhub}.json`);
   const authFileName = `${devhub}.json`;
-  const hubAuthFileSource = path.join(env.getString('HOME') || os.homedir(), '.sfdx', authFileName);
+  const hubAuthFileSource = path.join(env.getString('HOME') ?? os.homedir(), '.sfdx', authFileName);
   const authFileContents = JSON.parse(fs.readFileSync(hubAuthFileSource, 'utf-8')) as AuthFields;
   if (authFileContents.privateKey) {
     logger('copying variables to env from AuthFile for JWT');
