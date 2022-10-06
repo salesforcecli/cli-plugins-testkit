@@ -12,14 +12,7 @@ import { debug } from 'debug';
 import { AuthFields } from '@salesforce/core';
 import { env } from '@salesforce/kit';
 
-// this seems to be a known eslint error for enums
-// eslint-disable-next-line no-shadow
-export enum AuthStrategy {
-  JWT = 'JWT',
-  AUTH_URL = 'AUTH_URL',
-  REUSE = 'REUSE',
-  NONE = 'NONE',
-}
+export type DevhubAuthStrategy = 'AUTO' | 'JWT' | 'AUTH_URL' | 'REUSE' | 'NONE';
 
 const DEFAULT_INSTANCE_URL = 'https://login.salesforce.com';
 
@@ -75,7 +68,7 @@ export const prepareForAuthUrl = (homeDir: string): string => {
  *     optional but recommended: TESTKIT_HUB_INSTANCE
  *   required for AuthUrl: TESTKIT_AUTH_URL
  */
-export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = getAuthStrategy()): void => {
+export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy = getAuthStrategy()): void => {
   const logger = debug('testkit:authFromStubbedHome');
   const execOpts: shell.ExecOptions = { silent: true };
   const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
@@ -83,15 +76,18 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     execOpts.shell = shellOverride;
   }
 
-  if (authStrategy === AuthStrategy.JWT) {
+  if (authStrategy === 'JWT') {
     logger('trying jwt auth');
     const jwtKey = prepareForJwt(homeDir);
 
     const results = shell.exec(
-      `sfdx auth:jwt:grant -d -u ${env.getString('TESTKIT_HUB_USERNAME', '')} -i ${env.getString(
-        'TESTKIT_JWT_CLIENT_ID',
+      `sf login jwt org --set-default-dev-hub --username ${env.getString(
+        'TESTKIT_HUB_USERNAME',
         ''
-      )} -f ${jwtKey} -r ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
+      )} --clientid ${env.getString('TESTKIT_JWT_CLIENT_ID', '')} --keyfile ${jwtKey} --instance-url ${env.getString(
+        'TESTKIT_HUB_INSTANCE',
+        DEFAULT_INSTANCE_URL
+      )}`,
       execOpts
     ) as shell.ShellString;
 
@@ -105,7 +101,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
     }
     return;
   }
-  if (authStrategy === AuthStrategy.AUTH_URL) {
+  if (authStrategy === 'AUTH_URL') {
     logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = prepareForAuthUrl(homeDir);
@@ -125,23 +121,23 @@ export const testkitHubAuth = (homeDir: string, authStrategy: AuthStrategy = get
   logger('no hub configured');
 };
 
-const getAuthStrategy = (): AuthStrategy => {
+export const getAuthStrategy = (): DevhubAuthStrategy => {
   if (
     env.getString('TESTKIT_JWT_CLIENT_ID') &&
     env.getString('TESTKIT_HUB_USERNAME') &&
     env.getString('TESTKIT_JWT_KEY')
   ) {
-    return AuthStrategy.JWT;
+    return 'JWT';
   }
   // you provided a username but not an auth url, so you must already have an auth that you want to re-use
   if (env.getString('TESTKIT_HUB_USERNAME') && !env.getString('TESTKIT_AUTH_URL')) {
-    return AuthStrategy.REUSE;
+    return 'REUSE';
   }
   // auth url alone
   if (env.getString('TESTKIT_AUTH_URL')) {
-    return AuthStrategy.AUTH_URL;
+    return 'AUTH_URL';
   }
-  return AuthStrategy.NONE;
+  return 'NONE';
 };
 
 /**
@@ -156,11 +152,10 @@ const getAuthStrategy = (): AuthStrategy => {
  *  TESTKIT_JWT_KEY,TESTKIT_JWT_CLIENT_ID,TESTKIT_HUB_INSTANCE (if using jwt)
  *
  */
-export const transferExistingAuthToEnv = (authStrategy: AuthStrategy = getAuthStrategy()): void => {
-  // nothing to do if the variables are already provided
-  if (authStrategy !== AuthStrategy.REUSE) return;
+export const transferExistingAuthToEnv = (authStrategy: DevhubAuthStrategy): void => {
+  if (authStrategy !== 'REUSE') return;
 
-  const logger = debug('testkit:AuthReuse');
+  const logger = debug('testkit:transferExistingAuthToEnv');
   const devhub = env.getString('TESTKIT_HUB_USERNAME', '');
   logger(`reading ${devhub}.json`);
   const authFileName = `${devhub}.json`;

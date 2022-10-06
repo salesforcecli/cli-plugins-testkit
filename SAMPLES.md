@@ -387,7 +387,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-import { getString } from '@salesforce/ts-types';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -397,12 +396,14 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      setupCommands: ['sfdx force:org:create edition=Developer', 'sfdx force:source:push'],
+      scratchOrgs: [{ executable: 'sfdx', edition: 'developer' }],
     });
+
+    execCmd('force:source:push', { cli: 'sfdx' });
   });
 
   it('using testkit to run commands with an org', () => {
-    const username = getString(testSession.setup[0], 'result.username');
+    const username = [...testSession.orgs.keys()][0];
     execCmd(`user:create -u ${username}`, { ensureExitCode: 0 });
   });
 
@@ -418,7 +419,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-import { getString } from '@salesforce/ts-types';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -428,12 +428,12 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      setupCommands: ['sfdx force:org:create edition=Developer'],
+      scratchOrgs: [{ edition: 'developer', config: 'config/project-scratch-def.json' }],
     });
   });
 
   it('using testkit to run commands with an org', () => {
-    const username = getString(testSession.setup[0], 'result.username');
+    const username = [...testSession.orgs.keys()][0];
     execCmd(`force:source:deploy -x package.xml -u ${username}`, { ensureExitCode: 0 });
   });
 
@@ -449,7 +449,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-import { getString } from '@salesforce/ts-types';
 import * as path from 'path';
 
 describe('TestSession', () => {
@@ -460,7 +459,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      setupCommands: ['sfdx force:org:create -f config/project-scratch-def.json'],
+      scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
     });
   });
 
@@ -474,7 +473,7 @@ describe('TestSession', () => {
       name: 'project2',
     });
     testSession.stubCwd(project2.dir);
-    const username = getString(testSession.setup[0], 'result.username');
+    const username = [...testSession.orgs.keys()][0];
     execCmd(`force:source:pull -u ${username}`);
   });
 
@@ -490,7 +489,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { getString } from '@salesforce/ts-types';
 import * as shelljs from 'shelljs';
 
 /*
@@ -509,25 +507,26 @@ describe('TestSession', () => {
       project: {
         name: 'TestProj1',
       },
-      setupCommands: [
+      scratchOrgs: [
         // rely on defaultusername
-        'sfdx force:org:create -f config/project-scratch-def.json -s',
+        { executable: 'sfdx', config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        `sfdx force:org:create -f config/project-scratch-def.json username=${username}`,
+        { executable: 'sfdx', config: 'config/project-scratch-def.json', username },
       ],
     });
   });
 
   it('should use both orgs created as part of setupCommands', () => {
-    const firstOrg = getString(testSession.setup[0], 'result.username');
+    const firstOrg = testSession.orgs.get('default');
     execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
     execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });
   });
 
   it('should create a 3rd org and get the username from the json output', () => {
     // Note that this org will not be deleted for you by TestSession.
-    const rv = shelljs.exec('sfdx force:org:create -f config/project-scratch-def.json --json');
-    const jsonOutput = JSON.parse(rv.stdout);
+    const jsonOutput = execCmd<{ username: string }>('force:org:create -f config/project-scratch-def.json --json', {
+      cli: 'sfdx',
+    }).jsonOutput;
     const thirdOrg = jsonOutput.result.username;
     execCmd(`force:source:pull -u ${thirdOrg}`);
   });
