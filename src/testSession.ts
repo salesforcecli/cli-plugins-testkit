@@ -344,8 +344,14 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
         // eslint-disable-next-line no-await-in-loop
         await this.deleteOrgs();
         // eslint-disable-next-line no-await-in-loop
-        await sleep(timeout);
+        await this.sleep(timeout);
       }
     }
+  }
+
+  // used for test spy/stub
+  // eslint-disable-next-line class-methods-use-this
+  private async sleep(duration: Duration): Promise<void> {
+    await sleep(duration);
   }
 }
