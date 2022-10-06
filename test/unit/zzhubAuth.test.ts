@@ -4,6 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+/* eslint-disable arrow-body-style */
 
 /*
  * NOTE on chosen file name for these tests. When this test runs before testSession.test.ts
@@ -77,12 +78,10 @@ describe('hubAuth', () => {
       writeStub.callsFake((): void => {
         return;
       });
-      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
-        return true;
-      });
-      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
-        return sampleAuthData.jwtKeyWithHeaderFooter;
-      });
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => true);
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake(
+        (): string => sampleAuthData.jwtKeyWithHeaderFooter
+      );
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
@@ -106,12 +105,10 @@ describe('hubAuth', () => {
       writeStub.callsFake((): void => {
         return;
       });
-      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
-        return true;
-      });
-      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
-        return sampleAuthData.jwtKeyWithHeaderFooter;
-      });
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => true);
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake(
+        (): string => sampleAuthData.jwtKeyWithHeaderFooter
+      );
       const jwtKeyFile = prepareForJwt(homeDir);
       // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
@@ -142,12 +139,8 @@ describe('hubAuth', () => {
       writeStub.callsFake((): void => {
         return;
       });
-      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => {
-        return sampleAuthData.sfdxAuthUrl;
-      });
-      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => {
-        return true;
-      });
+      const readStub = stubMethod(sandbox, fs, 'readFileSync').callsFake((): string => sampleAuthData.sfdxAuthUrl);
+      stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => true);
       const authUrlFile = prepareForAuthUrl(homeDir);
 
       // eslint-disable-next-line no-unused-expressions
