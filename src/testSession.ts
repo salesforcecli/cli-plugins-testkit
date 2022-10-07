@@ -183,14 +183,16 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
 
     if (authStrategy !== 'NONE') {
       const config = shell.exec('sf config get target-dev-hub --json', this.shelljsExecOptions) as shell.ShellString;
-      const configResults = JSON.parse(config.stdout) as unknown as JsonOutput<Array<{ name: string; value: string }>>;
+      const configResults = JSON.parse(stripAnsi(config.stdout)) as unknown as JsonOutput<
+        Array<{ name: string; value: string }>
+      >;
       const usernameOrAlias = configResults.result.find((org) => org.name === 'target-dev-hub')?.value;
       if (usernameOrAlias) {
         const displayEnv = shell.exec(
           `sf env display -e ${usernameOrAlias} --json`,
           this.shelljsExecOptions
         ) as shell.ShellString;
-        const displayEnvResults = JSON.parse(displayEnv.stdout) as unknown as JsonOutput<OrgAuthorization>;
+        const displayEnvResults = JSON.parse(stripAnsi(displayEnv.stdout)) as unknown as JsonOutput<OrgAuthorization>;
         this.hubOrg = displayEnvResults.result;
       }
     }
