@@ -101,9 +101,8 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     }
     return;
   }
-  // the transferExistingAuthToEnv method will transfer the TESTKIT_HUB_USERNAME env var to be TESTKIT_AUTH_URL
-  // so we can auth with the URL for both
-  if (authStrategy === 'AUTH_URL' || authStrategy === 'REUSE') {
+
+  if (authStrategy === 'AUTH_URL') {
     logger('trying to authenticate with AuthUrl');
 
     const tmpUrl = prepareForAuthUrl(homeDir);
