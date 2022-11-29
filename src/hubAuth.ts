@@ -101,6 +101,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     }
     return;
   }
+
   if (authStrategy === 'AUTH_URL') {
     logger('trying to authenticate with AuthUrl');
 

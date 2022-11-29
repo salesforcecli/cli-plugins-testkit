@@ -170,10 +170,13 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
       JSON.stringify(JSON.parse(JSON.stringify(this.options)))
     );
 
-    const authStrategy =
+    let authStrategy =
       this.options.devhubAuthStrategy === 'AUTO' ? getAuthStrategy() : this.options.devhubAuthStrategy ?? 'NONE';
 
     transferExistingAuthToEnv(authStrategy);
+
+    authStrategy =
+      this.options.devhubAuthStrategy === 'AUTO' ? getAuthStrategy() : this.options.devhubAuthStrategy ?? 'NONE';
 
     // Set the homedir used by this test, on the TestSession and the process
     process.env.USERPROFILE = process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
