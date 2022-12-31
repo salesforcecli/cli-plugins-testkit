@@ -306,6 +306,7 @@ describe('TestSession', () => {
       session = await TestSession.create();
       stubMethod(sandbox, session, 'sleep').resolves();
       // @ts-ignore session.sandbox is private
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       restoreSpy = spyMethod(sandbox, session.sandbox, 'restore');
     });
 
