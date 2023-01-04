@@ -1,3 +1,12 @@
+## [3.2.16](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.15...3.2.16) (2023-01-04)
+
+
+### Bug Fixes
+
+* session.project knows from Options whether ([#370](https://github.com/salesforcecli/cli-plugins-testkit/issues/370)) ([8cc92d1](https://github.com/salesforcecli/cli-plugins-testkit/commit/8cc92d107b9d0b41bba1831ccd571a6e16a1346c))
+
+
+
 ## [3.2.15](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.14...3.2.15) (2022-12-24)
 
 
