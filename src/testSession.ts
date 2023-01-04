@@ -95,12 +95,12 @@ export interface TestSessionOptions {
  *   TESTKIT_HUB_INSTANCE = instance url for the hub.  Defaults to https://login.salesforce.com
  *   TESTKIT_AUTH_URL = auth url to be used with auth:sfdxurl:store
  */
-export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
+export class TestSession<T extends TestSessionOptions = TestSessionOptions> extends AsyncOptionalCreatable<T> {
   public id: string;
   public createdDate: Date;
   public dir: string;
   public homeDir: string;
-  public project?: TestProject;
+  public project!: T['project'] extends TestSessionOptions['project'] ? TestProject : TestProject | undefined;
 
   // this is stored on the class so that tests can set it to something much lower than default
   public rmRetryConfig: Partial<RetryConfig<void>> = { retries: 12, delay: 5000 };
@@ -115,15 +115,15 @@ export class TestSession extends AsyncOptionalCreatable<TestSessionOptions> {
   private sandbox = createSandbox();
   private retries: number;
   private zipDir: typeof zipDir;
-  private options: TestSessionOptions;
+  private options: T;
   private shelljsExecOptions: shell.ExecOptions = {
     silent: true,
   };
   private orgsAliases: string[] = ['default'];
 
-  public constructor(options: TestSessionOptions = {}) {
-    super(options);
-    this.options = options;
+  public constructor(options: T = {} as T) {
+    super(options ?? ({} as T));
+    this.options = options ?? ({} as T);
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
 
