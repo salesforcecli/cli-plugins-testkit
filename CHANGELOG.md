@@ -1,3 +1,12 @@
+## [3.2.17](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.16...3.2.17) (2023-01-05)
+
+
+### Bug Fixes
+
+* **deps:** bump json5 from 1.0.1 to 1.0.2 ([bf784db](https://github.com/salesforcecli/cli-plugins-testkit/commit/bf784db118d6f0b362b0b594b4c1a9bcd80ea0ee))
+
+
+
 ## [3.2.16](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.15...3.2.16) (2023-01-04)
 
 
