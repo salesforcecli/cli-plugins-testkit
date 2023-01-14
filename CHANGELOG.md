@@ -1,3 +1,12 @@
+## [3.2.18](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.17...3.2.18) (2023-01-14)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/ts-types from 1.7.1 to 1.7.2 ([efbff56](https://github.com/salesforcecli/cli-plugins-testkit/commit/efbff56041daac84666592529db44be846e1da87))
+
+
+
 ## [3.2.17](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.16...3.2.17) (2023-01-05)
 
 
