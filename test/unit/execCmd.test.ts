@@ -12,7 +12,8 @@ import { Duration, env } from '@salesforce/kit';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
-import { execCmd } from '../../src/execCmd';
+import { beforeEach } from 'mocha';
+import { execCmd } from '../../src';
 
 describe('execCmd (sync)', () => {
   const sandbox = sinon.createSandbox();
@@ -21,6 +22,12 @@ describe('execCmd (sync)', () => {
     status: 0,
     result: [{ foo: 'bar' }],
   };
+
+  let readFileStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    readFileStub = sandbox.stub(fs, 'readFileSync').returns(new ShellString(JSON.stringify(output)));
+  });
 
   afterEach(() => {
     sandbox.restore();
@@ -33,7 +40,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should default to bin/dev executable when cli = inherit', () => {
@@ -43,7 +52,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'inherit' });
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should default to sfdx when cli = sfdx', () => {
@@ -52,7 +63,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sfdx' });
-    expect(execStub.args[0][0]).to.equal(`sfdx ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`sfdx ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should default to sf when cli = sf', () => {
@@ -61,7 +74,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sf' });
-    expect(execStub.args[0][0]).to.equal(`sf ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`sf ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -72,7 +87,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should accept valid executable in the system path', () => {
@@ -82,7 +99,9 @@ describe('execCmd (sync)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should error when executable path not found', () => {
@@ -116,6 +135,7 @@ describe('execCmd (sync)', () => {
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
     const shellString = new ShellString(JSON.stringify(output));
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    readFileStub.returns(shellString);
     const result = execCmd(cmd);
     expect(result).to.have.deep.property('shellOutput', shellString);
     expect(result).to.have.property('execCmdDuration');
@@ -159,6 +179,7 @@ describe('execCmd (sync)', () => {
 
     const shellString = new ShellString('try JSON parsing this');
     stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    readFileStub.returns(shellString);
 
     const result = execCmd(`${cmd} --json`);
     expect(result).to.have.deep.property('shellOutput', shellString);
@@ -193,6 +214,11 @@ describe('execCmd (async)', () => {
     status: 0,
     result: [{ foo: 'bar' }],
   };
+  let readFileStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    readFileStub = sandbox.stub(fs, 'readFileSync').returns(new ShellString(JSON.stringify(output)));
+  });
 
   afterEach(() => {
     sandbox.restore();
@@ -205,7 +231,9 @@ describe('execCmd (async)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should accept valid sfdx path in env var', async () => {
@@ -217,7 +245,9 @@ describe('execCmd (async)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should accept valid executable in the system path', async () => {
@@ -227,7 +257,9 @@ describe('execCmd (async)', () => {
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
-    expect(execStub.args[0][0]).to.equal(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
+    expect(execStub.args[0][0]).to.include('> command-');
+    expect(execStub.args[0][0]).to.include('2> stderr-');
   });
 
   it('should error when executable path not found', async () => {
@@ -286,9 +318,9 @@ describe('execCmd (async)', () => {
   it('should return ExecCmdResult with jsonError when command includes --json and output not parseable', async () => {
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
-
     const shellString = new ShellString('try JSON parsing this');
     stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
+    readFileStub.returns(shellString);
 
     const result = await execCmd(`${cmd} --json`, { async: true });
     expect(result).to.have.deep.property('shellOutput', shellString);

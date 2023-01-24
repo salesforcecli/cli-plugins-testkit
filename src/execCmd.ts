@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import { join as pathJoin, resolve as pathResolve } from 'path';
+import { join, join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
@@ -83,10 +83,10 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
   Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
 
 // Add JSON output if json flag is set
-const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
+const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>, file: string): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as unknown as JsonOutput<T>;
+      result.jsonOutput = parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>;
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
@@ -153,16 +153,23 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
+  const commandFile = genFileName('command');
+  const stderrFile = genFileName('stderr');
+  const commandFileLocation = join(process.cwd(), commandFile);
+  const stderrFileLocation = join(process.cwd(), stderrFile);
+
   const result = {
-    shellOutput: '' as ShellString,
+    shellOutput: new ShellString(fs.readFileSync(commandFileLocation, 'utf-8')),
     execCmdDuration: Duration.seconds(0),
   } as ExecCmdResult<T>;
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  result.shellOutput = shelljs.exec(cmd, cmdOptions) as ShellString;
-  result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
-  result.shellOutput.stderr = stripAnsi(result.shellOutput.stderr);
+  result.shellOutput.code = (shelljs.exec(`${cmd} > ${commandFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
+
+  result.shellOutput.stdout = stripAnsi(fs.readFileSync(commandFileLocation, 'utf-8'));
+  result.shellOutput.stderr = stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8'));
+
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
@@ -170,8 +177,10 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  return addJsonOutput<T>(cmd, result);
+  return addJsonOutput<T>(cmd, result, commandFileLocation);
 };
+
+const genFileName = (name: string): string => `${name}-${Math.random()}.txt`;
 
 const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
   const debug = Debug('testkit:execCmdAsync');
@@ -179,12 +188,15 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
   // Add on the bin path
   cmd = buildCmd(cmd, options);
 
-  const resultPromise = new Promise<ExecCmdResult<T>>((resolve, reject) => {
+  return new Promise<ExecCmdResult<T>>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-
+    const commandFile = genFileName('command');
+    const stderrFile = genFileName('stderr');
+    const commandFilePath = join(process.cwd(), commandFile);
+    const stderrFilePath = join(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
@@ -197,22 +209,18 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
       }
 
       const result = {
-        shellOutput: new ShellString(stdout),
+        shellOutput: new ShellString(fs.readFileSync(commandFilePath, 'utf-8')),
         execCmdDuration,
       } as ExecCmdResult<T>;
       result.shellOutput.code = code;
-      result.shellOutput.stdout = stripAnsi(stdout);
-      result.shellOutput.stderr = stripAnsi(stderr);
-
-      resolve(addJsonOutput<T>(cmd, result));
+      result.shellOutput.stdout = stripAnsi(fs.readFileSync(commandFilePath, 'utf-8'));
+      result.shellOutput.stderr = stripAnsi(fs.readFileSync(stderrFilePath, 'utf-8'));
+      resolve(addJsonOutput<T>(cmd, result, commandFilePath));
     };
-
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(cmd, cmdOptions, callback);
+    shelljs.exec(`${cmd} > ${commandFile} 2> ${stderrFile}`, cmdOptions, callback);
   });
-
-  return resultPromise;
 };
 
 /**
