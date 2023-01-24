@@ -16,6 +16,7 @@ import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 
 import stripAnsi = require('strip-ansi');
+import { genUniqueString } from './genUniqueString';
 
 export type CLI = 'inherit' | 'sfdx' | 'sf';
 
@@ -153,8 +154,8 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
-  const commandFile = genFileName('command');
-  const stderrFile = genFileName('stderr');
+  const commandFile = genUniqueString('command');
+  const stderrFile = genUniqueString('stderr');
   const commandFileLocation = pathJoin(process.cwd(), commandFile);
   const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
 
@@ -182,8 +183,6 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   return addJsonOutput<T>(cmd, result, commandFileLocation);
 };
 
-const genFileName = (name: string): string => `${name}-${Math.random()}.txt`;
-
 const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
   const debug = Debug('testkit:execCmdAsync');
 
@@ -195,8 +194,8 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-    const commandFile = genFileName('command');
-    const stderrFile = genFileName('stderr');
+    const commandFile = genUniqueString('command');
+    const stderrFile = genUniqueString('stderr');
     const commandFilePath = pathJoin(process.cwd(), commandFile);
     const stderrFilePath = pathJoin(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {

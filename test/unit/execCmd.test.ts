@@ -41,8 +41,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should default to bin/dev executable when cli = inherit', () => {
@@ -53,8 +53,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'inherit' });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should default to sfdx when cli = sfdx', () => {
@@ -64,8 +64,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sfdx' });
     expect(execStub.args[0][0]).to.include(`sfdx ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should default to sf when cli = sf', () => {
@@ -75,8 +75,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sf' });
     expect(execStub.args[0][0]).to.include(`sf ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should accept valid sfdx path in env var', () => {
@@ -88,8 +88,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should accept valid executable in the system path', () => {
@@ -100,8 +100,8 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should error when executable path not found', () => {
@@ -232,8 +232,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should accept valid sfdx path in env var', async () => {
@@ -246,8 +246,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should accept valid executable in the system path', async () => {
@@ -258,8 +258,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command-');
-    expect(execStub.args[0][0]).to.include('2> stderr-');
+    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
   it('should error when executable path not found', async () => {
