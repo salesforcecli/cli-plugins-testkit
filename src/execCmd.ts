@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import { join, join as pathJoin, resolve as pathResolve } from 'path';
+import { join as pathJoin, resolve as pathResolve } from 'path';
 import { inspect } from 'util';
 import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
@@ -155,8 +155,8 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   const commandFile = genFileName('command');
   const stderrFile = genFileName('stderr');
-  const commandFileLocation = join(process.cwd(), commandFile);
-  const stderrFileLocation = join(process.cwd(), stderrFile);
+  const commandFileLocation = pathJoin(process.cwd(), commandFile);
+  const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
 
   const result = {
     shellOutput: new ShellString(fs.readFileSync(commandFileLocation, 'utf-8')),
@@ -165,7 +165,9 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  result.shellOutput.code = (shelljs.exec(`${cmd} > ${commandFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
+  result.shellOutput.code = (
+    shelljs.exec(`${cmd} 1> ${commandFile} 2> ${stderrFile} `, cmdOptions) as ShellString
+  ).code;
 
   result.shellOutput.stdout = stripAnsi(fs.readFileSync(commandFileLocation, 'utf-8'));
   result.shellOutput.stderr = stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8'));
@@ -195,8 +197,8 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
     debug(`Cmd options: ${inspect(cmdOptions)}`);
     const commandFile = genFileName('command');
     const stderrFile = genFileName('stderr');
-    const commandFilePath = join(process.cwd(), commandFile);
-    const stderrFilePath = join(process.cwd(), stderrFile);
+    const commandFilePath = pathJoin(process.cwd(), commandFile);
+    const stderrFilePath = pathJoin(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
@@ -219,7 +221,7 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmd} > ${commandFile} 2> ${stderrFile}`, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${commandFile} 2> ${stderrFile}`, cmdOptions, callback);
   });
 };
 
