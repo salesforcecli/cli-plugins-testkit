@@ -154,10 +154,11 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
-  const commandFile = genUniqueString('command');
-  const stderrFile = genUniqueString('stderr');
+  const commandFile = `${genUniqueString('command')}.txt`;
+  const stderrFile = `${genUniqueString('stderr')}.txt`;
   const commandFileLocation = pathJoin(process.cwd(), commandFile);
   const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+  fs.writeFileSync(commandFileLocation, '');
 
   const result = {
     shellOutput: new ShellString(fs.readFileSync(commandFileLocation, 'utf-8')),
@@ -194,8 +195,8 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-    const commandFile = genUniqueString('command');
-    const stderrFile = genUniqueString('stderr');
+    const commandFile = `${genUniqueString('command')}.txt`;
+    const stderrFile = `${genUniqueString('stderr')}.txt`;
     const commandFilePath = pathJoin(process.cwd(), commandFile);
     const stderrFilePath = pathJoin(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
