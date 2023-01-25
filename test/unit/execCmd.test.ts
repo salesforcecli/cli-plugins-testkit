@@ -22,11 +22,13 @@ describe('execCmd (sync)', () => {
     status: 0,
     result: [{ foo: 'bar' }],
   };
+  const outputShellString = new ShellString(JSON.stringify(output));
 
   let readFileStub: sinon.SinonStub;
 
   beforeEach(() => {
-    readFileStub = sandbox.stub(fs, 'readFileSync').returns(new ShellString(JSON.stringify(output)));
+    readFileStub = sandbox.stub(fs, 'readFileSync').returns(outputShellString);
+    sandbox.stub(fs, 'rmSync');
   });
 
   afterEach(() => {
@@ -41,7 +43,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -53,7 +55,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'inherit' });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -64,7 +66,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sfdx' });
     expect(execStub.args[0][0]).to.include(`sfdx ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -75,7 +77,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd, { cli: 'sf' });
     expect(execStub.args[0][0]).to.include(`sf ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -88,7 +90,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -100,7 +102,7 @@ describe('execCmd (sync)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
     execCmd(cmd);
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -218,6 +220,7 @@ describe('execCmd (async)', () => {
 
   beforeEach(() => {
     readFileStub = sandbox.stub(fs, 'readFileSync').returns(new ShellString(JSON.stringify(output)));
+    sandbox.stub(fs, 'rmSync');
   });
 
   afterEach(() => {
@@ -232,7 +235,7 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -246,7 +249,7 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
@@ -258,7 +261,7 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('> command');
+    expect(execStub.args[0][0]).to.include('1> stdout');
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 

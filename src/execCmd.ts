@@ -14,7 +14,6 @@ import { AnyJson, isNumber, Many } from '@salesforce/ts-types';
 import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
-
 import stripAnsi = require('strip-ansi');
 import { genUniqueString } from './genUniqueString';
 
@@ -154,25 +153,29 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
-  const commandFile = `${genUniqueString('command')}.txt`;
+  const stdoutFile = `${genUniqueString('stdout')}.txt`;
   const stderrFile = `${genUniqueString('stderr')}.txt`;
-  const commandFileLocation = pathJoin(process.cwd(), commandFile);
+  const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
   const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
-  fs.writeFileSync(commandFileLocation, '');
 
   const result = {
-    shellOutput: new ShellString(fs.readFileSync(commandFileLocation, 'utf-8')),
+    shellOutput: new ShellString(''),
     execCmdDuration: Duration.seconds(0),
   } as ExecCmdResult<T>;
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  result.shellOutput.code = (
-    shelljs.exec(`${cmd} 1> ${commandFile} 2> ${stderrFile} `, cmdOptions) as ShellString
-  ).code;
+  const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
 
-  result.shellOutput.stdout = stripAnsi(fs.readFileSync(commandFileLocation, 'utf-8'));
-  result.shellOutput.stderr = stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8'));
+  if (code === 0) {
+    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+    result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+  } else {
+    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+    // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+    result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
+  }
+  result.shellOutput.code = code;
 
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
@@ -181,7 +184,10 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  return addJsonOutput<T>(cmd, result, commandFileLocation);
+  const withJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+  fs.rmSync(stderrFileLocation);
+  fs.rmSync(stdoutFileLocation);
+  return withJson;
 };
 
 const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
@@ -195,10 +201,10 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-    const commandFile = `${genUniqueString('command')}.txt`;
+    const stdoutFile = `${genUniqueString('stdout')}.txt`;
     const stderrFile = `${genUniqueString('stderr')}.txt`;
-    const commandFilePath = pathJoin(process.cwd(), commandFile);
-    const stderrFilePath = pathJoin(process.cwd(), stderrFile);
+    const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
+    const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
@@ -211,17 +217,28 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
       }
 
       const result = {
-        shellOutput: new ShellString(fs.readFileSync(commandFilePath, 'utf-8')),
+        shellOutput: new ShellString(fs.readFileSync(stdoutFileLocation, 'utf-8')),
         execCmdDuration,
       } as ExecCmdResult<T>;
       result.shellOutput.code = code;
-      result.shellOutput.stdout = stripAnsi(fs.readFileSync(commandFilePath, 'utf-8'));
-      result.shellOutput.stderr = stripAnsi(fs.readFileSync(stderrFilePath, 'utf-8'));
-      resolve(addJsonOutput<T>(cmd, result, commandFilePath));
+
+      if (code === 0) {
+        result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+        result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+      } else {
+        result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+        // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+        result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
+      }
+
+      const addJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+      fs.rmSync(stdoutFileLocation);
+      fs.rmSync(stderrFileLocation);
+      resolve(addJson);
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmd} 1> ${commandFile} 2> ${stderrFile}`, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile}`, cmdOptions, callback);
   });
 };
 
