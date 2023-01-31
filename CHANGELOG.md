@@ -1,3 +1,12 @@
+## [3.2.20](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.19...3.2.20) (2023-01-31)
+
+
+### Bug Fixes
+
+* pipe output to files to avoid buffering and I/O ops, weird timeouts in plugin-packaging ([a8d3b1b](https://github.com/salesforcecli/cli-plugins-testkit/commit/a8d3b1bd486f2c558aedff457d693db30b65aadc))
+
+
+
 ## [3.2.19](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.18...3.2.19) (2023-01-28)
 
 
