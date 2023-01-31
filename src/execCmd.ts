@@ -14,8 +14,8 @@ import { AnyJson, isNumber, Many } from '@salesforce/ts-types';
 import Debug from 'debug';
 import * as shelljs from 'shelljs';
 import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
-
 import stripAnsi = require('strip-ansi');
+import { genUniqueString } from './genUniqueString';
 
 export type CLI = 'inherit' | 'sfdx' | 'sf';
 
@@ -83,10 +83,10 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
   Duration.milliseconds(hrTime[0] * Duration.MILLIS_IN_SECONDS + hrTime[1] / 1e6);
 
 // Add JSON output if json flag is set
-const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>): ExecCmdResult<T> => {
+const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>, file: string): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(result.shellOutput.stdout)) as unknown as JsonOutput<T>;
+      result.jsonOutput = parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>;
     } catch (parseErr: unknown) {
       result.jsonError = parseErr as Error;
     }
@@ -153,16 +153,30 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Running cmd: ${cmd}`);
   debug(`Cmd options: ${inspect(cmdOptions)}`);
 
+  const stdoutFile = `${genUniqueString('stdout')}.txt`;
+  const stderrFile = `${genUniqueString('stderr')}.txt`;
+  const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
+  const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+
   const result = {
-    shellOutput: '' as ShellString,
+    shellOutput: new ShellString(''),
     execCmdDuration: Duration.seconds(0),
   } as ExecCmdResult<T>;
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  result.shellOutput = shelljs.exec(cmd, cmdOptions) as ShellString;
-  result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
-  result.shellOutput.stderr = stripAnsi(result.shellOutput.stderr);
+  const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
+
+  if (code === 0) {
+    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+    result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+  } else {
+    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+    // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+    result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
+  }
+  result.shellOutput.code = code;
+
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
@@ -170,7 +184,10 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  return addJsonOutput<T>(cmd, result);
+  const withJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+  fs.rmSync(stderrFileLocation);
+  fs.rmSync(stdoutFileLocation);
+  return withJson;
 };
 
 const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<ExecCmdResult<T>> => {
@@ -179,12 +196,15 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
   // Add on the bin path
   cmd = buildCmd(cmd, options);
 
-  const resultPromise = new Promise<ExecCmdResult<T>>((resolve, reject) => {
+  return new Promise<ExecCmdResult<T>>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-
+    const stdoutFile = `${genUniqueString('stdout')}.txt`;
+    const stderrFile = `${genUniqueString('stderr')}.txt`;
+    const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
+    const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
@@ -197,22 +217,29 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
       }
 
       const result = {
-        shellOutput: new ShellString(stdout),
+        shellOutput: new ShellString(fs.readFileSync(stdoutFileLocation, 'utf-8')),
         execCmdDuration,
       } as ExecCmdResult<T>;
       result.shellOutput.code = code;
-      result.shellOutput.stdout = stripAnsi(stdout);
-      result.shellOutput.stderr = stripAnsi(stderr);
 
-      resolve(addJsonOutput<T>(cmd, result));
+      if (code === 0) {
+        result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+        result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+      } else {
+        result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+        // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+        result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
+      }
+
+      const addJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+      fs.rmSync(stdoutFileLocation);
+      fs.rmSync(stderrFileLocation);
+      resolve(addJson);
     };
-
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(cmd, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile}`, cmdOptions, callback);
   });
-
-  return resultPromise;
 };
 
 /**
