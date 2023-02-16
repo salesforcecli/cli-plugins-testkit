@@ -34,7 +34,10 @@ type BaseExecOptions = {
   cli?: CLI;
 };
 
-export type ExecCmdOptions = ExecOptions & BaseExecOptions;
+export type ExecCmdOptions = ExecOptions &
+  BaseExecOptions &
+  // prevent the overriding of our default by passing in an explicitly undefined value for cwd
+  ({ cwd: string } | { cwd?: never });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: any) => any ? never : K }[keyof T]>>;
@@ -63,7 +66,7 @@ export interface ExecCmdResult<T> {
   execCmdDuration: Duration;
 }
 
-const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
+const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions & { cwd: string } => {
   const defaults: ExecCmdOptions = {
     env: { ...process.env, ...options?.env },
     cwd: process.cwd(),
@@ -155,8 +158,8 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   const stdoutFile = `${genUniqueString('stdout')}.txt`;
   const stderrFile = `${genUniqueString('stderr')}.txt`;
-  const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
-  const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+  const stdoutFileLocation = pathJoin(cmdOptions.cwd, stdoutFile);
+  const stderrFileLocation = pathJoin(cmdOptions.cwd, stderrFile);
 
   const result = {
     shellOutput: new ShellString(''),
@@ -202,8 +205,9 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
     debug(`Cmd options: ${inspect(cmdOptions)}`);
     const stdoutFile = `${genUniqueString('stdout')}.txt`;
     const stderrFile = `${genUniqueString('stderr')}.txt`;
-    const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
-    const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+    // buildCmdOptions will always
+    const stdoutFileLocation = pathJoin(cmdOptions.cwd ?? process.cwd(), stdoutFile);
+    const stderrFileLocation = pathJoin(cmdOptions.cwd ?? process.cwd(), stderrFile);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
