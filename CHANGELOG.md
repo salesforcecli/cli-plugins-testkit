@@ -1,3 +1,12 @@
+## [3.2.21](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.20...3.2.21) (2023-02-16)
+
+
+### Bug Fixes
+
+* always return stdout and stderr from execCmd ([#406](https://github.com/salesforcecli/cli-plugins-testkit/issues/406)) ([ca970ab](https://github.com/salesforcecli/cli-plugins-testkit/commit/ca970abfdd429a62264ff8f834c3582ce6449fa1))
+
+
+
 ## [3.2.20](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.19...3.2.20) (2023-01-31)
 
 
