@@ -203,11 +203,9 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-    const stdoutFile = `${genUniqueString('stdout')}.txt`;
-    const stderrFile = `${genUniqueString('stderr')}.txt`;
     // buildCmdOptions will always
-    const stdoutFileLocation = pathJoin(cmdOptions.cwd ?? process.cwd(), stdoutFile);
-    const stderrFileLocation = pathJoin(cmdOptions.cwd ?? process.cwd(), stderrFile);
+    const stdoutFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stdout')}.txt`);
+    const stderrFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stderr')}.txt`);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
