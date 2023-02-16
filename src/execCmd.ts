@@ -167,14 +167,13 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   const startTime = process.hrtime();
   const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
 
-  if (code === 0) {
-    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
-    result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
-  } else {
-    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
-    // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
-    result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
-  }
+  // capture the output for both stdout and stderr
+  result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+  result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+  const shellStringForStderr = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+  // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+  result.shellOutput.stderr = stripAnsi(shellStringForStderr.stdout);
+
   result.shellOutput.code = code;
 
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
