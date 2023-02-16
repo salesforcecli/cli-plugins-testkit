@@ -34,7 +34,10 @@ type BaseExecOptions = {
   cli?: CLI;
 };
 
-export type ExecCmdOptions = ExecOptions & BaseExecOptions;
+export type ExecCmdOptions = ExecOptions &
+  BaseExecOptions &
+  // prevent the overriding of our default by passing in an explicitly undefined value for cwd
+  ({ cwd: string } | { cwd?: never });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: any) => any ? never : K }[keyof T]>>;
@@ -63,7 +66,7 @@ export interface ExecCmdResult<T> {
   execCmdDuration: Duration;
 }
 
-const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions => {
+const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions & { cwd: string } => {
   const defaults: ExecCmdOptions = {
     env: { ...process.env, ...options?.env },
     cwd: process.cwd(),
@@ -155,8 +158,8 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   const stdoutFile = `${genUniqueString('stdout')}.txt`;
   const stderrFile = `${genUniqueString('stderr')}.txt`;
-  const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
-  const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+  const stdoutFileLocation = pathJoin(cmdOptions.cwd, stdoutFile);
+  const stderrFileLocation = pathJoin(cmdOptions.cwd, stderrFile);
 
   const result = {
     shellOutput: new ShellString(''),
@@ -167,14 +170,13 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   const startTime = process.hrtime();
   const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
 
-  if (code === 0) {
-    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
-    result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
-  } else {
-    result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
-    // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
-    result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
-  }
+  // capture the output for both stdout and stderr
+  result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
+  result.shellOutput.stdout = stripAnsi(result.shellOutput.stdout);
+  const shellStringForStderr = new ShellString(stripAnsi(fs.readFileSync(stderrFileLocation, 'utf-8')));
+  // The ShellString constructor sets the argument as stdout, so we strip 'stdout' and set as stderr
+  result.shellOutput.stderr = stripAnsi(shellStringForStderr.stdout);
+
   result.shellOutput.code = code;
 
   result.execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
@@ -201,10 +203,9 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
 
     debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
-    const stdoutFile = `${genUniqueString('stdout')}.txt`;
-    const stderrFile = `${genUniqueString('stderr')}.txt`;
-    const stdoutFileLocation = pathJoin(process.cwd(), stdoutFile);
-    const stderrFileLocation = pathJoin(process.cwd(), stderrFile);
+    // buildCmdOptions will always
+    const stdoutFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stdout')}.txt`);
+    const stderrFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stderr')}.txt`);
     const callback: ExecCallback = (code, stdout, stderr) => {
       const execCmdDuration = hrtimeToMillisDuration(process.hrtime(startTime));
       debug(`Command completed with exit code: ${code}`);
@@ -238,7 +239,7 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile}`, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
   });
 };
 
