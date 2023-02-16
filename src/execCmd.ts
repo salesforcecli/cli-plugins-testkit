@@ -239,7 +239,7 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile}`, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
   });
 };
 
