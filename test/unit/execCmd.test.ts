@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import { join } from 'path';
-import { expect, assert } from 'chai';
+import { expect, assert, config } from 'chai';
 import * as sinon from 'sinon';
 import { Duration, env } from '@salesforce/kit';
 import { stubMethod } from '@salesforce/ts-sinon';
@@ -14,6 +14,8 @@ import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { beforeEach } from 'mocha';
 import { execCmd } from '../../src';
+
+config.truncateThreshold = 0;
 
 describe('execCmd (sync)', () => {
   const sandbox = sinon.createSandbox();
@@ -235,8 +237,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('1> stdout');
-    expect(execStub.args[0][0]).to.include('2> stderr');
+    expect(execStub.args[0][0]).to.match(/1> .*stdout.*txt/);
+    expect(execStub.args[0][0]).to.match(/2> .*stderr.*txt/);
   });
 
   it('should accept valid sfdx path in env var', async () => {
@@ -249,8 +251,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('1> stdout');
-    expect(execStub.args[0][0]).to.include('2> stderr');
+    expect(execStub.args[0][0]).to.match(/1> .*stdout.*txt/);
+    expect(execStub.args[0][0]).to.match(/2> .*stderr.*txt/);
   });
 
   it('should accept valid executable in the system path', async () => {
@@ -261,8 +263,8 @@ describe('execCmd (async)', () => {
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');
     await execCmd(cmd, { async: true });
     expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('1> stdout');
-    expect(execStub.args[0][0]).to.include('2> stderr');
+    expect(execStub.args[0][0]).to.match(/1> .*stdout.*txt/);
+    expect(execStub.args[0][0]).to.match(/2> .*stderr.*txt/);
   });
 
   it('should error when executable path not found', async () => {
