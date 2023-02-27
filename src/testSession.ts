@@ -192,7 +192,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
       const usernameOrAlias = configResults.result.find((org) => org.name === 'target-dev-hub')?.value;
       if (usernameOrAlias) {
         const displayEnv = shell.exec(
-          `sf env display -e ${usernameOrAlias} --json`,
+          `sf org:display -o ${usernameOrAlias} --json`,
           this.shelljsExecOptions
         ) as shell.ShellString;
         const displayEnvResults = JSON.parse(stripAnsi(displayEnv.stdout)) as unknown as JsonOutput<OrgAuthorization>;
@@ -284,7 +284,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         if (this.orgsAliases.includes(org)) continue;
 
         this.debug(`Deleting test org: ${org}`);
-        const rv = shell.exec(`sf env delete scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
+        const rv = shell.exec(`sf org:delete:scratch -o ${org} -p`, this.shelljsExecOptions) as shell.ShellString;
         this.orgs.delete(org);
         if (rv.code !== 0) {
           // Must still delete the session dir if org:delete fails
@@ -349,7 +349,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
         if (org.username) {
           if (org.executable === 'sfdx') baseCmd += ` username=${org.username}`;
-          else throw new Error('username property is not supported by sf env create scratch');
+          else throw new Error('username property is not supported by sf org create scratch');
         }
 
         if (org.edition) {
