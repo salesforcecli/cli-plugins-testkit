@@ -1,3 +1,12 @@
+## [3.2.23](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.22...3.2.23) (2023-02-27)
+
+
+### Bug Fixes
+
+* remove deprecated sf env commands ([16d99d8](https://github.com/salesforcecli/cli-plugins-testkit/commit/16d99d8d5c704540b364b239326a819597ef0ddf))
+
+
+
 ## [3.2.22](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.21...3.2.22) (2023-02-25)
 
 
