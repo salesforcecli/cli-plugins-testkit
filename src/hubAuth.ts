@@ -81,7 +81,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     const jwtKey = prepareForJwt(homeDir);
 
     const results = shell.exec(
-      `sf org login jwt --set-default-dev-hub --username ${env.getString(
+      `sf org:login:jwt --set-default-dev-hub --username ${env.getString(
         'TESTKIT_HUB_USERNAME',
         ''
       )} --client-id ${env.getString(

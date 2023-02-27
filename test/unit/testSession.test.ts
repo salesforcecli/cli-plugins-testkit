@@ -340,7 +340,7 @@ describe('TestSession', () => {
       await session.clean();
 
       expect(restoreSpy.called).to.equal(true);
-      expect(execStub.firstCall.args[0]).to.equal(`sf org delete scratch -o ${username} -p`);
+      expect(execStub.firstCall.args[0]).to.equal(`sf org:delete:scratch -o ${username} -p`);
       expect(rmStub.firstCall.args[0]).to.equal(session.dir);
       expect(rmStub.firstCall.args[1]).to.deep.equal(rmOptions);
     });
