@@ -81,13 +81,13 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     const jwtKey = prepareForJwt(homeDir);
 
     const results = shell.exec(
-      `sf login jwt org --set-default-dev-hub --username ${env.getString(
+      `sf org login jwt --set-default-dev-hub --username ${env.getString(
         'TESTKIT_HUB_USERNAME',
         ''
-      )} --clientid ${env.getString('TESTKIT_JWT_CLIENT_ID', '')} --keyfile ${jwtKey} --instance-url ${env.getString(
-        'TESTKIT_HUB_INSTANCE',
-        DEFAULT_INSTANCE_URL
-      )}`,
+      )} --client-id ${env.getString(
+        'TESTKIT_JWT_CLIENT_ID',
+        ''
+      )} --jwt-key-file ${jwtKey} --instance-url ${env.getString('TESTKIT_HUB_INSTANCE', DEFAULT_INSTANCE_URL)}`,
       execOpts
     ) as shell.ShellString;
 
@@ -107,11 +107,11 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
 
     const tmpUrl = prepareForAuthUrl(homeDir);
 
-    const shellOutput = shell.exec(`sfdx auth:sfdxurl:store -d -f ${tmpUrl}`, execOpts) as shell.ShellString;
+    const shellOutput = shell.exec(`sf org:login:sfdx-url -d -f ${tmpUrl}`, execOpts) as shell.ShellString;
     logger(shellOutput);
     if (shellOutput.code !== 0) {
       throw new Error(
-        `auth:sfdxurl for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
+        `org:login:sfdx-ur for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
           shellOutput.stdout + shellOutput.stderr
         }`
       );
