@@ -8,7 +8,7 @@
   "types": "lib/index.d.ts",
   "repository": "salesforcecli/cli-plugins-testkit",
   "scripts": {
-    "build": "sf-build && yarn samples",
+    "build": "wireit",
     "ci-docs": "yarn sf-ci-docs",
     "clean": "sf-clean",
     "clean-all": "sf-clean all",
@@ -19,7 +19,6 @@
     "lint-fix": "yarn sf-lint --fix",
     "prepack": "sf-prepack",
     "prepare": "sf-install",
-    "samples": "tsc -p samples && ts-node samples/generateSamplesDoc.ts",
     "test": "wireit",
     "test:only": "wireit"
   },
@@ -42,8 +41,8 @@
     "!lib/**/*.map"
   ],
   "dependencies": {
-    "@salesforce/core": "^3.33.1",
-    "@salesforce/kit": "^1.8.0",
+    "@salesforce/core": "^3.33.5",
+    "@salesforce/kit": "^1.9.0",
     "@salesforce/ts-types": "^1.7.3",
     "@types/shelljs": "^0.8.11",
     "archiver": "^5.2.0",
@@ -85,10 +84,21 @@
     "access": "public"
   },
   "wireit": {
+    "samples": {
+      "command": "tsc -p samples && ts-node samples/generateSamplesDoc.ts",
+      "files": [
+        "samples/**/*.ts",
+        "samples/**/*.json"
+      ],
+      "output": [
+        "SAMPLE.md"
+      ]
+    },
     "build": {
       "dependencies": [
         "compile",
-        "lint"
+        "lint",
+        "samples"
       ]
     },
     "compile": {
