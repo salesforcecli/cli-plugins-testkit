@@ -1,6 +1,7 @@
 {
-  "test": {
-    "testsPath": "test/**/*.test.ts"
-  },
-  "exclude-scripts": ["build"]
+  "wireit": {
+    "build": {
+      "dependencies": ["compile", "lint", "samples"]
+    }
+  }
 }

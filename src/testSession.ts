@@ -129,7 +129,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
-    this.retries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries) ?? 0;
+    this.retries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries ?? 0);
 
     const shellOverride = env.getString('TESTKIT_EXEC_SHELL');
     if (shellOverride) {
