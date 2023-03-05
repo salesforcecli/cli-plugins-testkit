@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@salesforce/dev-config": "^3.0.0",
-    "@salesforce/dev-scripts": "^4.1.1",
+    "@salesforce/dev-scripts": "^4.1.2",
     "@salesforce/prettier-config": "^0.0.2",
     "@salesforce/ts-sinon": "^1.4.6",
     "@types/archiver": "^5.1.0",
@@ -152,6 +152,9 @@
     },
     "test:only": {
       "command": "nyc mocha \"test/**/*.test.ts\"",
+      "env": {
+        "FORCE_COLOR": "2"
+      },
       "files": [
         "test/**/*.ts",
         "src/**/*.ts",
