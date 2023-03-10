@@ -111,7 +111,7 @@ export const testkitHubAuth = (homeDir: string, authStrategy: DevhubAuthStrategy
     logger(shellOutput);
     if (shellOutput.code !== 0) {
       throw new Error(
-        `org:login:sfdx-ur for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
+        `org:login:sfdx-url for url ${tmpUrl} failed with exit code: ${shellOutput.code}\n ${
           shellOutput.stdout + shellOutput.stderr
         }`
       );
