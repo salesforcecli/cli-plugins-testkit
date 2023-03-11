@@ -1,3 +1,12 @@
+## [3.2.25](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.24...3.2.25) (2023-03-11)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/kit from 1.9.0 to 1.9.2 ([98b705c](https://github.com/salesforcecli/cli-plugins-testkit/commit/98b705c7ca6361fa7a879fce1c1b614c4d747d9e))
+
+
+
 ## [3.2.24](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.23...3.2.24) (2023-03-04)
 
 
