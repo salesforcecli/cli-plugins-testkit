@@ -329,7 +329,10 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         }
 
         let baseCmd =
-          executable === 'sf' ? `${executable} env create scratch --json` : `${executable} force:org:create --json`;
+          executable === 'sf'
+            ? `${executable} env create scratch --json -y ${org.duration ?? '1'}`
+            : `${executable} force:org:create --json -d ${org.duration ?? '1'}`;
+        baseCmd += ` -w ${org.wait ?? 60}`;
 
         if (org.config) {
           baseCmd += ` -f ${org.config}`;
@@ -337,10 +340,6 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
         if (org.alias) {
           baseCmd += ` -a ${org.alias}`;
-        }
-
-        if (org.duration) {
-          baseCmd += executable === 'sf' ? ` -y ${org.duration}` : ` -d ${org.duration}`;
         }
 
         if (org.setDefault) {
@@ -354,12 +353,6 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
         if (org.edition) {
           baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
-        }
-
-        if (org.wait) {
-          baseCmd += ` -w ${org.wait}`;
-        } else {
-          baseCmd += ' -w 60';
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
