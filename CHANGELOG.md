@@ -1,3 +1,12 @@
+# [3.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.26...3.3.0) (2023-03-24)
+
+
+### Features
+
+* shorter scratch org lifetime ([#433](https://github.com/salesforcecli/cli-plugins-testkit/issues/433)) ([0c36a10](https://github.com/salesforcecli/cli-plugins-testkit/commit/0c36a10e50dd318e4221c3c910369cfebaadae39))
+
+
+
 ## [3.2.26](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.2.25...3.2.26) (2023-03-19)
 
 
