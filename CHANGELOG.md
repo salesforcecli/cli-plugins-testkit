@@ -1,3 +1,12 @@
+## [3.3.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.1...3.3.2) (2023-04-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 3.34.4 to 3.34.6 ([27eaadd](https://github.com/salesforcecli/cli-plugins-testkit/commit/27eaadd36a1f613000aabd004737ad2d10160cc6))
+
+
+
 ## [3.3.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.0...3.3.1) (2023-03-25)
 
 
