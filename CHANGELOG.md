@@ -1,3 +1,12 @@
+## [3.3.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.2...3.3.3) (2023-04-16)
+
+
+### Bug Fixes
+
+* **deps:** bump @types/shelljs from 0.8.11 to 0.8.12 ([ded6146](https://github.com/salesforcecli/cli-plugins-testkit/commit/ded6146cd5b24f018e4115446067e563de9e5488))
+
+
+
 ## [3.3.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.1...3.3.2) (2023-04-02)
 
 
