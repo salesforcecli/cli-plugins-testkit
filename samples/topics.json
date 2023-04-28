@@ -180,7 +180,7 @@
       "1. Clean the TestSession in a code block that always runs (e.g., mocha’s after() ) to keep your plugin clean. You can always choose to zip a project or test session after tests run or on each test failure.",
       "1. Point your CI jobs to different CLI executables using the TESTKIT_EXECUTABLE_PATH env var to ensure your plugin works with the various ways the CLI can be installed. By default it will use your plugin’s `./bin/run` but you can define a local or global npm install path or install from public archives.",
       "1. Use a naming pattern for test files that use the testkit. These are not unit tests so we like to refer to them as “NUTs” and have a convention of `*.nut.ts` so we can run them separately from unit tests.",
-      "1. Use `SFDX_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.",
+      "1. Use `SF_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.",
       "1. When writing TypeScript NUTs remember to pass the expected type to execCmd so JSON results are typed for you.",
       "1. Take advantage of TestSession's automatic authentication using the appropriate environment variables."
     ]
