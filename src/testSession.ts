@@ -181,7 +181,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
     // Set the homedir used by this test, on the TestSession and the process
     process.env.USERPROFILE = process.env.HOME = this.homeDir = env.getString('TESTKIT_HOMEDIR', this.dir);
 
-    process.env.SFDX_USE_GENERIC_UNIX_KEYCHAIN = 'true';
+    process.env.SF_USE_GENERIC_UNIX_KEYCHAIN = 'true';
     testkitHubAuth(this.homeDir, authStrategy);
 
     if (authStrategy !== 'NONE') {
