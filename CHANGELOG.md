@@ -1,3 +1,12 @@
+## [3.3.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.4...3.3.5) (2023-04-29)
+
+
+### Bug Fixes
+
+* use newer envs to prevent warnings in NUTs ([6a8b980](https://github.com/salesforcecli/cli-plugins-testkit/commit/6a8b9805b4bf47e07ffa0c56805009b6150f10a7))
+
+
+
 ## [3.3.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.3...3.3.4) (2023-04-23)
 
 
