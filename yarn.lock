@@ -675,10 +675,10 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^2.1.7", "@oclif/core@^2.3.0", "@oclif/core@^2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.3.1.tgz#82d977338c68b3faeda84f780c2f97a3dd322cb2"
-  integrity sha512-18CkjjF16hwhBd/42z+0CHAwvZlBfpyCmdZxpasN/od8c/hdm0oDEJvVB33/xD0LDYg8glKoQ5zVNVvPM/uJ/Q==
+"@oclif/core@^2.1.7", "@oclif/core@^2.3.0", "@oclif/core@^2.3.1", "@oclif/core@^2.8.0":
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.8.2.tgz#86fc31f20419dbb3cd25f89f4f1d83760c60f7c0"
+  integrity sha512-g50NrCdEcFlBfuwZb9RxLmxPNQ9wIaBPOiwbxlGYRkHMnsC6LNHcvVtyDnmndU8qoXrmCOZ6ocSZenOMlG+G1w==
   dependencies:
     "@types/cli-progress" "^3.11.0"
     ansi-escapes "^4.3.2"
@@ -704,6 +704,7 @@
     strip-ansi "^6.0.1"
     supports-color "^8.1.1"
     supports-hyperlinks "^2.2.0"
+    ts-node "^10.9.1"
     tslib "^2.5.0"
     widest-line "^3.1.0"
     wordwrap "^1.0.0"
@@ -878,10 +879,10 @@
   resolved "https://registry.yarnpkg.com/@salesforce/dev-config/-/dev-config-3.1.0.tgz#8eb5b35860ff60d1c1dc3fd9329b01a28475d5b9"
   integrity sha512-cPph7ibj3DeSzWDFLcLtxOh5fmUlDUY2Ezq43n0V6auVP+l8orxRHjCExHS86SB3QKVgXkC8yYhryXiS8KF7Zw==
 
-"@salesforce/dev-scripts@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/dev-scripts/-/dev-scripts-4.3.0.tgz#af20b6f09ccaee60533644c7e5d1f5c4453c950a"
-  integrity sha512-Ym1tBAyYxo+IuH/duojBvQHS7NXCysz61SzRG7forQCEEMq189h7zYshioLL+ZGPx3qNIQE04+Zx1Vbuf3qJAg==
+"@salesforce/dev-scripts@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/dev-scripts/-/dev-scripts-4.3.1.tgz#004ba314441ef36a146e5c5d04563ee7f9b7862e"
+  integrity sha512-JWJXG2TOltGh8GOSP4gQejRQ3KaM/lG4zjN7/L3JfkBYsfKodoQgXpu5n+wuH04j+f8hYUU2fWvjKgl8lfKOiA==
   dependencies:
     "@commitlint/cli" "^17.1.2"
     "@commitlint/config-conventional" "^17.1.0"
@@ -906,7 +907,7 @@
     husky "^7.0.4"
     mocha "^9.1.3"
     nyc "^15.1.0"
-    oclif "^3.7.0"
+    oclif "^3.8.2"
     prettier "^2.7.1"
     pretty-quick "^3.1.0"
     shelljs "~0.8.4"
@@ -5279,12 +5280,12 @@ object.values@^1.1.5, object.values@^1.1.6:
     define-properties "^1.1.4"
     es-abstract "^1.20.4"
 
-oclif@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-3.7.0.tgz#6507033312dbcae25e99050010c33d67a31e93a3"
-  integrity sha512-LtLc7/3lOQ0d6/JKGj8QriIK/MiIcjZXVX3WoynbXUswG/X8oIsSr1+F6Q69VVbXnjbYlbfiP+uYASr36Mrjzg==
+oclif@^3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-3.8.2.tgz#1bc9a4b43b0bfa3e8e991086b0bbec397748b5fe"
+  integrity sha512-PsMPYp3jc0fL4AgZLvMMHfP488Iu1pOoqF0AwglBwBtY9YYSQB5Es8dzWpaDDvUsJeWTBHeted48CT7jRrA4OQ==
   dependencies:
-    "@oclif/core" "^2.3.0"
+    "@oclif/core" "^2.8.0"
     "@oclif/plugin-help" "^5.1.19"
     "@oclif/plugin-not-found" "^2.3.7"
     "@oclif/plugin-warn-if-update-available" "^2.0.14"
@@ -5300,8 +5301,8 @@ oclif@^3.7.0:
     semver "^7.3.8"
     shelljs "^0.8.5"
     tslib "^2.3.1"
-    yeoman-environment "^3.11.1"
-    yeoman-generator "^5.6.1"
+    yeoman-environment "^3.15.1"
+    yeoman-generator "^5.8.0"
     yosay "^2.0.2"
 
 once@^1.3.0, once@^1.3.1, once@^1.4.0:
@@ -6620,7 +6621,7 @@ trim-newlines@^3.0.0:
   resolved "https://registry.yarnpkg.com/trim-newlines/-/trim-newlines-3.0.1.tgz#260a5d962d8b752425b32f3a7db0dcacd176c144"
   integrity sha512-c1PTsA3tYrIsLGkJkzHF+w9F2EyxfXGo4UyJc4pFL++FMjnq0HJS69T3M7d//gKrFKwy429bouPescbjecU+Zw==
 
-ts-node@^10.0.0, ts-node@^10.8.1:
+ts-node@^10.0.0, ts-node@^10.8.1, ts-node@^10.9.1:
   version "10.9.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.9.1.tgz#e73de9102958af9e1f0b168a6ff320e25adcff4b"
   integrity sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==
@@ -7235,7 +7236,7 @@ yargs@^17.0.0, yargs@^17.3.1:
     y18n "^5.0.5"
     yargs-parser "^21.1.1"
 
-yeoman-environment@^3.11.1:
+yeoman-environment@^3.15.1:
   version "3.15.1"
   resolved "https://registry.yarnpkg.com/yeoman-environment/-/yeoman-environment-3.15.1.tgz#b094b858bfbd24db8061d255d0e7871224190474"
   integrity sha512-P4DTQxqCxNTBD7gph+P+dIckBdx0xyHmvOYgO3vsc9/Sl67KJ6QInz5Qv6tlXET3CFFJ/YxPIdl9rKb0XwTRLg==
@@ -7277,7 +7278,7 @@ yeoman-environment@^3.11.1:
     textextensions "^5.12.0"
     untildify "^4.0.0"
 
-yeoman-generator@^5.6.1:
+yeoman-generator@^5.8.0:
   version "5.8.0"
   resolved "https://registry.yarnpkg.com/yeoman-generator/-/yeoman-generator-5.8.0.tgz#a1951ce0d95555f94adc5975a517d4741b5ce24d"
   integrity sha512-dsrwFn9/c2/MOe80sa2nKfbZd/GaPTgmmehdgkFifs1VN/I7qPsW2xcBfvSkHNGK+PZly7uHyH8kaVYSFNUDhQ==
