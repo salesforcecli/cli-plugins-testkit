@@ -1,7 +1,13 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+import { tmpdir } from 'os';
+import { expect } from 'chai';
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
-import { expect } from 'chai';
-import { tmpdir } from 'os';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -15,7 +21,7 @@ describe('TestSession', () => {
   });
 
   it('should use overridden session directory', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`);
+    execCmd(`config:set org-instance-url=${testSession.id}`);
     expect(testSession.dir).to.equal(tmpdir());
   });
 

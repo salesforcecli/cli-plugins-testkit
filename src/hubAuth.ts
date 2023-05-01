@@ -181,7 +181,7 @@ export const transferExistingAuthToEnv = (authStrategy: DevhubAuthStrategy): voi
     // this is an org from web:auth or auth:url.  Generate the authUrl and set in the env
     logger('copying variables to env from org:display for AuthUrl');
     const displayContents = JSON.parse(
-      shell.exec(`sfdx force:org:display -u ${devhub} --verbose --json`, execOpts) as string
+      shell.exec(`sf force:org:display -u ${devhub} --verbose --json`, execOpts) as string
     ) as OrgDisplayResult;
 
     logger(`found ${displayContents.result.sfdxAuthUrl}`);

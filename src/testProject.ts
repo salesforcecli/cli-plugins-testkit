@@ -25,7 +25,7 @@ export interface TestProjectOptions {
  * A SFDX project for use with testing.  The project can be defined by:
  *   1. Copied from a project on the filesystem to a destination dir
  *   2. Cloned using a git url
- *   3. Created by name using the force:project:create command
+ *   3. Created by name using the project:generate command
  *
  * The project will be copied/cloned/created to the provided destination dir
  * or the OS tmpdir by default.
@@ -79,17 +79,17 @@ export class TestProject {
     }
     // Create a new project using the command.
     else {
-      // verify sfdx is found
-      if (!shell.which('sfdx')) {
-        throw new Error('sfdx executable not found for creating a project using force:project:create command');
+      // verify sf is found
+      if (!shell.which('sf')) {
+        throw new Error('sf executable not found for creating a project using project:generate command');
       }
       const name = options.name ?? genUniqueString('project_%s');
       const rv = shell.exec(
-        `sfdx force:project:create -n ${name} -d ${destDir}`,
+        `sf project:generate -n ${name} -d ${destDir}`,
         this.shelljsExecOptions
       ) as shell.ShellString;
       if (rv.code !== 0) {
-        throw new Error(`force:project:create failed with error:\n${rv.stderr}`);
+        throw new Error(`project:generate failed with error:\n${rv.stderr}`);
       }
       this.dir = path.join(destDir, name);
     }
@@ -99,7 +99,7 @@ export class TestProject {
   /**
    * Zip the test project contents
    *
-   * @name The name of the zip file to create. Default is the project dirname.
+   * @name name of the zip file to create. Default is the project dirname.
    * @destDir The zip file will be written to this path. Default is `process.cwd()`.
    * @returns The created zip file path.
    */

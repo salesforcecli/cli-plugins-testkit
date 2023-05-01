@@ -101,10 +101,16 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
-  process.env.TESTKIT_EXECUTABLE_PATH = 'sfdx';
+  process.env.TESTKIT_EXECUTABLE_PATH = 'sf';
 
   it('should use the specified Salesforce CLI executable', () => {
     execCmd('config:list');
@@ -167,6 +173,12 @@ A TestSession provides conveniences to testing plugin commands with options to a
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -180,7 +192,7 @@ describe('TestSession', () => {
   });
 
   it('should run a command from within a generated project', () => {
-    execCmd('force:source:convert', { ensureExitCode: 0 });
+    execCmd('project:convert:source', { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -252,6 +264,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -261,7 +279,7 @@ describe('TestSession', () => {
   });
 
   it('should allow access to anything on TestSession without a project', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`, { ensureExitCode: 0 });
+    execCmd(`config:set org-instance-url=${testSession.id}`, { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -276,8 +294,14 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { expect } from 'chai';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import { tmpdir } from 'os';
+import { expect } from 'chai';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -291,7 +315,7 @@ describe('TestSession', () => {
   });
 
   it('should use overridden session directory', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`);
+    execCmd(`config:set org-instance-url=${testSession.id}`);
     expect(testSession.dir).to.equal(tmpdir());
   });
 
@@ -357,6 +381,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -366,7 +396,7 @@ describe('TestSession', () => {
   });
 
   it('should archive the TestSession contents in process.cwd() when a test fails', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`, { ensureExitCode: 0 });
+    execCmd(`config:set org-instance-url=${testSession.id}`, { ensureExitCode: 0 });
   });
 
   afterEach(async function () {
@@ -387,6 +417,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -396,10 +432,10 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      scratchOrgs: [{ executable: 'sfdx', edition: 'developer' }],
+      scratchOrgs: [{ executable: 'sf', edition: 'developer' }],
     });
 
-    execCmd('force:source:push', { cli: 'sfdx' });
+    execCmd('project:deploy:start', { cli: 'sf' });
   });
 
   it('using testkit to run commands with an org', () => {
@@ -419,6 +455,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -434,7 +476,7 @@ describe('TestSession', () => {
 
   it('using testkit to run commands with an org', () => {
     const username = [...testSession.orgs.keys()][0];
-    execCmd(`force:source:deploy -x package.xml -u ${username}`, { ensureExitCode: 0 });
+    execCmd(`project:deploy:start -x package.xml -o ${username}`, { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -449,6 +491,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import * as path from 'path';
 
 describe('TestSession', () => {
@@ -459,7 +507,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
+      scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
     });
   });
 
@@ -474,7 +522,7 @@ describe('TestSession', () => {
     });
     testSession.stubCwd(project2.dir);
     const username = [...testSession.orgs.keys()][0];
-    execCmd(`force:source:pull -u ${username}`);
+    execCmd(`project:retrieve:start -o ${username}`);
   });
 
   after(async () => {
@@ -489,6 +537,12 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import * as shelljs from 'shelljs';
 
 /*
@@ -509,26 +563,26 @@ describe('TestSession', () => {
       },
       scratchOrgs: [
         // rely on defaultusername
-        { executable: 'sfdx', config: 'config/project-scratch-def.json', setDefault: true },
+        { executable: 'sf', config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        { executable: 'sfdx', config: 'config/project-scratch-def.json', username },
+        { executable: 'sf', config: 'config/project-scratch-def.json', username },
       ],
     });
   });
 
   it('should use both orgs created as part of setupCommands', () => {
     const firstOrg = testSession.orgs.get('default');
-    execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
-    execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });
+    execCmd(`project:retrieve:start -m ApexClass -o ${firstOrg}`, { ensureExitCode: 0 });
+    execCmd(`project:retrieve:start -p force-app -o ${username}`, { ensureExitCode: 0 });
   });
 
   it('should create a 3rd org and get the username from the json output', () => {
     // Note that this org will not be deleted for you by TestSession.
-    const jsonOutput = execCmd<{ username: string }>('force:org:create -f config/project-scratch-def.json --json', {
-      cli: 'sfdx',
+    const jsonOutput = execCmd<{ username: string }>('env:create:scratch -f config/project-scratch-def.json --json', {
+      cli: 'sf',
     }).jsonOutput;
     const thirdOrg = jsonOutput.result.username;
-    execCmd(`force:source:pull -u ${thirdOrg}`);
+    execCmd(`project:retrieve:start -o ${thirdOrg}`);
   });
 
   after(async () => {
@@ -541,8 +595,8 @@ describe('Sample NUT 2', () => {
   before(async () => {
     // NOTE: this is for demonstration purposes and doesn't work as is
     //       since shelljs does not return promises, but conveys the point.
-    const org1 = shelljs.exec('sfdx force:org:create edition=Developer', { async: true });
-    const org2 = shelljs.exec('sfdx force:org:create edition=Developer', { async: true });
+    const org1 = shelljs.exec('sf env:create:scratch edition=Developer', { async: true });
+    const org2 = shelljs.exec('sf env:create:scratch edition=Developer', { async: true });
     await Promise.all([org1, org2]);
   });
 });
@@ -675,6 +729,6 @@ export TESTKIT_EXEC_SHELL=powershell.exe
 1. Clean the TestSession in a code block that always runs (e.g., mocha’s after() ) to keep your plugin clean. You can always choose to zip a project or test session after tests run or on each test failure.
 1. Point your CI jobs to different CLI executables using the TESTKIT_EXECUTABLE_PATH env var to ensure your plugin works with the various ways the CLI can be installed. By default it will use your plugin’s `./bin/run` but you can define a local or global npm install path or install from public archives.
 1. Use a naming pattern for test files that use the testkit. These are not unit tests so we like to refer to them as “NUTs” and have a convention of `*.nut.ts` so we can run them separately from unit tests.
-1. Use `SFDX_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.
+1. Use `SF_USE_GENERIC_UNIX_KEYCHAIN=true` to prevent authentication keychain issues.
 1. When writing TypeScript NUTs remember to pass the expected type to execCmd so JSON results are typed for you.
 1. Take advantage of TestSession's automatic authentication using the appropriate environment variables.
