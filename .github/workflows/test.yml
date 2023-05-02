@@ -13,3 +13,38 @@ jobs:
   windows-unit-tests:
     needs: yarn-lockfile-check
     uses: salesforcecli/github-workflows/.github/workflows/unitTestsWindows.yml@main
+  xNuts-pa:
+    needs: linux-unit-tests
+    name: xNuts-pa
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        command:
+          - 'yarn test:nuts'
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
+    with:
+      packageName: '@salesforce/cli-plugins-testkit'
+      externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-auth'
+      command: ${{matrix.command}}
+      os: ${{matrix.os}}
+      useCache: false
+    secrets: inherit
+
+  xNuts-pu:
+    needs: linux-unit-tests
+    name: xNuts-pu
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        command:
+          - 'yarn test:nuts'
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
+    with:
+      packageName: '@salesforce/cli-plugins-testkit'
+      externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-user'
+      command: ${{matrix.command}}
+      os: ${{matrix.os}}
+      useCache: false
+    secrets: inherit

@@ -342,16 +342,15 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         }
 
         if (org.setDefault) {
-          baseCmd += executable === 'sf' ? ' -d' : ' -s';
+          baseCmd += ' -d';
         }
 
         if (org.username) {
-          if (org.executable === 'sfdx') baseCmd += ` username=${org.username}`;
-          else throw new Error('username property is not supported by sf org create scratch');
+          baseCmd += `--username ${org.username}`;
         }
 
         if (org.edition) {
-          baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
+          baseCmd += ` -e ${org.edition}`;
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
