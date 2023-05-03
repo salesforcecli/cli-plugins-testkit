@@ -28,6 +28,8 @@ jobs:
       packageName: '@salesforce/cli-plugins-testkit'
       externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-auth'
       preBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      postbuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
       command: ${{matrix.command}}
       os: ${{matrix.os}}
       useCache: false
@@ -48,6 +50,8 @@ jobs:
       packageName: '@salesforce/cli-plugins-testkit'
       externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-user'
       preBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      postbuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
       command: ${{matrix.command}}
       os: ${{matrix.os}}
       useCache: false
