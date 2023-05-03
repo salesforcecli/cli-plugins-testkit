@@ -13,3 +13,46 @@ jobs:
   windows-unit-tests:
     needs: yarn-lockfile-check
     uses: salesforcecli/github-workflows/.github/workflows/unitTestsWindows.yml@main
+
+  xNuts-pa:
+    needs: linux-unit-tests
+    name: xNuts-pa
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        #        , windows-latest]
+        command:
+          - 'yarn test:nuts'
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
+    with:
+      packageName: '@salesforce/cli-plugins-testkit'
+      externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-auth'
+      preBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      postbuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      command: ${{matrix.command}}
+      os: ${{matrix.os}}
+      useCache: false
+    secrets: inherit
+
+  xNuts-pu:
+    needs: linux-unit-tests
+    name: xNuts-pu
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        command:
+          - 'yarn test:nuts'
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
+    with:
+      packageName: '@salesforce/cli-plugins-testkit'
+      externalProjectGitUrl: 'https://github.com/salesforcecli/plugin-user'
+      preBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      postbuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/cli-plugins-testkit/samples/**/*.ts'
+      command: ${{matrix.command}}
+      os: ${{matrix.os}}
+      useCache: false
+    secrets: inherit
