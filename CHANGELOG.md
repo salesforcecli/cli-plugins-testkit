@@ -1,3 +1,12 @@
+## [3.3.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.5...3.3.6) (2023-05-05)
+
+
+### Bug Fixes
+
+* move from sfdx examples/commands/defaults to sf ([#462](https://github.com/salesforcecli/cli-plugins-testkit/issues/462)) ([2cdee20](https://github.com/salesforcecli/cli-plugins-testkit/commit/2cdee201322d6e785ee8e7ac0015320310e5c6f5))
+
+
+
 ## [3.3.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.4...3.3.5) (2023-04-29)
 
 
