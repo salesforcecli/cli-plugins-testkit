@@ -1,7 +1,13 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+import * as path from 'path';
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
 import { TestProject } from '../src/testProject';
-import * as path from 'path';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -11,7 +17,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
+      scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
     });
   });
 
@@ -26,7 +32,7 @@ describe('TestSession', () => {
     });
     testSession.stubCwd(project2.dir);
     const username = [...testSession.orgs.keys()][0];
-    execCmd(`force:source:pull -u ${username}`);
+    execCmd(`project:retrieve:start -o ${username}`);
   });
 
   after(async () => {

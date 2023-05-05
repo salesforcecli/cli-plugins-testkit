@@ -104,7 +104,7 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 
 describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
-  process.env.TESTKIT_EXECUTABLE_PATH = 'sfdx';
+  process.env.TESTKIT_EXECUTABLE_PATH = 'sf';
 
   it('should use the specified Salesforce CLI executable', () => {
     execCmd('config:list');
@@ -180,7 +180,7 @@ describe('TestSession', () => {
   });
 
   it('should run a command from within a generated project', () => {
-    execCmd('force:source:convert', { ensureExitCode: 0 });
+    execCmd('project:convert:source', { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -261,7 +261,7 @@ describe('TestSession', () => {
   });
 
   it('should allow access to anything on TestSession without a project', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`, { ensureExitCode: 0 });
+    execCmd(`config:set org-instance-url=${testSession.id}`, { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -278,6 +278,7 @@ describe('TestSession', () => {
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { tmpdir } from 'os';
+import { expect } from 'chai';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -291,7 +292,7 @@ describe('TestSession', () => {
   });
 
   it('should use overridden session directory', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`);
+    execCmd(`config:set org-instance-url=${testSession.id}`);
     expect(testSession.dir).to.equal(tmpdir());
   });
 
@@ -366,7 +367,7 @@ describe('TestSession', () => {
   });
 
   it('should archive the TestSession contents in process.cwd() when a test fails', () => {
-    execCmd(`config:set instanceUrl=${testSession.id}`, { ensureExitCode: 0 });
+    execCmd(`config:set org-instance-url=${testSession.id}`, { ensureExitCode: 0 });
   });
 
   afterEach(async function () {
@@ -396,10 +397,10 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      scratchOrgs: [{ executable: 'sfdx', edition: 'developer' }],
+      scratchOrgs: [{ executable: 'sf', edition: 'developer' }],
     });
 
-    execCmd('force:source:push', { cli: 'sfdx' });
+    execCmd('project:deploy:start', { cli: 'sf' });
   });
 
   it('using testkit to run commands with an org', () => {
@@ -434,7 +435,7 @@ describe('TestSession', () => {
 
   it('using testkit to run commands with an org', () => {
     const username = [...testSession.orgs.keys()][0];
-    execCmd(`force:source:deploy -x package.xml -u ${username}`, { ensureExitCode: 0 });
+    execCmd(`project:deploy:start -x package.xml -o ${username}`, { ensureExitCode: 0 });
   });
 
   after(async () => {
@@ -459,7 +460,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
+      scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
     });
   });
 
@@ -474,7 +475,7 @@ describe('TestSession', () => {
     });
     testSession.stubCwd(project2.dir);
     const username = [...testSession.orgs.keys()][0];
-    execCmd(`force:source:pull -u ${username}`);
+    execCmd(`project:retrieve:start -o ${username}`);
   });
 
   after(async () => {
@@ -509,26 +510,26 @@ describe('TestSession', () => {
       },
       scratchOrgs: [
         // rely on defaultusername
-        { executable: 'sfdx', config: 'config/project-scratch-def.json', setDefault: true },
+        { executable: 'sf', config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        { executable: 'sfdx', config: 'config/project-scratch-def.json', username },
+        { executable: 'sf', config: 'config/project-scratch-def.json', username },
       ],
     });
   });
 
   it('should use both orgs created as part of setupCommands', () => {
     const firstOrg = testSession.orgs.get('default');
-    execCmd(`force:source:retrieve -m ApexClass -u ${firstOrg}`, { ensureExitCode: 0 });
-    execCmd(`force:source:retrieve -p force-app -u ${username}`, { ensureExitCode: 0 });
+    execCmd(`project:retrieve:start -m ApexClass -o ${firstOrg}`, { ensureExitCode: 0 });
+    execCmd(`project:retrieve:start -p force-app -o ${username}`, { ensureExitCode: 0 });
   });
 
   it('should create a 3rd org and get the username from the json output', () => {
     // Note that this org will not be deleted for you by TestSession.
-    const jsonOutput = execCmd<{ username: string }>('force:org:create -f config/project-scratch-def.json --json', {
-      cli: 'sfdx',
+    const jsonOutput = execCmd<{ username: string }>('env:create:scratch -f config/project-scratch-def.json --json', {
+      cli: 'sf',
     }).jsonOutput;
     const thirdOrg = jsonOutput.result.username;
-    execCmd(`force:source:pull -u ${thirdOrg}`);
+    execCmd(`project:retrieve:start -o ${thirdOrg}`);
   });
 
   after(async () => {
@@ -541,8 +542,8 @@ describe('Sample NUT 2', () => {
   before(async () => {
     // NOTE: this is for demonstration purposes and doesn't work as is
     //       since shelljs does not return promises, but conveys the point.
-    const org1 = shelljs.exec('sfdx force:org:create edition=Developer', { async: true });
-    const org2 = shelljs.exec('sfdx force:org:create edition=Developer', { async: true });
+    const org1 = shelljs.exec('sf env:create:scratch edition=Developer', { async: true });
+    const org2 = shelljs.exec('sf env:create:scratch edition=Developer', { async: true });
     await Promise.all([org1, org2]);
   });
 });

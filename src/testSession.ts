@@ -22,6 +22,9 @@ import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAu
 import { JsonOutput } from './execCmd';
 
 export type ScratchOrgConfig = {
+  /**
+   * @deprecated 'sf' will be default
+   */
   executable?: 'sfdx' | 'sf';
   config?: string;
   duration?: number;
@@ -328,11 +331,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           throw new Error(`${executable} executable not found for creating scratch orgs`);
         }
 
-        let baseCmd =
-          executable === 'sf'
-            ? `${executable} env create scratch --json -y ${org.duration ?? '1'}`
-            : `${executable} force:org:create --json -d ${org.duration ?? '1'}`;
-        baseCmd += ` -w ${org.wait ?? 60}`;
+        let baseCmd = `sf env:create:scratch --json -y ${org.duration ?? '1'} -w ${org.wait ?? 60}`;
 
         if (org.config) {
           baseCmd += ` -f ${org.config}`;
@@ -343,16 +342,15 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         }
 
         if (org.setDefault) {
-          baseCmd += executable === 'sf' ? ' -d' : ' -s';
+          baseCmd += ' -d';
         }
 
         if (org.username) {
-          if (org.executable === 'sfdx') baseCmd += ` username=${org.username}`;
-          else throw new Error('username property is not supported by sf org create scratch');
+          baseCmd += `--username ${org.username}`;
         }
 
         if (org.edition) {
-          baseCmd += executable === 'sf' ? ` -e ${org.edition}` : ` edition=${org.edition}`;
+          baseCmd += ` -e ${org.edition}`;
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;

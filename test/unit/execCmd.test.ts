@@ -19,7 +19,7 @@ config.truncateThreshold = 0;
 
 describe('execCmd (sync)', () => {
   const sandbox = sinon.createSandbox();
-  const cmd = 'force:user:create -a testuser1';
+  const cmd = 'org:create:user -a testuser1';
   const output = {
     status: 0,
     result: [{ foo: 'bar' }],
@@ -213,7 +213,7 @@ describe('execCmd (sync)', () => {
 
 describe('execCmd (async)', () => {
   const sandbox = sinon.createSandbox();
-  const cmd = 'force:user:create -a testuser1';
+  const cmd = 'org:create:user -a testuser1';
   const output = {
     status: 0,
     result: [{ foo: 'bar' }],

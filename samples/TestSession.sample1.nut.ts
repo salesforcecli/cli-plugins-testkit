@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
 
@@ -13,7 +19,7 @@ describe('TestSession', () => {
   });
 
   it('should run a command from within a generated project', () => {
-    execCmd('force:source:convert', { ensureExitCode: 0 });
+    execCmd('project:convert:source', { ensureExitCode: 0 });
   });
 
   after(async () => {

@@ -10,7 +10,7 @@ import { EventEmitter } from 'events';
 import { assert, expect } from 'chai';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as sinon from 'sinon';
-import { zipDir } from '../../lib/zip';
+import { zipDir } from '../../src/zip';
 
 describe('zipDir', () => {
   const sandbox = sinon.createSandbox();

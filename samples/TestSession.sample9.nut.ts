@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import { execCmd } from '../src/execCmd';
 import { TestSession } from '../src/testSession';
 
@@ -9,10 +15,10 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      scratchOrgs: [{ executable: 'sfdx', edition: 'developer' }],
+      scratchOrgs: [{ executable: 'sf', edition: 'developer' }],
     });
 
-    execCmd('force:source:push', { cli: 'sfdx' });
+    execCmd('project:deploy:start', { cli: 'sf' });
   });
 
   it('using testkit to run commands with an org', () => {

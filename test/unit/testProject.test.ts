@@ -13,7 +13,7 @@ import * as shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
-import { TestProject } from '../../lib/testProject';
+import { TestProject } from '../../src';
 
 describe('TestProject', () => {
   const sandbox = sinon.createSandbox();
@@ -102,7 +102,7 @@ describe('TestProject', () => {
     const destinationDir = pathJoin('foo', 'bar');
     const testProject = new TestProject({ name, destinationDir });
     expect(testProject.dir).to.equal(pathJoin(destinationDir, name));
-    const execArg1 = `sfdx force:project:create -n ${name} -d ${destinationDir}`;
+    const execArg1 = `sf project:generate -n ${name} -d ${destinationDir}`;
     expect(execStub.firstCall.args[0]).to.equal(execArg1);
     expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
   });
@@ -115,7 +115,7 @@ describe('TestProject', () => {
     const testProject = new TestProject({});
     const expectedPath = pathJoin(tmpdir(), 'project_');
     expect(testProject.dir.startsWith(expectedPath)).to.equal(true);
-    const execArg1 = 'sfdx force:project:create -n project_';
+    const execArg1 = 'sf project:generate -n project_';
     expect(execStub.firstCall.args[0]).to.include(execArg1);
     expect(execStub.firstCall.args[0]).to.include(`-d ${tmpdir()}`);
   });
@@ -130,11 +130,11 @@ describe('TestProject', () => {
       new TestProject({});
       assert(false, 'TestProject should throw');
     } catch (err: unknown) {
-      expect((err as Error).message).to.equal(`force:project:create failed with error:\n${shellString.stderr}`);
+      expect((err as Error).message).to.equal(`project:generate failed with error:\n${shellString.stderr}`);
     }
   });
 
-  it('should error if sfdx not found', () => {
+  it('should error if sf not found', () => {
     stubMethod(sandbox, shelljs, 'which').returns(null);
     const name = 'MyTestProject';
     const destinationDir = pathJoin('foo', 'bar');
@@ -143,7 +143,7 @@ describe('TestProject', () => {
       assert(false, 'TestProject should throw');
     } catch (err: unknown) {
       expect((err as Error).message).to.equal(
-        'sfdx executable not found for creating a project using force:project:create command'
+        'sf executable not found for creating a project using project:generate command'
       );
     }
   });

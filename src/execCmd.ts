@@ -116,7 +116,7 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  *    1. TESTKIT_EXECUTABLE_PATH env var
  *    2. `bin/dev` (default)
  *
- * @returns The command string with CLI executable. E.g., `"node_modules/bin/sfdx force:user:create -a testuser1"`
+ * @returns The command string with CLI executable. E.g., `"node_modules/bin/sf org:create:user -a testuser1"`
  */
 const determineExecutable = (cli: CLI = 'inherit'): string => {
   const debug = Debug('testkit:determineExecutable');
@@ -129,7 +129,7 @@ const determineExecutable = (cli: CLI = 'inherit'): string => {
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
-  // If which finds the path in the system path, use that.
+  // If 'which' finds the path in the system path, use that.
   if (which) {
     resolvedPath = which;
   } else if (!fs.existsSync(bin)) {
