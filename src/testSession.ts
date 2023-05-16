@@ -41,6 +41,8 @@ export type ScratchOrgConfig = {
     | 'partner-professional';
   username?: string;
   wait?: number;
+  /** true by default. Has no effect unless you set it to false */
+  tracksSource?: boolean;
 };
 
 export interface TestSessionOptions {
@@ -351,6 +353,11 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
         if (org.edition) {
           baseCmd += ` -e ${org.edition}`;
+        }
+
+        // explicitly disable tracking only if set to false.  True is the default on the command
+        if (org.tracksSource === false) {
+          baseCmd += ' --no-track-source';
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
