@@ -1,3 +1,12 @@
+# [3.4.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.6...3.4.0) (2023-05-16)
+
+
+### Features
+
+* option to disable source tracking on scratch orgs ([#470](https://github.com/salesforcecli/cli-plugins-testkit/issues/470)) ([69b616c](https://github.com/salesforcecli/cli-plugins-testkit/commit/69b616cd6020a721f2bda493143f516a3ee66d02))
+
+
+
 ## [3.3.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.5...3.3.6) (2023-05-05)
 
 
