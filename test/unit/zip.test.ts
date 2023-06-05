@@ -15,15 +15,15 @@ describe('zipDir', () => {
   it('should zip a directory', async () => {
     const rootDir = join(tmpdir(), 'testkitZipTest');
     if (fs.existsSync(rootDir)) {
-      fs.rmdirSync(rootDir);
+      fs.rmSync(rootDir, { recursive: true, force: true });
     }
     const sourceDir = join(rootDir, 'sourceDir');
     const nestedDir = join(sourceDir, 'nestedDir');
-    let zipPath: string;
+    const filePath1 = join(sourceDir, 'file1.txt');
+    const filePath2 = join(nestedDir, 'file2.txt');
+    let zipPath = '';
     try {
       fs.mkdirSync(nestedDir, { recursive: true });
-      const filePath1 = join(sourceDir, 'file1.txt');
-      const filePath2 = join(nestedDir, 'file2.txt');
       fs.writeFileSync(filePath1, 'file 1 content');
       fs.writeFileSync(filePath2, 'file 2 content');
       const zipName = 'myZip.zip';
@@ -46,8 +46,7 @@ describe('zipDir', () => {
       expect(zip.files).to.haveOwnProperty('nestedDir/');
       expect(zip.files).to.haveOwnProperty('nestedDir/file2.txt');
     } finally {
-      fs.unlinkSync(zipPath);
-      fs.rmdirSync(rootDir);
+      fs.rmSync(rootDir, { recursive: true, force: true });
     }
   });
 });
