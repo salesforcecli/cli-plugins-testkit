@@ -5,52 +5,49 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as fs from 'fs';
-import { join as pathJoin } from 'path';
-import { EventEmitter } from 'events';
-import { assert, expect } from 'chai';
-import { stubMethod } from '@salesforce/ts-sinon';
-import * as sinon from 'sinon';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { expect } from 'chai';
+import * as JSZip from 'jszip';
 import { zipDir } from '../../src/zip';
 
 describe('zipDir', () => {
-  const sandbox = sinon.createSandbox();
-
-  class WriteStreamMock extends EventEmitter {
-    public write = sandbox.stub().returns(true);
-    public end = sandbox.stub().callsFake(() => {
-      this.emit('end');
-    });
-  }
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should zip a directory', async () => {
-    stubMethod(sandbox, fs, 'createWriteStream').returns(new WriteStreamMock());
-    const zipName = 'zipTest1.zip';
-    const zipPath = await zipDir({
-      sourceDir: pathJoin(process.cwd(), 'test', 'unit'),
-      destDir: process.cwd(),
-      name: zipName,
-    });
-    expect(zipPath).to.equal(pathJoin(process.cwd(), zipName));
-  });
-
-  it('should fail on error', async () => {
-    stubMethod(sandbox, fs, 'createWriteStream').returns(new WriteStreamMock());
-    const zipName = 'zipTest2.zip';
-
+    const rootDir = join(tmpdir(), 'testkitZipTest');
+    if (fs.existsSync(rootDir)) {
+      fs.rmdirSync(rootDir);
+    }
+    const sourceDir = join(rootDir, 'sourceDir');
+    const nestedDir = join(sourceDir, 'nestedDir');
+    let zipPath: string;
     try {
-      await zipDir({
-        sourceDir: '',
-        destDir: process.cwd(),
+      fs.mkdirSync(nestedDir, { recursive: true });
+      const filePath1 = join(sourceDir, 'file1.txt');
+      const filePath2 = join(nestedDir, 'file2.txt');
+      fs.writeFileSync(filePath1, 'file 1 content');
+      fs.writeFileSync(filePath2, 'file 2 content');
+      const zipName = 'myZip.zip';
+      const expectedZipPath = join(rootDir, zipName);
+
+      zipPath = await zipDir({
+        sourceDir,
+        destDir: rootDir,
         name: zipName,
       });
-      assert(false, 'Expected zipDir() to throw an error');
-    } catch (e) {
-      const errMsg = 'diretory dirpath argument must be a non-empty string value';
-      expect(e).to.have.property('message', errMsg);
+
+      expect(fs.existsSync(expectedZipPath)).to.equal(true);
+      expect(fs.statSync(expectedZipPath).size).to.be.greaterThan(0);
+      expect(zipPath).to.equal(expectedZipPath);
+
+      // read the zip to ensure it has the expected files
+      const jsZip = new JSZip();
+      const zip = await jsZip.loadAsync(fs.readFileSync(zipPath));
+      expect(zip.files).to.haveOwnProperty('file1.txt');
+      expect(zip.files).to.haveOwnProperty('nestedDir/');
+      expect(zip.files).to.haveOwnProperty('nestedDir/file2.txt');
+    } finally {
+      fs.unlinkSync(zipPath);
+      fs.rmdirSync(rootDir);
     }
   });
 });
