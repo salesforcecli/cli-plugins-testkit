@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { create as createArchive } from 'archiver';
+import * as JSZip from 'jszip';
 import Debug from 'debug';
 
 export interface ZipDirConfig {
@@ -36,34 +36,36 @@ export interface ZipDirConfig {
 export const zipDir = async (config: ZipDirConfig): Promise<string> => {
   const debug = Debug('testkit:zipDir');
   const { sourceDir, destDir, name } = config;
-  const zip = createArchive('zip', { zlib: { level: 3 } });
   const zipFilePath = path.join(destDir, name);
-  const output = fs.createWriteStream(zipFilePath);
+  const zip = new JSZip();
   debug(`Zipping contents of ${sourceDir} to ${zipFilePath}`);
 
-  return new Promise((resolve, reject) => {
-    output.on('close', () => {
-      debug(`Zip ${zipFilePath} is closed`);
-      resolve(zipFilePath);
-    });
-    output.on('end', () => {
-      debug(`Zip data has drained for ${zipFilePath}`);
-      resolve(zipFilePath);
-    });
-    zip.on('warning', (err) => {
-      if (err.code === 'ENOENT') {
-        debug(`Zip warning for ${zipFilePath}\n${err.message}`);
+  const zipDirRecursive = (dir: string): void => {
+    const dirents = fs.readdirSync(dir, { withFileTypes: true });
+    for (const dirent of dirents) {
+      const fullPath = path.resolve(dir, dirent.name);
+      if (dirent.isDirectory()) {
+        zipDirRecursive(fullPath);
       } else {
-        reject(err);
+        const relPath = path.relative(sourceDir, fullPath);
+        // Ensure only posix paths are added to zip files
+        const relPosixPath = relPath.replace(/\\/g, '/');
+        zip.file(relPosixPath, fs.createReadStream(fullPath));
       }
-    });
-    zip.on('error', (err) => {
-      reject(err);
-    });
-    zip.pipe(output);
-    zip.directory(sourceDir, false);
-    zip.finalize().catch((err: unknown) => {
-      debug(`Zip finalize error with: ${(err as Error).message}`);
-    });
+    }
+  };
+
+  zipDirRecursive(sourceDir);
+
+  const zipBuf = await zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 3 },
   });
+
+  fs.writeFileSync(zipFilePath, zipBuf);
+
+  debug('Zip file written');
+
+  return zipFilePath;
 };

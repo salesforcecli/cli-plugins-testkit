@@ -48,8 +48,8 @@
     "@salesforce/kit": "^3.0.2",
     "@salesforce/ts-types": "^2.0.2",
     "@types/shelljs": "^0.8.12",
-    "archiver": "^5.2.0",
     "debug": "^4.3.1",
+    "jszip": "^3.10.1",
     "shelljs": "^0.8.4",
     "strip-ansi": "6.0.1",
     "ts-retry-promise": "^0.7.0"
@@ -59,7 +59,6 @@
     "@salesforce/dev-scripts": "^5.4.2",
     "@salesforce/prettier-config": "^0.0.3",
     "@salesforce/ts-sinon": "^1.4.8",
-    "@types/archiver": "^5.3.2",
     "@types/debug": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.9",
