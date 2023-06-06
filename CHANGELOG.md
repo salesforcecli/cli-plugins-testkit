@@ -1,3 +1,16 @@
+# [4.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.0.1...4.1.0) (2023-06-06)
+
+
+### Features
+
+* replace archiver with jszip ([#489](https://github.com/salesforcecli/cli-plugins-testkit/issues/489)) ([f37c74e](https://github.com/salesforcecli/cli-plugins-testkit/commit/f37c74e7a54d829cefb285fd8b7f6048b62fd578))
+
+
+
+## [4.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.4.0...4.0.1) (2023-05-31)
+
+
+
 # [3.4.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/3.3.6...3.4.0) (2023-05-16)
 
 
