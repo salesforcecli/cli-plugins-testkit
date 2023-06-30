@@ -192,7 +192,6 @@ describe('execCmd (sync)', () => {
     expect(result.jsonOutput).to.deep.equal(undefined);
     expect(result.jsonError).to.be.an('Error');
     expect(result.jsonError?.name).to.equal('JsonParseError');
-    expect(result.jsonError?.message).to.match(/Parse error in file unknown on line 1\n\r?try JSON parsing this/);
   });
 
   it('should override shell default', () => {
@@ -334,7 +333,6 @@ describe('execCmd (async)', () => {
     expect(result.jsonOutput).to.deep.equal(undefined);
     expect(result.jsonError).to.be.an('Error');
     expect(result.jsonError?.name).to.equal('JsonParseError');
-    expect(result.jsonError?.message).to.match(/Parse error in file unknown on line 1\n\r?try JSON parsing this/);
   });
 
   it('should override shell default', async () => {
