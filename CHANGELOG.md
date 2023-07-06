@@ -1,3 +1,12 @@
+## [4.2.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.1...4.2.2) (2023-07-06)
+
+
+### Bug Fixes
+
+* ignore errors from when sessionDir can't be deleted ([#508](https://github.com/salesforcecli/cli-plugins-testkit/issues/508)) ([ea28f73](https://github.com/salesforcecli/cli-plugins-testkit/commit/ea28f7318f3a4359829c2fdacf7e343ff836f7af))
+
+
+
 ## [4.2.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.0...4.2.1) (2023-07-06)
 
 
