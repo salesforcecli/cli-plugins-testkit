@@ -17,7 +17,7 @@ import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
 import Sinon = require('sinon');
 import { AuthFields } from '@salesforce/core';
-import { ScratchOrgConfig, TestSession } from '../../src/testSession';
+import { ScratchOrgConfig, TestSession, rmOptions } from '../../src/testSession';
 import { TestProject } from '../../src/testProject';
 
 describe('TestSession', () => {
@@ -296,7 +296,6 @@ describe('TestSession', () => {
     let restoreSpy: Sinon.SinonSpy;
     let session: TestSession;
     let shellString: ShellString;
-    const rmOptions = { recursive: true, force: true, maxRetries: 100, retryDelay: 2000 };
 
     beforeEach(async () => {
       shellString = new ShellString(JSON.stringify(''));

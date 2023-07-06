@@ -74,6 +74,8 @@ export interface TestSessionOptions {
   retries?: number;
 }
 
+// exported for test assertions
+export const rmOptions = { recursive: true, force: true, maxRetries: 5, retryDelay: 2000 };
 /**
  * Represents a test session, which is a unique location for non-unit test (nut)
  * artifacts such as a project and a mocked home dir.  It also provides easy
@@ -309,7 +311,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
     }
     this.debug(`Deleting test session dir: ${this.dir}`);
     try {
-      return await fs.promises.rm(this.dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 2000 });
+      return await fs.promises.rm(this.dir, rmOptions);
     } catch (e) {
       this.debug(`Error deleting test session dir: ${this.dir}`);
       this.debug(e);
