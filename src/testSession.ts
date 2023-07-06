@@ -308,7 +308,12 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
       return;
     }
     this.debug(`Deleting test session dir: ${this.dir}`);
-    return fs.promises.rm(this.dir, { recursive: true, force: true, maxRetries: 100, retryDelay: 2000 });
+    try {
+      return await fs.promises.rm(this.dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 2000 });
+    } catch (e) {
+      this.debug(`Error deleting test session dir: ${this.dir}`);
+      this.debug(e);
+    }
   }
 
   // Executes commands and keeps track of any orgs created.
