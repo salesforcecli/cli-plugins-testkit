@@ -1,3 +1,12 @@
+# [4.2.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.1.1...4.2.0) (2023-07-06)
+
+
+### Features
+
+* logging testkit clean failures ([5dbdace](https://github.com/salesforcecli/cli-plugins-testkit/commit/5dbdace85016c99172098e198316747fe702de6b))
+
+
+
 ## [4.1.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.1.0...4.1.1) (2023-06-07)
 
 
