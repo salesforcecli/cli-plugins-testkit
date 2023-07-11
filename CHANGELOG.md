@@ -1,3 +1,12 @@
+## [4.2.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.4...4.2.5) (2023-07-11)
+
+
+### Bug Fixes
+
+* add warnings to jsonOutput type ([#512](https://github.com/salesforcecli/cli-plugins-testkit/issues/512)) ([ef54e8a](https://github.com/salesforcecli/cli-plugins-testkit/commit/ef54e8a66ffe8ff4f5d9832e77707128447d3f0d))
+
+
+
 ## [4.2.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.3...4.2.4) (2023-07-11)
 
 
