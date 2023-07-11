@@ -1,3 +1,12 @@
+## [4.2.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.3...4.2.4) (2023-07-11)
+
+
+### Bug Fixes
+
+* **deps:** bump semver from 5.7.1 to 5.7.2 ([68ef9a6](https://github.com/salesforcecli/cli-plugins-testkit/commit/68ef9a65273a04f215945a12256dce53c7564e6a))
+
+
+
 ## [4.2.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.2...4.2.3) (2023-07-08)
 
 
