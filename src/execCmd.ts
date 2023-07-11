@@ -42,7 +42,7 @@ export type ExecCmdOptions = ExecOptions &
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: any) => any ? never : K }[keyof T]>>;
 
-export type JsonOutput<T> = { status: number; result: T } & Partial<ExcludeMethods<SfError>>;
+export type JsonOutput<T> = { status: number; result: T; warnings: string[] } & Partial<ExcludeMethods<SfError>>;
 
 export interface ExecCmdResult<T> {
   /**
