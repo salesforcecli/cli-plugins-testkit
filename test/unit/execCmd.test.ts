@@ -61,17 +61,6 @@ describe('execCmd (sync)', () => {
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
-  it('should default to sfdx when cli = sfdx', () => {
-    sandbox.stub(fs, 'existsSync').returns(true);
-    sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
-    const shellString = new ShellString(JSON.stringify(output));
-    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
-    execCmd(cmd, { cli: 'sfdx' });
-    expect(execStub.args[0][0]).to.include(`sfdx ${cmd}`);
-    expect(execStub.args[0][0]).to.include('1> stdout');
-    expect(execStub.args[0][0]).to.include('2> stderr');
-  });
-
   it('should default to sf when cli = sf', () => {
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
@@ -83,22 +72,9 @@ describe('execCmd (sync)', () => {
     expect(execStub.args[0][0]).to.include('2> stderr');
   });
 
-  it('should accept valid sfdx path in env var', () => {
-    const binPath = join('sfdx-cli', 'bin', 'sfdx');
-    sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
-    sandbox.stub(fs, 'existsSync').returns(true);
-    sandbox.stub(env, 'getString').returns(binPath);
-    const shellString = new ShellString(JSON.stringify(output));
-    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
-    execCmd(cmd);
-    expect(execStub.args[0][0]).to.include(`${binPath} ${cmd}`);
-    expect(execStub.args[0][0]).to.include('1> stdout');
-    expect(execStub.args[0][0]).to.include('2> stderr');
-  });
-
   it('should accept valid executable in the system path', () => {
-    const binPath = 'sfdx';
-    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sfdx'));
+    const binPath = 'sf';
+    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sf'));
     sandbox.stub(env, 'getString').returns(binPath);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
@@ -240,8 +216,8 @@ describe('execCmd (async)', () => {
     expect(execStub.args[0][0]).to.match(/2> .*stderr.*txt/);
   });
 
-  it('should accept valid sfdx path in env var', async () => {
-    const binPath = join('sfdx-cli', 'bin', 'sfdx');
+  it('should accept valid sf path in env var', async () => {
+    const binPath = join('@salesforce', 'cli', 'bin', 'sf');
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(shelljs, 'which').callsFake((x) => new ShellString(x));
 
@@ -255,8 +231,8 @@ describe('execCmd (async)', () => {
   });
 
   it('should accept valid executable in the system path', async () => {
-    const binPath = 'sfdx';
-    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sfdx'));
+    const binPath = 'sf';
+    sandbox.stub(shelljs, 'which').returns(new ShellString('/usr/local/bin/sf'));
     sandbox.stub(env, 'getString').returns(binPath);
     const shellString = new ShellString(JSON.stringify(output));
     const execStub = stubMethod(sandbox, shelljs, 'exec').yields(0, shellString, '');

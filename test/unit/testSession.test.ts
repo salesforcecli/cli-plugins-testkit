@@ -168,7 +168,7 @@ describe('TestSession', () => {
         });
       const sleepSpy = spyMethod(sandbox, TestSession.prototype, 'sleep');
 
-      const scratchOrgs = [{ executable: 'sf', config: 'config/project-scratch-def.json' }] as ScratchOrgConfig[];
+      const scratchOrgs = [{ config: 'config/project-scratch-def.json' }] as ScratchOrgConfig[];
 
       const session = await TestSession.create({
         scratchOrgs,
@@ -195,7 +195,6 @@ describe('TestSession', () => {
       const session = await TestSession.create({
         scratchOrgs: [
           {
-            executable: 'sf',
             config: 'config/project-scratch-def.json',
             alias: 'my-org',
             setDefault: true,
@@ -238,7 +237,7 @@ describe('TestSession', () => {
       const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
 
       const session = await TestSession.create({
-        scratchOrgs: [{ executable: 'sfdx', config: 'config/project-scratch-def.json' }],
+        scratchOrgs: [{ config: 'config/project-scratch-def.json' }],
       });
 
       expect(mkdirpStub.calledWith(session.dir)).to.equal(true);
@@ -264,7 +263,7 @@ describe('TestSession', () => {
 
       try {
         await TestSession.create({
-          scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+          scratchOrgs: [{ config: 'config/project-scratch-def.json' }],
         });
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {
@@ -281,7 +280,7 @@ describe('TestSession', () => {
 
       try {
         await TestSession.create({
-          scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+          scratchOrgs: [{ config: 'config/project-scratch-def.json' }],
         });
         assert(false, 'TestSession.create() should throw');
       } catch (err: unknown) {

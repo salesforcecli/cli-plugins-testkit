@@ -22,10 +22,6 @@ import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAu
 import { JsonOutput } from './execCmd';
 
 export type ScratchOrgConfig = {
-  /**
-   * @deprecated 'sf' will be default
-   */
-  executable?: 'sfdx' | 'sf';
   config?: string;
   duration?: number;
   alias?: string;
@@ -334,7 +330,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           continue;
         }
 
-        const executable = org.executable ?? 'sf';
+        const executable = 'sf';
 
         if (!shell.which(executable)) {
           throw new Error(`${executable} executable not found for creating scratch orgs`);

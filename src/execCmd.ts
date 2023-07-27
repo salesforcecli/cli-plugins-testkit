@@ -17,7 +17,7 @@ import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 import stripAnsi = require('strip-ansi');
 import { genUniqueString } from './genUniqueString';
 
-export type CLI = 'inherit' | 'sfdx' | 'sf';
+export type CLI = 'inherit' | 'sf';
 
 type BaseExecOptions = {
   /**
@@ -28,8 +28,7 @@ type BaseExecOptions = {
   /**
    * The executable that should be used for execCmd.
    * - inherit uses TESTKIT_EXECUTABLE_PATH to determine the executable. If it's not set it defaults to the local bin/dev
-   * - sfdx refers to the globally installed sfdx executable
-   * - sf refers to the globally installed sfdx executable
+   * - sf refers to the globally installed sf v2 (sf/sfdx) executable
    */
   cli?: CLI;
 };
