@@ -17,7 +17,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+      scratchOrgs: [{ config: 'config/project-scratch-def.json' }],
     });
   });
 
