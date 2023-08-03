@@ -62,13 +62,13 @@ expect(result.name).to.equal('expectedName');
 
 ```bash
 # Install the release candidate in the current directory using NPM
-npm install sfdx@latest-rc
+npm install @salesforce/cli@latest-rc
 
 # Install the newly published version of my plugin
-./node_modules/.bin/sfdx plugins:install myplugin
+./node_modules/.bin/sf plugins:install myplugin
 
-# Target the local sfdx
-export TESTKIT_EXECUTABLE_PATH=./node_modules/.bin/sfdx
+# Target the local sf
+export TESTKIT_EXECUTABLE_PATH=./node_modules/.bin/sf
 
 # Run NUTs (requires a test:nuts script target in the package.json)
 yarn test:nuts
@@ -80,7 +80,7 @@ You will notice that the executable is not configurable in the `execCmd` method 
 import { exec } from 'shelljs';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 
-await exec('sfdx auth:jwt:grant ... --json');
+await exec('sf auth:jwt:grant ... --json');
 const result = await execCmd('mycommand --myflag --json');
 ```
 

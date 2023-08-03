@@ -28,8 +28,8 @@ type BaseExecOptions = {
   /**
    * The executable that should be used for execCmd.
    * - inherit uses TESTKIT_EXECUTABLE_PATH to determine the executable. If it's not set it defaults to the local bin/dev
-   * - sfdx refers to the globally installed sfdx executable
-   * - sf refers to the globally installed sfdx executable
+   * - sfdx refers to the globally installed sf executable
+   * - sf refers to the globally installed sf executable
    */
   cli?: CLI;
 };

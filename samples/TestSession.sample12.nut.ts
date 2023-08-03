@@ -26,9 +26,9 @@ describe('TestSession', () => {
       },
       scratchOrgs: [
         // rely on defaultusername
-        { executable: 'sf', config: 'config/project-scratch-def.json', setDefault: true },
+        { config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        { executable: 'sf', config: 'config/project-scratch-def.json', username },
+        { config: 'config/project-scratch-def.json', username },
       ],
     });
   });
