@@ -45,7 +45,7 @@
   ],
   "dependencies": {
     "@salesforce/core": "^4.3.11",
-    "@salesforce/kit": "^3.0.6",
+    "@salesforce/kit": "^3.0.8",
     "@salesforce/ts-types": "^2.0.2",
     "@types/shelljs": "^0.8.12",
     "debug": "^4.3.1",
