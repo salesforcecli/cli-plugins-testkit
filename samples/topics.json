@@ -49,6 +49,11 @@
         "file": "TestSession.sample1.nut.ts"
       },
       {
+        "header": "Testing with generated sfdx project with a specific api version",
+        "usecase": "I have a plugin with commands that require a SFDX project that need a specific api version in the sfdx-project.json.",
+        "file": "TestSession.sample1b.nut.ts"
+      },
+      {
         "header": "Testing with local sfdx project",
         "usecase": "I have a plugin with commands that require a SFDX project and the test project I want to use is in a local directory within my plugin repo.",
         "file": "TestSession.sample2.nut.ts"

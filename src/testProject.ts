@@ -14,12 +14,14 @@ import { env } from '@salesforce/kit';
 import { genUniqueString } from './genUniqueString';
 import { zipDir, ZipDirConfig } from './zip';
 
-export interface TestProjectOptions {
-  sourceDir?: string;
-  gitClone?: string;
+export type TestProjectOptions = {
   name?: string;
   destinationDir?: string;
-}
+} & (
+  | { sourceDir?: string; gitClone?: never; apiVersion?: never }
+  | { sourceDir?: never; gitClone?: string; apiVersion?: never }
+  | { sourceDir?: never; gitClone?: never; apiVersion?: string }
+);
 
 /**
  * A SFDX project for use with testing.  The project can be defined by:
@@ -53,7 +55,7 @@ export class TestProject {
     }
 
     // Copy a dir containing a SFDX project to a dir for testing.
-    if (options?.sourceDir) {
+    if (options.sourceDir) {
       const rv = shell.cp('-r', options.sourceDir, destDir);
       if (rv.code !== 0) {
         throw new Error(`project copy failed with error:\n${rv.stderr}`);
@@ -61,7 +63,7 @@ export class TestProject {
       this.dir = path.join(destDir, path.basename(options.sourceDir));
     }
     // Clone a git repo containing a SFDX project in a dir for testing.
-    else if (options?.gitClone) {
+    else if (options.gitClone) {
       // verify git is found
       if (!shell.which('git')) {
         throw new Error('git executable not found for creating a project from a git clone');
@@ -85,7 +87,9 @@ export class TestProject {
       }
       const name = options.name ?? genUniqueString('project_%s');
       const rv = shell.exec(
-        `sf project:generate -n ${name} -d ${destDir}`,
+        `sf project:generate -n ${name} -d ${destDir}${
+          options.apiVersion ? ` --api-version ${options.apiVersion}` : ''
+        }`,
         this.shelljsExecOptions
       ) as shell.ShellString;
       if (rv.code !== 0) {
