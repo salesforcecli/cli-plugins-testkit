@@ -14,10 +14,12 @@ import { env } from '@salesforce/kit';
 import { genUniqueString } from './genUniqueString';
 import { zipDir, ZipDirConfig } from './zip';
 
+type apiVersionNumber = number;
+
 export type TestProjectOptions = {
   name?: string;
   destinationDir?: string;
-} & ({ sourceDir: string } | { gitClone: string } | { apiVersion?: string });
+} & ({ sourceDir: string } | { gitClone: string } | { apiVersion?: `${apiVersionNumber}.0` });
 
 /**
  * A SFDX project for use with testing.  The project can be defined by:
