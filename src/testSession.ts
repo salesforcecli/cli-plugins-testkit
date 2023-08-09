@@ -340,7 +340,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           throw new Error(`${executable} executable not found for creating scratch orgs`);
         }
 
-        let baseCmd = `sf env:create:scratch --json -y ${org.duration ?? '1'} -w ${org.wait ?? 60}`;
+        let baseCmd = `sf org:create:scratch --json -y ${org.duration ?? '1'} -w ${org.wait ?? 60}`;
 
         if (org.config) {
           baseCmd += ` -f ${org.config}`;
@@ -355,7 +355,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         }
 
         if (org.username) {
-          baseCmd += `--username ${org.username}`;
+          baseCmd += ` --username ${org.username}`;
         }
 
         if (org.edition) {
