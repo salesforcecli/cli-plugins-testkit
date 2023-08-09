@@ -427,7 +427,7 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      scratchOrgs: [{ executable: 'sf', edition: 'developer' }],
+      scratchOrgs: [{ edition: 'developer' }],
     });
 
     execCmd('project:deploy:start', { cli: 'sf' });
@@ -491,7 +491,7 @@ describe('TestSession', () => {
       project: {
         sourceDir: path.join(process.cwd(), 'localTestProj'),
       },
-      scratchOrgs: [{ executable: 'sf', config: 'config/project-scratch-def.json' }],
+      scratchOrgs: [{ config: 'config/project-scratch-def.json' }],
     });
   });
 
@@ -542,9 +542,9 @@ describe('TestSession', () => {
       },
       scratchOrgs: [
         // rely on defaultusername
-        { executable: 'sf', config: 'config/project-scratch-def.json', setDefault: true },
+        { config: 'config/project-scratch-def.json', setDefault: true },
         // explicitly set a username
-        { executable: 'sf', config: 'config/project-scratch-def.json', username },
+        { config: 'config/project-scratch-def.json', username },
       ],
     });
   });

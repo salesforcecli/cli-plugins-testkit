@@ -15,7 +15,7 @@ describe('TestSession', () => {
       project: {
         name: 'MyTestProject',
       },
-      scratchOrgs: [{ executable: 'sf', edition: 'developer' }],
+      scratchOrgs: [{ edition: 'developer' }],
     });
 
     execCmd('project:deploy:start', { cli: 'sf' });
