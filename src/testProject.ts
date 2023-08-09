@@ -17,7 +17,11 @@ import { zipDir, ZipDirConfig } from './zip';
 export type TestProjectOptions = {
   name?: string;
   destinationDir?: string;
-} & ({ sourceDir: string } | { gitClone: string } | { apiVersion?: `${number}.0` });
+} & (
+  | { sourceDir: string; gitClone?: never; apiVersion?: never }
+  | { gitClone: string; sourceDir?: never; apiVersion?: never }
+  | { apiVersion?: `${number}.0`; sourceDir?: never; gitClone?: never }
+);
 
 /**
  * A SFDX project for use with testing.  The project can be defined by:
@@ -51,7 +55,7 @@ export class TestProject {
     }
 
     // Copy a dir containing a SFDX project to a dir for testing.
-    if ('sourceDir' in options) {
+    if (options.sourceDir) {
       const rv = shell.cp('-r', options.sourceDir, destDir);
       if (rv.code !== 0) {
         throw new Error(`project copy failed with error:\n${rv.stderr}`);
@@ -59,7 +63,7 @@ export class TestProject {
       this.dir = path.join(destDir, path.basename(options.sourceDir));
     }
     // Clone a git repo containing a SFDX project in a dir for testing.
-    else if ('gitClone' in options) {
+    else if (options.gitClone) {
       // verify git is found
       if (!shell.which('git')) {
         throw new Error('git executable not found for creating a project from a git clone');
