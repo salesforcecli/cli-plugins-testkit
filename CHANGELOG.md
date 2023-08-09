@@ -1,3 +1,16 @@
+# [4.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.9...4.3.0) (2023-08-09)
+
+
+### Features
+
+* project api version ([#539](https://github.com/salesforcecli/cli-plugins-testkit/issues/539)) ([a569636](https://github.com/salesforcecli/cli-plugins-testkit/commit/a5696367b3dcc293ae8eec1e6dd0cb839ad50586))
+
+
+
+## [4.2.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.8...4.2.9) (2023-08-07)
+
+
+
 ## [4.2.8](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.2.7...4.2.8) (2023-07-29)
 
 
