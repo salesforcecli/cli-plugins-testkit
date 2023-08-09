@@ -102,12 +102,7 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
@@ -174,12 +169,7 @@ A TestSession provides conveniences to testing plugin commands with options to a
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -208,12 +198,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -300,12 +285,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -330,12 +310,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 import { tmpdir } from 'os';
 import { expect } from 'chai';
 
@@ -417,12 +392,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -453,12 +423,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -491,12 +456,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -527,12 +487,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 import * as path from 'path';
 
 describe('TestSession', () => {
@@ -573,12 +528,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+TestProjectBaseOptions;
 import * as shelljs from 'shelljs';
 
 /*
