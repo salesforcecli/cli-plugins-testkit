@@ -107,6 +107,23 @@ describe('TestProject', () => {
     expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
   });
 
+  it('should generate from a name with api version', () => {
+    const apiVersion = '50.0';
+    stubMethod(sandbox, shelljs, 'which').returns(true);
+    const shellOverride = 'powershell.exe';
+    stubMethod(sandbox, env, 'getString').returns(shellOverride);
+    const shellString = new ShellString('');
+    shellString.code = 0;
+    const execStub = stubMethod(sandbox, shelljs, 'exec').returns(shellString);
+    const name = 'MyTestProject';
+    const destinationDir = pathJoin('foo', 'bar');
+    const testProject = new TestProject({ name, destinationDir, apiVersion });
+    expect(testProject.dir).to.equal(pathJoin(destinationDir, name));
+    const execArg1 = `sf project:generate -n ${name} -d ${destinationDir} --api-version ${apiVersion}`;
+    expect(execStub.firstCall.args[0]).to.equal(execArg1);
+    expect(execStub.firstCall.args[1]).to.have.property('shell', shellOverride);
+  });
+
   it('should generate by default', () => {
     stubMethod(sandbox, shelljs, 'which').returns(true);
     const shellString = new ShellString('');
