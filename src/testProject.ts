@@ -18,9 +18,9 @@ export type TestProjectOptions = {
   name?: string;
   destinationDir?: string;
 } & (
-  | { sourceDir: string; gitClone?: never; apiVersion?: never }
-  | { gitClone: string; sourceDir?: never; apiVersion?: never }
-  | { apiVersion?: `${number}.0`; sourceDir?: never; gitClone?: never }
+  | { sourceDir?: string; gitClone?: never; apiVersion?: never }
+  | { sourceDir?: never; gitClone?: string; apiVersion?: never }
+  | { sourceDir?: never; gitClone?: never; apiVersion?: string }
 );
 
 /**

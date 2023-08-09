@@ -102,7 +102,6 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
@@ -169,7 +168,6 @@ A TestSession provides conveniences to testing plugin commands with options to a
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -198,7 +196,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -285,7 +282,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -310,7 +306,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
+
 import { tmpdir } from 'os';
 import { expect } from 'chai';
 
@@ -392,7 +388,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -423,7 +418,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -456,7 +450,6 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -487,7 +480,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
+
 import * as path from 'path';
 
 describe('TestSession', () => {
@@ -528,7 +521,7 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-TestProjectBaseOptions;
+
 import * as shelljs from 'shelljs';
 
 /*
