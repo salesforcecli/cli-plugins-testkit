@@ -1,3 +1,12 @@
+## [4.3.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.3.3...4.3.4) (2023-09-03)
+
+
+### Bug Fixes
+
+* **deps:** bump ts-retry-promise from 0.7.0 to 0.7.1 ([44cd824](https://github.com/salesforcecli/cli-plugins-testkit/commit/44cd82454dad29f0bda1e652b43e124885e3f7a6))
+
+
+
 ## [4.3.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.3.2...4.3.3) (2023-09-02)
 
 
