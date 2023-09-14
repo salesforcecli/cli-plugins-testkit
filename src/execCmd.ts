@@ -114,7 +114,7 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  *
  * If the cli is 'inherit', the executable preference order is:
  *    1. TESTKIT_EXECUTABLE_PATH env var
- *    2. `bin/dev` (default)
+ *    2. `bin/dev.js` (default)
  *
  * @returns The command string with CLI executable. E.g., `"node_modules/bin/sf org:create:user -a testuser1"`
  */
