@@ -121,11 +121,14 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
 const determineExecutable = (cli: CLI = 'inherit'): string => {
   const debug = Debug('testkit:determineExecutable');
 
-  const bin =
+  let bin =
     cli === 'inherit'
       ? env.getString('TESTKIT_EXECUTABLE_PATH') ??
-        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev')
+        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js')
       : cli;
+
+  // Support plugins who still use bin/dev instead of bin/dev.js
+  if (bin.endsWith('dev.js') && !fs.existsSync(bin)) bin = bin.replace('.js', '');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
