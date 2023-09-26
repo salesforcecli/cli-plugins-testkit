@@ -1,3 +1,9 @@
+# [4.4.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.3.6...4.4.0) (2023-09-26)
+
+### Features
+
+- support bin/dev.js scripts ([ec9eef9](https://github.com/salesforcecli/cli-plugins-testkit/commit/ec9eef9ca9e21dc5f0002cfcec6027ad7e5082b7))
+
 ## [4.3.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.3.5...4.3.6) (2023-09-16)
 
 ### Bug Fixes
