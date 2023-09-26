@@ -114,18 +114,21 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  *
  * If the cli is 'inherit', the executable preference order is:
  *    1. TESTKIT_EXECUTABLE_PATH env var
- *    2. `bin/dev` (default)
+ *    2. `bin/dev.js` (default)
  *
  * @returns The command string with CLI executable. E.g., `"node_modules/bin/sf org:create:user -a testuser1"`
  */
 const determineExecutable = (cli: CLI = 'inherit'): string => {
   const debug = Debug('testkit:determineExecutable');
 
-  const bin =
+  let bin =
     cli === 'inherit'
       ? env.getString('TESTKIT_EXECUTABLE_PATH') ??
-        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev')
+        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js')
       : cli;
+
+  // Support plugins who still use bin/dev instead of bin/dev.js
+  if (bin.endsWith('dev.js') && !fs.existsSync(bin)) bin = bin.replace('.js', '');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 
