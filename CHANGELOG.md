@@ -1,3 +1,9 @@
+## [4.4.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.0...4.4.1) (2023-09-28)
+
+### Bug Fixes
+
+- **deps:** bump get-func-name from 2.0.0 to 2.0.2 ([b224f31](https://github.com/salesforcecli/cli-plugins-testkit/commit/b224f31a64a421d8f2370a67970f29e125ab56ec))
+
 # [4.4.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.3.6...4.4.0) (2023-09-26)
 
 ### Features
