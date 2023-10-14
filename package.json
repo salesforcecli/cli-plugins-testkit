@@ -44,7 +44,7 @@
     "!lib/**/*.map"
   ],
   "dependencies": {
-    "@salesforce/core": "^5.3.5",
+    "@salesforce/core": "^5.3.9",
     "@salesforce/kit": "^3.0.13",
     "@salesforce/ts-types": "^2.0.6",
     "@types/shelljs": "^0.8.13",
