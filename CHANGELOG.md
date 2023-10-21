@@ -1,3 +1,12 @@
+## [4.4.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.9...4.4.10) (2023-10-21)
+
+
+### Bug Fixes
+
+* **deps:** bump @types/shelljs from 0.8.13 to 0.8.14 ([81ed87d](https://github.com/salesforcecli/cli-plugins-testkit/commit/81ed87d7b7fa6d83cab63728ff9b218957ec265c))
+
+
+
 ## [4.4.9](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.8...4.4.9) (2023-10-21)
 
 
