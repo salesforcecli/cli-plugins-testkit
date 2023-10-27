@@ -166,7 +166,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           binDev += '.js';
         }
 
-        // only used in the case when bin/run or bin/run.js doesn't exist
+        // only used in the case when bin/dev or bin/dev.js doesn't exist
         let binRun = path.join(process.cwd(), 'bin', 'run');
         if (!fs.existsSync(binRun)) {
           binRun += '.js';
