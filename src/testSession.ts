@@ -161,11 +161,17 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
       // to use the bin/dev from the cwd now.
       if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
-        const binDev = path.join(process.cwd(), 'bin', 'dev');
-        env.setString(
-          'TESTKIT_EXECUTABLE_PATH',
-          fs.existsSync(binDev) ? binDev : path.join(process.cwd(), 'bin', 'run')
-        );
+        let binDev = path.join(process.cwd(), 'bin', 'dev');
+        if (!fs.existsSync(binDev)) {
+          binDev += '.js';
+        }
+
+        // only used in the case when bin/run or bin/run.js doesn't exist
+        let binRun = path.join(process.cwd(), 'bin', 'run');
+        if (!fs.existsSync(binRun)) {
+          binRun += '.js';
+        }
+        env.setString('TESTKIT_EXECUTABLE_PATH', fs.existsSync(binDev) ? binDev : binRun);
       }
 
       this.stubCwd(projectDir);
