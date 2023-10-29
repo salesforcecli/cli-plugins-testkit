@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { randomBytes } from 'crypto';
-import { format } from 'util';
+import { randomBytes } from 'node:crypto';
+import { format } from 'node:util';
 
 /**
  * Returns a unique string. If template is supplied and contains a replaceable string (see node library util.format)

@@ -4,9 +4,9 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'fs';
-import { tmpdir } from 'os';
-import { join as pathJoin } from 'path';
+import * as fs from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join as pathJoin } from 'node:path';
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import * as shelljs from 'shelljs';

@@ -11,9 +11,9 @@
  * a number of the testSession fail. Running these tests after testSession tests seems to work,
  * so chose a file name that guarantees these will be run last.
  */
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { stubMethod } from '@salesforce/ts-sinon';
 import * as chai from 'chai';
 import { AuthFields } from '@salesforce/core';

@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'fs';
-import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import { join as pathJoin, resolve as pathResolve } from 'path';
-import { inspect } from 'util';
+import * as fs from 'node:fs';
+import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
+import { join as pathJoin, resolve as pathResolve } from 'node:path';
+import { inspect } from 'node:util';
 import { SfError } from '@salesforce/core';
 import { Duration, env, parseJson } from '@salesforce/kit';
 import { AnyJson, isNumber, Many } from '@salesforce/ts-types';

@@ -7,8 +7,8 @@
 
 // For testing private properties of TestSession
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import * as shelljs from 'shelljs';
