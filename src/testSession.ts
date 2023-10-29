@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { RetryConfig } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';

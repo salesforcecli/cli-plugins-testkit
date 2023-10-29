@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import { tmpdir } from 'os';
-import { inspect } from 'util';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { tmpdir } from 'node:os';
+import { inspect } from 'node:util';
 import { debug, Debugger } from 'debug';
 import * as shell from 'shelljs';
 import { env } from '@salesforce/kit';
