@@ -1,3 +1,12 @@
+## [4.4.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.11...4.4.12) (2023-10-30)
+
+
+### Bug Fixes
+
+* update bin/dev|run exec for when run.js exist ([d387c30](https://github.com/salesforcecli/cli-plugins-testkit/commit/d387c301feb2fec4967fa034a22e63857faf1d26))
+
+
+
 ## [4.4.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.10...4.4.11) (2023-10-29)
 
 
