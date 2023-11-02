@@ -19,7 +19,7 @@ import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
 import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
-import { JsonOutput } from './execCmd';
+import { determineExecutable, JsonOutput } from './execCmd';
 
 export type ScratchOrgConfig = {
   /**
@@ -156,22 +156,12 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         projectDir = this.project.dir;
       }
 
-      // The default bin/dev in execCmd will no longer resolve properly when
+      // The default bin/run.js in execCmd will no longer resolve properly when
       // a test project is used since process.cwd is changed.  If the
       // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
-      // to use the bin/dev from the cwd now.
+      // to use the bin/run.js from the cwd now.
       if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
-        let binDev = path.join(process.cwd(), 'bin', 'dev');
-        if (!fs.existsSync(binDev)) {
-          binDev += '.js';
-        }
-
-        // only used in the case when bin/dev or bin/dev.js doesn't exist
-        let binRun = path.join(process.cwd(), 'bin', 'run');
-        if (!fs.existsSync(binRun)) {
-          binRun += '.js';
-        }
-        env.setString('TESTKIT_EXECUTABLE_PATH', fs.existsSync(binDev) ? binDev : binRun);
+        env.setString('TESTKIT_EXECUTABLE_PATH', determineExecutable('inherit'));
       }
 
       this.stubCwd(projectDir);

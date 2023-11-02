@@ -17,7 +17,7 @@ import { ExecCallback, ExecOptions, ShellString } from 'shelljs';
 import stripAnsi = require('strip-ansi');
 import { genUniqueString } from './genUniqueString';
 
-export type CLI = 'inherit' | 'sfdx' | 'sf';
+export type CLI = 'inherit' | 'sfdx' | 'sf' | 'dev';
 
 type BaseExecOptions = {
   /**
@@ -114,21 +114,35 @@ const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString
  *
  * If the cli is 'inherit', the executable preference order is:
  *    1. TESTKIT_EXECUTABLE_PATH env var
- *    2. `bin/dev.js` (default)
+ *    2. `bin/run.js` (default)
  *
  * @returns The command string with CLI executable. E.g., `"node_modules/bin/sf org:create:user -a testuser1"`
  */
-const determineExecutable = (cli: CLI = 'inherit'): string => {
+export const determineExecutable = (cli: CLI = 'inherit'): string => {
   const debug = Debug('testkit:determineExecutable');
 
-  let bin =
-    cli === 'inherit'
-      ? env.getString('TESTKIT_EXECUTABLE_PATH') ??
-        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js')
-      : cli;
+  let bin: string | undefined;
+  switch (cli) {
+    case 'inherit':
+      bin =
+        env.getString('TESTKIT_EXECUTABLE_PATH') ??
+        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'run.cmd' : 'run.js');
+      break;
+    case 'dev':
+      bin =
+        env.getString('TESTKIT_EXECUTABLE_PATH') ??
+        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js');
+      break;
+    case 'sfdx':
+      bin = cli;
+      break;
+    case 'sf':
+      bin = cli;
+      break;
+  }
 
-  // Support plugins who still use bin/dev instead of bin/dev.js
-  if (bin.endsWith('dev.js') && !fs.existsSync(bin)) bin = bin.replace('.js', '');
+  // Support plugins who still use bin/run instead of bin/run.js
+  if (bin.endsWith('.js') && !fs.existsSync(bin)) bin = bin.replace('.js', '');
   const which = shelljs.which(bin);
   let resolvedPath = pathResolve(bin);
 

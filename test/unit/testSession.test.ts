@@ -99,6 +99,8 @@ describe('TestSession', () => {
       const shellString = new ShellString('');
       shellString.code = 0;
       stubMethod(sandbox, shelljs, 'cp').returns(shellString);
+      stubMethod(sandbox, shelljs, 'which').returns(shellString);
+      stubMethod(sandbox, fs, 'existsSync').returns(true);
       const stubCwdStub = stubMethod(sandbox, TestSession.prototype, 'stubCwd');
 
       const session = await TestSession.create({ project: { sourceDir } });
@@ -130,6 +132,8 @@ describe('TestSession', () => {
       const shellString = new ShellString('');
       shellString.code = 0;
       stubMethod(sandbox, shelljs, 'cp').returns(shellString);
+      stubMethod(sandbox, shelljs, 'which').returns(shellString);
+      stubMethod(sandbox, fs, 'existsSync').returns(true);
       const stubCwdStub = stubMethod(sandbox, TestSession.prototype, 'stubCwd');
 
       const session = await TestSession.create({ project: { sourceDir } });
