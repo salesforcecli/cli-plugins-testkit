@@ -1,3 +1,12 @@
+# [5.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.12...5.0.0) (2023-11-02)
+
+
+### Bug Fixes
+
+* cache process.cwd() ([290e986](https://github.com/salesforcecli/cli-plugins-testkit/commit/290e98650827f8505aa98d8f334d941df4ca9e19))
+
+
+
 ## [4.4.12](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.11...4.4.12) (2023-10-30)
 
 
