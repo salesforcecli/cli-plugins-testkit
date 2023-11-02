@@ -19,7 +19,7 @@ import { zipDir } from './zip';
 
 import { TestProject, TestProjectOptions } from './testProject';
 import { DevhubAuthStrategy, getAuthStrategy, testkitHubAuth, transferExistingAuthToEnv } from './hubAuth';
-import { determineExecutable, JsonOutput } from './execCmd';
+import { Cache, JsonOutput } from './execCmd';
 
 export type ScratchOrgConfig = {
   /**
@@ -134,6 +134,12 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
     this.debug = debug('testkit:session');
     this.zipDir = zipDir;
 
+    // Cache the current process.cwd() so that we can use it when resolving
+    // the bin/run.js executable path. This is necessary because setting the
+    // project option changes the process.cwd() to the project dir, which
+    // doesn't have bin/run.js
+    Cache.getInstance().set('pluginDir', process.cwd());
+
     this.createdDate = new Date();
     this.id = genUniqueString(`${this.createdDate.valueOf()}%s`);
     this.retries = env.getNumber('TESTKIT_SETUP_RETRIES', this.options.retries ?? 0);
@@ -154,14 +160,6 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
       if (!projectDir) {
         this.project = new TestProject({ ...this.options.project, destinationDir: this.dir });
         projectDir = this.project.dir;
-      }
-
-      // The default bin/run.js in execCmd will no longer resolve properly when
-      // a test project is used since process.cwd is changed.  If the
-      // TESTKIT_EXECUTABLE_PATH env var is not being used, then set it
-      // to use the bin/run.js from the cwd now.
-      if (!env.getString('TESTKIT_EXECUTABLE_PATH')) {
-        env.setString('TESTKIT_EXECUTABLE_PATH', determineExecutable('inherit'));
       }
 
       this.stubCwd(projectDir);
