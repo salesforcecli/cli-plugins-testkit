@@ -122,16 +122,17 @@ export const determineExecutable = (cli: CLI = 'inherit'): string => {
   const debug = Debug('testkit:determineExecutable');
 
   let bin: string | undefined;
+  const root = Cache.getInstance().get('pluginDir') ?? process.cwd();
   switch (cli) {
     case 'inherit':
       bin =
         env.getString('TESTKIT_EXECUTABLE_PATH') ??
-        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'run.cmd' : 'run.js');
+        pathJoin(root, 'bin', process.platform === 'win32' ? 'run.cmd' : 'run.js');
       break;
     case 'dev':
       bin =
         env.getString('TESTKIT_EXECUTABLE_PATH') ??
-        pathJoin(process.cwd(), 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js');
+        pathJoin(root, 'bin', process.platform === 'win32' ? 'dev.cmd' : 'dev.js');
       break;
     case 'sfdx':
       bin = cli;
@@ -451,4 +452,15 @@ export async function execInteractiveCmd(
       resolve(result);
     });
   });
+}
+
+export class Cache extends Map<string, string> {
+  private static instance: Cache;
+
+  public static getInstance(): Cache {
+    if (!Cache.instance) {
+      Cache.instance = new Cache();
+    }
+    return Cache.instance;
+  }
 }
