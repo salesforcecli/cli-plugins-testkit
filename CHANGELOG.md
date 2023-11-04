@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.0.0...5.0.1) (2023-11-04)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 5.3.10 to 5.3.17 ([c4f2a83](https://github.com/salesforcecli/cli-plugins-testkit/commit/c4f2a83871baf268c269f88ee1b16150b14ddb86))
+
+
+
 # [5.0.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/4.4.12...5.0.0) (2023-11-02)
 
 
