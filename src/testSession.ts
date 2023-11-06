@@ -323,7 +323,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         // Don't create orgs if we are supposed to reuse one from the env
         const orgUsername = env.getString('TESTKIT_ORG_USERNAME');
         if (orgUsername) {
-          dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${org}`);
+          dbug(`Not creating a new org. Reusing TESTKIT_ORG_USERNAME of: ${orgUsername}`);
           this.orgs.set(orgUsername, { username: orgUsername });
           continue;
         }
