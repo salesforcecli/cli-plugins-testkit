@@ -1,3 +1,12 @@
+## [5.0.2](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.0.1...5.0.2) (2023-11-06)
+
+
+### Bug Fixes
+
+* logging username ([2a5ae24](https://github.com/salesforcecli/cli-plugins-testkit/commit/2a5ae24c4004fdd79fa5c4889599cfaea48eb3bc))
+
+
+
 ## [5.0.1](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.0.0...5.0.1) (2023-11-04)
 
 
