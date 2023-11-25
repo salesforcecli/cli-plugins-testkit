@@ -527,10 +527,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@salesforce/core@^6.1.3":
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-6.1.4.tgz#5c9d90490ab8688f9497fef63134a43f1cbe0f70"
-  integrity sha512-/1hhcpMyx3DaFrxZ/il0a8yUapRRuWzUlxUntahp9ELo/Fx7FiE7o2g0jh8AxAqfb4LKu1mV8sV656liClx6sA==
+"@salesforce/core@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-6.2.0.tgz#9bac72c0b48c733cf1d32d19f9775c34d895f207"
+  integrity sha512-HuggjBCLA18yXYHChnsrPDGbM+fAPx+9NeS7Dkx3/o1VhJ2hok5BUkvdaeoAVex/0Oc2J+KcvX/gqrjY51iOhQ==
   dependencies:
     "@salesforce/kit" "^3.0.15"
     "@salesforce/schemas" "^1.6.1"
