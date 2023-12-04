@@ -1,3 +1,12 @@
+# [5.1.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.0.6...5.1.0) (2023-12-04)
+
+
+### Features
+
+* add nonZero to ensureExitCode ([#599](https://github.com/salesforcecli/cli-plugins-testkit/issues/599)) ([862aedd](https://github.com/salesforcecli/cli-plugins-testkit/commit/862aedd6c82a226115ab55e9d125f5a1230d8087))
+
+
+
 ## [5.0.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.0.5...5.0.6) (2023-12-02)
 
 
