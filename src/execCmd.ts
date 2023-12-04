@@ -23,7 +23,7 @@ type BaseExecOptions = {
   /**
    * Throws if this exit code is not returned by the child process.
    */
-  ensureExitCode?: number;
+  ensureExitCode?: number | 'nonZero';
 
   /**
    * The executable that should be used for execCmd.
@@ -97,7 +97,7 @@ const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>, file: string): 
   return result;
 };
 
-const getExitCodeError = (cmd: string, expectedCode: number, output: ShellString) => {
+const getExitCodeError = (cmd: string, expectedCode: number | 'nonZero', output: ShellString) => {
   const errorDetails =
     output.stdout || output.stderr
       ? // return details if they exist
@@ -201,6 +201,10 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
+    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
+  }
+
+  if (cmdOptions.ensureExitCode === 'nonZero' && result.shellOutput.code === 0) {
     throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
