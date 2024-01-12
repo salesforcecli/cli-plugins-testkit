@@ -413,7 +413,10 @@ export async function execInteractiveCmd(
       const shouldScrollForAnswer = current.includes('❯') && scrollTarget;
 
       if (shouldScrollForAnswer) {
-        const regex = /(?<=❯\s)(.*)/g;
+        // recent inquirer versions include a unicode character in the prompt that we need to strip out
+        // it's something like a backspace or a backline character used to type over existing output
+        // this generally removes all the "control" characters in the first section of unicode
+        const regex = /(?<=❯\s)([\u0020-\u00d7ff]+)/g;
         const selected = (current.match(regex) ?? [''])[0].trim();
         if (selected === scrollTarget) {
           seen.add(matchingQuestion);
