@@ -1,3 +1,12 @@
+## [5.1.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.4...5.1.5) (2024-01-12)
+
+
+### Bug Fixes
+
+* regex for new inquirer select ([#610](https://github.com/salesforcecli/cli-plugins-testkit/issues/610)) ([75f1a16](https://github.com/salesforcecli/cli-plugins-testkit/commit/75f1a16725746828e118beeaaa4c16203e74e399))
+
+
+
 ## [5.1.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.3...5.1.4) (2024-01-06)
 
 
