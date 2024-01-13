@@ -1,3 +1,12 @@
+## [5.1.7](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.6...5.1.7) (2024-01-13)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 6.4.4 to 6.4.7 ([0b0a922](https://github.com/salesforcecli/cli-plugins-testkit/commit/0b0a92221d460e4632f2734a1d3e437eeced7f35))
+
+
+
 ## [5.1.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.5...5.1.6) (2024-01-13)
 
 
