@@ -55,7 +55,7 @@
     "ts-retry-promise": "^0.8.0"
   },
   "devDependencies": {
-    "@salesforce/dev-scripts": "^8.3.0",
+    "@salesforce/dev-scripts": "^8.4.0",
     "@salesforce/ts-sinon": "^1.4.19",
     "@types/debug": "^4.1.12",
     "ts-node": "^10.9.2",
