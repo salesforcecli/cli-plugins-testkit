@@ -45,7 +45,7 @@ export type ScratchOrgConfig = {
   tracksSource?: boolean;
 };
 
-export interface TestSessionOptions {
+export type TestSessionOptions = {
   /**
    * Specify a different location for the test session.
    */

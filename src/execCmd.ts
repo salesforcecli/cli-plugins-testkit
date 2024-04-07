@@ -44,7 +44,7 @@ type ExcludeMethods<T> = Pick<T, NonNullable<{ [K in keyof T]: T[K] extends (_: 
 
 export type JsonOutput<T> = { status: number; result: T; warnings: string[] } & Partial<ExcludeMethods<SfError>>;
 
-export interface ExecCmdResult<T> {
+export type ExecCmdResult<T> = {
   /**
    * Command output parsed as JSON, if `--json` param present.
    */
