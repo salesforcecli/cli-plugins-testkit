@@ -191,7 +191,7 @@ export const transferExistingAuthToEnv = (authStrategy: DevhubAuthStrategy): voi
   throw new Error(`Unable to reuse existing hub ${devhub}.  Check file ${devhub}.json`);
 };
 
-interface OrgDisplayResult {
+type OrgDisplayResult = {
   result: {
     sfdxAuthUrl?: string;
   };

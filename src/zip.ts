@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import * as JSZip from 'jszip';
 import Debug from 'debug';
 
-export interface ZipDirConfig {
+export type ZipDirConfig = {
   /**
    * The directory to zip.
    */
