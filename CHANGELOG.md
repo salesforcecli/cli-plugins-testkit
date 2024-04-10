@@ -1,3 +1,12 @@
+# [5.2.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.14...5.2.0) (2024-04-10)
+
+
+### Features
+
+* core7 ([#631](https://github.com/salesforcecli/cli-plugins-testkit/issues/631)) ([bf71cac](https://github.com/salesforcecli/cli-plugins-testkit/commit/bf71cac1b437e038685b27e6de6cbb9ba39a4972))
+
+
+
 ## [5.1.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.1.13...5.1.14) (2024-04-06)
 
 
