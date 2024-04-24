@@ -171,7 +171,7 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   const debug = Debug('testkit:execCmd');
 
   // Add on the bin path
-  const cmdWithBin = buildCmd(cmd, options);
+  cmd = buildCmd(cmd, options);
   const cmdOptions = buildCmdOptions(options);
 
   debug(`Running cmd: ${cmd}`);
@@ -189,7 +189,7 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  const code = (shelljs.exec(`${cmdWithBin} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
+  const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
 
   // capture the output for both stdout and stderr
   result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
@@ -204,14 +204,14 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
-    throw getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, result.shellOutput);
+    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
   if (cmdOptions.ensureExitCode === 'nonZero' && result.shellOutput.code === 0) {
-    throw getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, result.shellOutput);
+    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  const withJson = addJsonOutput<T>(cmdWithBin, result, stdoutFileLocation);
+  const withJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
   fs.rmSync(stderrFileLocation);
   fs.rmSync(stdoutFileLocation);
   return withJson;
@@ -221,12 +221,12 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
   const debug = Debug('testkit:execCmdAsync');
 
   // Add on the bin path
-  const cmdWithBin = buildCmd(cmd, options);
+  cmd = buildCmd(cmd, options);
 
   return new Promise<ExecCmdResult<T>>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
 
-    debug(`Running cmd: ${cmdWithBin}`);
+    debug(`Running cmd: ${cmd}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
     // buildCmdOptions will always
     const stdoutFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stdout')}.txt`);
@@ -239,7 +239,7 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         const output = new ShellString(stdout);
         output.code = code;
         output.stderr = stderr;
-        reject(getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, output));
+        reject(getExitCodeError(cmd, cmdOptions.ensureExitCode, output));
       }
 
       const result = {
@@ -257,14 +257,14 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
       }
 
-      const addJson = addJsonOutput<T>(cmdWithBin, result, stdoutFileLocation);
+      const addJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
       fs.rmSync(stdoutFileLocation);
       fs.rmSync(stderrFileLocation);
       resolve(addJson);
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmdWithBin} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
+    shelljs.exec(`${cmd} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
   });
 };
 
