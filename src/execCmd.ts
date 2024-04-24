@@ -64,7 +64,7 @@ export type ExecCmdResult<T> = {
    * Command execution duration.
    */
   execCmdDuration: Duration;
-}
+};
 
 const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions & { cwd: string } => {
   const defaults: ExecCmdOptions = {
@@ -89,9 +89,12 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
 const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>, file: string): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>;
+      return {
+        ...result,
+        jsonOutput: parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>,
+      };
     } catch (parseErr: unknown) {
-      result.jsonError = parseErr as Error;
+      return { ...result, jsonError: parseErr as Error };
     }
   }
   return result;
@@ -168,7 +171,7 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   const debug = Debug('testkit:execCmd');
 
   // Add on the bin path
-  cmd = buildCmd(cmd, options);
+  const cmdWithBin = buildCmd(cmd, options);
   const cmdOptions = buildCmdOptions(options);
 
   debug(`Running cmd: ${cmd}`);
@@ -186,7 +189,7 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
 
   // Execute the command in a synchronous child process
   const startTime = process.hrtime();
-  const code = (shelljs.exec(`${cmd} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
+  const code = (shelljs.exec(`${cmdWithBin} 1> ${stdoutFile} 2> ${stderrFile} `, cmdOptions) as ShellString).code;
 
   // capture the output for both stdout and stderr
   result.shellOutput = new ShellString(stripAnsi(fs.readFileSync(stdoutFileLocation, 'utf-8')));
@@ -201,14 +204,14 @@ const execCmdSync = <T>(cmd: string, options?: ExecCmdOptions): ExecCmdResult<T>
   debug(`Command completed with exit code: ${result.shellOutput.code}`);
 
   if (isNumber(cmdOptions.ensureExitCode) && result.shellOutput.code !== cmdOptions.ensureExitCode) {
-    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
+    throw getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
   if (cmdOptions.ensureExitCode === 'nonZero' && result.shellOutput.code === 0) {
-    throw getExitCodeError(cmd, cmdOptions.ensureExitCode, result.shellOutput);
+    throw getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, result.shellOutput);
   }
 
-  const withJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+  const withJson = addJsonOutput<T>(cmdWithBin, result, stdoutFileLocation);
   fs.rmSync(stderrFileLocation);
   fs.rmSync(stdoutFileLocation);
   return withJson;
@@ -218,12 +221,12 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
   const debug = Debug('testkit:execCmdAsync');
 
   // Add on the bin path
-  cmd = buildCmd(cmd, options);
+  const cmdWithBin = buildCmd(cmd, options);
 
   return new Promise<ExecCmdResult<T>>((resolve, reject) => {
     const cmdOptions = buildCmdOptions(options);
 
-    debug(`Running cmd: ${cmd}`);
+    debug(`Running cmd: ${cmdWithBin}`);
     debug(`Cmd options: ${inspect(cmdOptions)}`);
     // buildCmdOptions will always
     const stdoutFileLocation = pathJoin(cmdOptions.cwd, `${genUniqueString('stdout')}.txt`);
@@ -236,7 +239,7 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         const output = new ShellString(stdout);
         output.code = code;
         output.stderr = stderr;
-        reject(getExitCodeError(cmd, cmdOptions.ensureExitCode, output));
+        reject(getExitCodeError(cmdWithBin, cmdOptions.ensureExitCode, output));
       }
 
       const result = {
@@ -254,14 +257,14 @@ const execCmdAsync = async <T>(cmd: string, options: ExecCmdOptions): Promise<Ex
         result.shellOutput.stderr = stripAnsi(result.shellOutput.stdout);
       }
 
-      const addJson = addJsonOutput<T>(cmd, result, stdoutFileLocation);
+      const addJson = addJsonOutput<T>(cmdWithBin, result, stdoutFileLocation);
       fs.rmSync(stdoutFileLocation);
       fs.rmSync(stderrFileLocation);
       resolve(addJson);
     };
     // Execute the command async in a child process
     const startTime = process.hrtime();
-    shelljs.exec(`${cmd} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
+    shelljs.exec(`${cmdWithBin} 1> ${stdoutFileLocation} 2> ${stderrFileLocation}`, cmdOptions, callback);
   });
 };
 
@@ -363,9 +366,12 @@ export type PromptAnswers = Record<string, Many<string>>;
  *    { cwd: session.dir, ensureExitCode: 0 }
  *  );
  * ```
+ *
+ * If your flag values included spaces (where you'd normally need quotes like `some:cmd --flag "value with spaces"`),
+ * use an array of strings to represent the command ex: `['some:cmd', '--flag', 'value with spaces']`
  */
 export async function execInteractiveCmd(
-  command: string,
+  command: string | string[],
   answers: PromptAnswers,
   options: InteractiveCommandExecutionOptions = {}
 ): Promise<InteractiveCommandExecutionResult> {
@@ -378,7 +384,7 @@ export async function execInteractiveCmd(
       process.platform === 'win32'
         ? { shell: true, cwd: process.cwd(), ...options }
         : { cwd: process.cwd(), ...options };
-    const child = spawn(bin, command.split(' '), opts);
+    const child = spawn(bin, Array.isArray(command) ? command : command.split(' '), opts);
     child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
@@ -448,7 +454,7 @@ export async function execInteractiveCmd(
 
       if (isNumber(options.ensureExitCode) && code !== options.ensureExitCode) {
         reject(
-          getExitCodeError(command, options.ensureExitCode, {
+          getExitCodeError(Array.isArray(command) ? command.join(' ') : command, options.ensureExitCode, {
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code,
