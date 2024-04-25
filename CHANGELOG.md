@@ -1,3 +1,12 @@
+# [5.3.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.2.3...5.3.0) (2024-04-25)
+
+
+### Features
+
+* execInteractive takes string or string[] ([#637](https://github.com/salesforcecli/cli-plugins-testkit/issues/637)) ([9819b52](https://github.com/salesforcecli/cli-plugins-testkit/commit/9819b52da21ab89751d048718df9dbc3acf959b9))
+
+
+
 ## [5.2.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.2.2...5.2.3) (2024-04-20)
 
 
