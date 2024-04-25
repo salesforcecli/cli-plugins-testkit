@@ -64,7 +64,7 @@ export type ExecCmdResult<T> = {
    * Command execution duration.
    */
   execCmdDuration: Duration;
-}
+};
 
 const buildCmdOptions = (options?: ExecCmdOptions): ExecCmdOptions & { cwd: string } => {
   const defaults: ExecCmdOptions = {
@@ -89,9 +89,12 @@ const hrtimeToMillisDuration = (hrTime: [number, number]) =>
 const addJsonOutput = <T>(cmd: string, result: ExecCmdResult<T>, file: string): ExecCmdResult<T> => {
   if (cmd.includes('--json')) {
     try {
-      result.jsonOutput = parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>;
+      return {
+        ...result,
+        jsonOutput: parseJson(stripAnsi(fs.readFileSync(file, 'utf-8'))) as unknown as JsonOutput<T>,
+      };
     } catch (parseErr: unknown) {
-      result.jsonError = parseErr as Error;
+      return { ...result, jsonError: parseErr as Error };
     }
   }
   return result;
@@ -363,22 +366,30 @@ export type PromptAnswers = Record<string, Many<string>>;
  *    { cwd: session.dir, ensureExitCode: 0 }
  *  );
  * ```
+ *
+ * If your flag values included spaces (where you'd normally need quotes like `some:cmd --flag "value with spaces"`),
+ * use an array of strings to represent the command ex: `['some:cmd', '--flag', 'value with spaces']`
  */
 export async function execInteractiveCmd(
-  command: string,
+  command: string | string[],
   answers: PromptAnswers,
   options: InteractiveCommandExecutionOptions = {}
 ): Promise<InteractiveCommandExecutionResult> {
   const debug = Debug('testkit:execInteractiveCmd');
 
   return new Promise((resolve, reject) => {
+    if (typeof command === 'string' && command.includes('"')) {
+      throw new Error(
+        'Use an array of strings to represent the command when it includes quotes, ex: ["some:cmd", "--flag", "value with spaces"]'
+      );
+    }
     const bin = determineExecutable(options?.cli).trim();
     const startTime = process.hrtime();
     const opts =
       process.platform === 'win32'
         ? { shell: true, cwd: process.cwd(), ...options }
         : { cwd: process.cwd(), ...options };
-    const child = spawn(bin, command.split(' '), opts);
+    const child = spawn(bin, Array.isArray(command) ? command : command.split(' '), opts);
     child.stdin.setDefaultEncoding('utf-8');
 
     const seen = new Set<string>();
@@ -448,7 +459,7 @@ export async function execInteractiveCmd(
 
       if (isNumber(options.ensureExitCode) && code !== options.ensureExitCode) {
         reject(
-          getExitCodeError(command, options.ensureExitCode, {
+          getExitCodeError(Array.isArray(command) ? command.join(' ') : command, options.ensureExitCode, {
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code,
