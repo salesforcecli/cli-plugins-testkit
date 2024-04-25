@@ -378,6 +378,11 @@ export async function execInteractiveCmd(
   const debug = Debug('testkit:execInteractiveCmd');
 
   return new Promise((resolve, reject) => {
+    if (typeof command === 'string' && command.includes('"')) {
+      throw new Error(
+        'Use an array of strings to represent the command when it includes quotes, ex: ["some:cmd", "--flag", "value with spaces"]'
+      );
+    }
     const bin = determineExecutable(options?.cli).trim();
     const startTime = process.hrtime();
     const opts =
