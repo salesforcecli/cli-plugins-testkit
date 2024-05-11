@@ -1,3 +1,12 @@
+## [5.3.4](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.3...5.3.4) (2024-05-11)
+
+
+### Bug Fixes
+
+* **deps:** bump sinon from 17.0.1 to 17.0.2 ([52921f1](https://github.com/salesforcecli/cli-plugins-testkit/commit/52921f1ad8f16062ff2774dd4adeaaef9d920a5a))
+
+
+
 ## [5.3.3](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.2...5.3.3) (2024-05-11)
 
 
