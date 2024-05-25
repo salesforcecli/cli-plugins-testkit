@@ -1,3 +1,12 @@
+## [5.3.6](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.5...5.3.6) (2024-05-25)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/kit from 3.1.1 to 3.1.2 ([5383811](https://github.com/salesforcecli/cli-plugins-testkit/commit/5383811630320a3d873e1092b1170f8f04791a45))
+
+
+
 ## [5.3.5](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.4...5.3.5) (2024-05-18)
 
 
