@@ -53,7 +53,7 @@
     "shelljs": "^0.8.4",
     "sinon": "^17.0.2",
     "strip-ansi": "6.0.1",
-    "ts-retry-promise": "^0.8.0"
+    "ts-retry-promise": "^0.8.1"
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "^9.1.2",
