@@ -1,3 +1,12 @@
+## [5.3.8](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.7...5.3.8) (2024-05-26)
+
+
+### Bug Fixes
+
+* **deps:** bump ts-retry-promise from 0.8.0 to 0.8.1 ([0260339](https://github.com/salesforcecli/cli-plugins-testkit/commit/026033999509676f0bb2cf36f161d0045848ee81))
+
+
+
 ## [5.3.7](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.6...5.3.7) (2024-05-25)
 
 
