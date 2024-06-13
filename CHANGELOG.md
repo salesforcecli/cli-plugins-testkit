@@ -1,3 +1,12 @@
+## [5.3.11](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.10...5.3.11) (2024-06-13)
+
+
+### Bug Fixes
+
+* **deps:** bump braces from 3.0.2 to 3.0.3 ([f7b7a4b](https://github.com/salesforcecli/cli-plugins-testkit/commit/f7b7a4bb3ae333a3af73046c13b839269a77066e))
+
+
+
 ## [5.3.10](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.9...5.3.10) (2024-06-08)
 
 
