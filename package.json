@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "^10.1.0",
-    "@salesforce/ts-sinon": "^1.4.19",
+    "@salesforce/ts-sinon": "^1.4.20",
     "@types/debug": "^4.1.12",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
