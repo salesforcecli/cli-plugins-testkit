@@ -1,3 +1,12 @@
+## [5.3.15](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.14...5.3.15) (2024-06-19)
+
+
+### Bug Fixes
+
+* **deps:** core 8 ([3e78f33](https://github.com/salesforcecli/cli-plugins-testkit/commit/3e78f33c26278aa8dcaa0ece91739b6a767cf251))
+
+
+
 ## [5.3.14](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.13...5.3.14) (2024-06-16)
 
 
