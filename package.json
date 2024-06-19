@@ -44,8 +44,8 @@
     "!lib/**/*.map"
   ],
   "dependencies": {
-    "@salesforce/core": "^7.4.1",
-    "@salesforce/kit": "^3.1.4",
+    "@salesforce/core": "^8.0.1",
+    "@salesforce/kit": "^3.1.6",
     "@salesforce/ts-types": "^2.0.10",
     "@types/shelljs": "^0.8.15",
     "debug": "^4.3.5",
@@ -56,8 +56,8 @@
     "ts-retry-promise": "^0.8.1"
   },
   "devDependencies": {
-    "@salesforce/dev-scripts": "^10.1.0",
-    "@salesforce/ts-sinon": "^1.4.20",
+    "@salesforce/dev-scripts": "^10.2.0",
+    "@salesforce/ts-sinon": "^1.4.22",
     "@types/debug": "^4.1.12",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
