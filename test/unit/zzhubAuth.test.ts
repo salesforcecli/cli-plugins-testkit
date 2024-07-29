@@ -11,18 +11,17 @@
  * a number of the testSession fail. Running these tests after testSession tests seems to work,
  * so chose a file name that guarantees these will be run last.
  */
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { stubMethod } from '@salesforce/ts-sinon';
-import * as chai from 'chai';
+import { expect } from 'chai';
 import { AuthFields } from '@salesforce/core';
 import { Env, env } from '@salesforce/kit';
-import * as sinon from 'sinon';
-import * as shell from 'shelljs';
+import sinon from 'sinon';
+import shell from 'shelljs';
 import { prepareForAuthUrl, prepareForJwt, transferExistingAuthToEnv } from '../../src/hubAuth';
 
-const { expect } = chai;
 const tmp = os.tmpdir();
 type SampleData = {
   jwtKeyWithHeaderFooter: string;

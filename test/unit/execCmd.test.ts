@@ -4,13 +4,13 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import { join } from 'node:path';
 import { expect, assert, config } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Duration, env } from '@salesforce/kit';
 import { stubMethod } from '@salesforce/ts-sinon';
-import * as shelljs from 'shelljs';
+import shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { beforeEach } from 'mocha';
 import { execCmd } from '../../src';
