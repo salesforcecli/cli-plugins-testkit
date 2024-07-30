@@ -6,7 +6,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import Debug from 'debug';
 
 export type ZipDirConfig = {
@@ -25,7 +25,7 @@ export type ZipDirConfig = {
    * E.g., "myArchivedDir.zip"
    */
   name: string;
-}
+};
 
 /**
  * Zip the contents of a directory to a file.

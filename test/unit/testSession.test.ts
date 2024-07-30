@@ -7,11 +7,11 @@
 
 // For testing private properties of TestSession
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { assert, expect } from 'chai';
-import * as sinon from 'sinon';
-import * as shelljs from 'shelljs';
+import sinon from 'sinon';
+import shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
