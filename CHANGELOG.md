@@ -1,3 +1,12 @@
+## [5.3.23](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.22...5.3.23) (2024-08-04)
+
+
+### Bug Fixes
+
+* **deps:** bump debug from 4.3.5 to 4.3.6 ([a503e24](https://github.com/salesforcecli/cli-plugins-testkit/commit/a503e24e65f1dc651df059fd8e2d3876e6d90748))
+
+
+
 ## [5.3.22](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.21...5.3.22) (2024-08-04)
 
 
