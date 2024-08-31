@@ -1,3 +1,12 @@
+## [5.3.27](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.26...5.3.27) (2024-08-31)
+
+
+### Bug Fixes
+
+* **deps:** bump micromatch from 4.0.5 to 4.0.8 ([b7c71de](https://github.com/salesforcecli/cli-plugins-testkit/commit/b7c71dee897908e1d1ac1a813b1207bc305c9c79))
+
+
+
 ## [5.3.26](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.25...5.3.26) (2024-08-17)
 
 
