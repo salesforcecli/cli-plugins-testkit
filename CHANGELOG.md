@@ -1,3 +1,12 @@
+## [5.3.36](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.35...5.3.36) (2024-11-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 8.6.3 to 8.6.4 ([3c03599](https://github.com/salesforcecli/cli-plugins-testkit/commit/3c03599a86cc4a12795a764c3250ac348847603e))
+
+
+
 ## [5.3.35](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.34...5.3.35) (2024-10-26)
 
 
