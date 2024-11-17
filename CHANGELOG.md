@@ -1,3 +1,12 @@
+## [5.3.38](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.37...5.3.38) (2024-11-17)
+
+
+### Bug Fixes
+
+* **deps:** bump cross-spawn from 7.0.3 to 7.0.5 ([2164e9b](https://github.com/salesforcecli/cli-plugins-testkit/commit/2164e9b1eccd5c9590d266deed27d0d67106f5a4))
+
+
+
 ## [5.3.37](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.36...5.3.37) (2024-11-16)
 
 
