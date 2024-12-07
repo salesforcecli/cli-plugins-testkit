@@ -48,7 +48,7 @@
     "@salesforce/kit": "^3.2.3",
     "@salesforce/ts-types": "^2.0.11",
     "@types/shelljs": "^0.8.15",
-    "debug": "^4.3.7",
+    "debug": "^4.4.0",
     "jszip": "^3.10.1",
     "shelljs": "^0.8.4",
     "sinon": "^17.0.2",
