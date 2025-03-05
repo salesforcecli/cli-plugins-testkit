@@ -334,9 +334,9 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           throw new Error(`${executable} executable not found for creating scratch orgs`);
         }
 
-        let baseCmd = `sf org:create:scratch --description 'created by cli-plugins-testkit' --json -y ${
-          org.duration ?? '1'
-        } -w ${org.wait ?? 60}`;
+        let baseCmd = `sf org:create:scratch --name 'cli-plugins-testkit' --json -y ${org.duration ?? '1'} -w ${
+          org.wait ?? 60
+        }`;
 
         if (org.config) {
           baseCmd += ` -f ${org.config}`;
