@@ -184,7 +184,7 @@ describe('TestSession', () => {
       expect(execStub.callCount).to.equal(scratchOrgs.length * (retries + 1));
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
       expect(execStub.firstCall.args[0]).to.equal(
-        'sf org:create:scratch --json -y 1 -w 60 -f config/project-scratch-def.json'
+        "sf org:create:scratch --description 'created by cli-plugins-testkit' --json -y 1 -w 60 -f config/project-scratch-def.json"
       );
     });
 
@@ -218,7 +218,7 @@ describe('TestSession', () => {
       expect(session.orgs.get(username)).to.deep.equal({ username, orgId: '12345' });
       expect(session.orgs.get('default')).to.deep.equal({ username, orgId: '12345' });
       expect(execStub.firstCall.args[0]).to.equal(
-        'sf org:create:scratch --json -y 1 -w 60 -f config/project-scratch-def.json -a my-org -d -e developer'
+        "sf org:create:scratch --description 'created by cli-plugins-testkit' --json -y 1 -w 60 -f config/project-scratch-def.json -a my-org -d -e developer"
       );
       expect(process.env.HOME).to.equal(session.homeDir);
       expect(process.env.USERPROFILE).to.equal(session.homeDir);
@@ -259,7 +259,8 @@ describe('TestSession', () => {
 
     it('should error if setup command fails', async () => {
       stubMethod(sandbox, shelljs, 'which').returns(true);
-      const expectedCmd = 'sf org:create:scratch --json -y 1 -w 60 -f config/project-scratch-def.json';
+      const expectedCmd =
+        "sf org:create:scratch --description 'created by cli-plugins-testkit' --json -y 1 -w 60 -f config/project-scratch-def.json";
       const execRv = 'Cannot foo before bar';
       const shellString = new ShellString(JSON.stringify(execRv));
       shellString.code = 1;
