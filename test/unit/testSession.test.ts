@@ -15,7 +15,7 @@ import shelljs from 'shelljs';
 import { ShellString } from 'shelljs';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { env } from '@salesforce/kit';
-import Sinon = require('sinon');
+import Sinon from 'sinon';
 import { AuthFields } from '@salesforce/core';
 import { ScratchOrgConfig, TestSession, rmOptions } from '../../src/testSession';
 import { TestProject } from '../../src/testProject';
