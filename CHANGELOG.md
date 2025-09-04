@@ -1,3 +1,16 @@
+## [5.3.40](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.40-dev.0...5.3.40) (2025-09-04)
+
+
+
+## [5.3.40-dev.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.39...5.3.40-dev.0) (2025-09-04)
+
+
+### Bug Fixes
+
+* string-width resolution ([ebdb40b](https://github.com/salesforcecli/cli-plugins-testkit/commit/ebdb40bcf1ae27bb1a1cd7c8ffabfba52f61fd21))
+
+
+
 ## [5.3.39](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.38...5.3.39) (2024-12-07)
 
 
