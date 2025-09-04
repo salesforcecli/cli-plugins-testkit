@@ -63,6 +63,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   },
+  "resolutions": {
+    "string-width": "^4.2.3"
+  },
   "config": {},
   "publishConfig": {
     "access": "public"
