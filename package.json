@@ -61,9 +61,7 @@
     "@salesforce/ts-sinon": "^1.4.30",
     "@types/debug": "^4.1.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
-  },
-  "resolutions": {
+    "typescript": "^5.7.2",
     "string-width": "^4.2.3"
   },
   "config": {},
