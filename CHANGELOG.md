@@ -1,3 +1,21 @@
+## [5.3.41](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.41-dev.0...5.3.41) (2025-09-05)
+
+
+### Bug Fixes
+
+* remove temp dep ([760d7c7](https://github.com/salesforcecli/cli-plugins-testkit/commit/760d7c706b00150e8eb995863121212058c0af8b))
+
+
+
+## [5.3.41-dev.0](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.40...5.3.41-dev.0) (2025-09-05)
+
+
+### Bug Fixes
+
+* string-width dev dep ([201f868](https://github.com/salesforcecli/cli-plugins-testkit/commit/201f86852d6b2842eaeb67f2558822050ff2cea0))
+
+
+
 ## [5.3.40](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.40-dev.0...5.3.40) (2025-09-04)
 
 
