@@ -6,13 +6,13 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import util from 'node:util';
 import { RetryConfig } from 'ts-retry-promise';
 import { debug, Debugger } from 'debug';
 import { AsyncOptionalCreatable, Duration, env, parseJson, sleep } from '@salesforce/kit';
 import { Optional } from '@salesforce/ts-types';
 import { createSandbox, SinonStub } from 'sinon';
 import * as shell from 'shelljs';
-import stripAnsi = require('strip-ansi');
 import { AuthFields, OrgAuthorization } from '@salesforce/core';
 import { genUniqueString } from './genUniqueString';
 import { zipDir } from './zip';
@@ -72,7 +72,7 @@ export type TestSessionOptions = {
    * The number of times to retry the scratch org create after the initial attempt if it fails. Will be overridden by TESTKIT_SETUP_RETRIES environment variable.
    */
   retries?: number;
-}
+};
 
 // exported for test assertions
 export const rmOptions = { recursive: true, force: true };
@@ -187,7 +187,7 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
 
     if (authStrategy !== 'NONE') {
       const config = shell.exec('sf config get target-dev-hub --json', this.shelljsExecOptions) as shell.ShellString;
-      const configResults = JSON.parse(stripAnsi(config.stdout)) as unknown as JsonOutput<
+      const configResults = JSON.parse(util.stripVTControlCharacters(config.stdout)) as unknown as JsonOutput<
         Array<{ name: string; value: string }>
       >;
       const usernameOrAlias = configResults.result.find((org) => org.name === 'target-dev-hub')?.value;
@@ -196,7 +196,9 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
           `sf org:display -o ${usernameOrAlias} --json`,
           this.shelljsExecOptions
         ) as shell.ShellString;
-        const displayEnvResults = JSON.parse(stripAnsi(displayEnv.stdout)) as unknown as JsonOutput<OrgAuthorization>;
+        const displayEnvResults = JSON.parse(
+          util.stripVTControlCharacters(displayEnv.stdout)
+        ) as unknown as JsonOutput<OrgAuthorization>;
         this.hubOrg = displayEnvResults.result;
       }
     }
@@ -362,8 +364,8 @@ export class TestSession<T extends TestSessionOptions = TestSessionOptions> exte
         }
 
         const rv = shell.exec(baseCmd, this.shelljsExecOptions) as shell.ShellString;
-        rv.stdout = stripAnsi(rv.stdout);
-        rv.stderr = stripAnsi(rv.stderr);
+        rv.stdout = rv.stdout ? util.stripVTControlCharacters(rv.stdout) : rv.stdout;
+        rv.stderr = rv.stderr ? util.stripVTControlCharacters(rv.stderr) : rv.stderr;
         if (rv.code !== 0) {
           throw Error(`${baseCmd} failed due to: ${rv.stdout}`);
         }
