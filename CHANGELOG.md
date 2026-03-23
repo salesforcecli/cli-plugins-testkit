@@ -1,3 +1,12 @@
+## [5.3.47](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.46...5.3.47) (2026-03-23)
+
+
+### Bug Fixes
+
+* **deps:** bump form-data from 4.0.0 to 4.0.5 ([eec044c](https://github.com/salesforcecli/cli-plugins-testkit/commit/eec044ca78128879f8da5b1bfe56aebb9866654d))
+
+
+
 ## [5.3.46](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.45...5.3.46) (2026-03-23)
 
 
