@@ -1,3 +1,12 @@
+## [5.3.45](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.44...5.3.45) (2026-03-23)
+
+
+### Bug Fixes
+
+* **deps:** bump shelljs and @types/shelljs ([6451de9](https://github.com/salesforcecli/cli-plugins-testkit/commit/6451de9affda5001b74a5aaa1f4daa679c5d626c))
+
+
+
 ## [5.3.44](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.43...5.3.44) (2026-03-23)
 
 
