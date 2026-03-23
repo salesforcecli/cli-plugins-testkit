@@ -1,3 +1,12 @@
+## [5.3.43](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.42...5.3.43) (2026-03-23)
+
+
+### Bug Fixes
+
+* **deps:** bump jws from 3.2.2 to 3.2.3 ([a41ece2](https://github.com/salesforcecli/cli-plugins-testkit/commit/a41ece22fbe17f94b7942901bffa113cb8fce62a))
+
+
+
 ## [5.3.42](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.41...5.3.42) (2026-03-23)
 
 
