@@ -629,10 +629,10 @@
   resolved "https://registry.yarnpkg.com/@salesforce/prettier-config/-/prettier-config-0.0.3.tgz#ba648d4886bb38adabe073dbea0b3a91b3753bb0"
   integrity sha512-hYOhoPTCSYMDYn+U1rlEk16PoBeAJPkrdg4/UtAzupM1mRRJOwEPMG1d7U8DxJFKuXW3DMEYWr2MwAIBDaHmFg==
 
-"@salesforce/ts-sinon@^1.4.30":
-  version "1.4.30"
-  resolved "https://registry.yarnpkg.com/@salesforce/ts-sinon/-/ts-sinon-1.4.30.tgz#08d18c27b026f0da87506b0d84d72d1069b9c6ec"
-  integrity sha512-vCjpxrt97qqc9yOygcrQ2GZve1QFJcSMmvSOrzxLGuGPXL61NfQM/vWtwUhQYi7PiqGnRYsspy/dy9WR/V308g==
+"@salesforce/ts-sinon@^1.4.33":
+  version "1.4.33"
+  resolved "https://registry.yarnpkg.com/@salesforce/ts-sinon/-/ts-sinon-1.4.33.tgz#b1f13ffe5faf3ad8709fd21d99d497002093c88e"
+  integrity sha512-vzcXahroM1s9/xhAhd11/XCh9ebLZfVkAIq5B32LzQgRJeUTJvF53n3j3TphdS/YkmBJyRj/P7p5133O/oJwWA==
   dependencies:
     "@salesforce/ts-types" "^2.0.12"
     sinon "^5.1.1"
