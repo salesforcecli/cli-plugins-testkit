@@ -1,3 +1,12 @@
+## [5.3.52](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.51...5.3.52) (2026-04-04)
+
+
+### Bug Fixes
+
+* **deps:** bump lodash from 4.17.23 to 4.18.1 ([f5046cd](https://github.com/salesforcecli/cli-plugins-testkit/commit/f5046cde90142ca19f5270790bad0481eb1ac673))
+
+
+
 ## [5.3.51](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.50...5.3.51) (2026-04-04)
 
 
