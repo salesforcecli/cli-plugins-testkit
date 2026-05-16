@@ -61,7 +61,7 @@
     "@salesforce/ts-sinon": "^1.4.34",
     "@types/debug": "^4.1.13",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   },
   "config": {},
   "publishConfig": {
