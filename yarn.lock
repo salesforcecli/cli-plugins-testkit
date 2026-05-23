@@ -555,10 +555,10 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/core@^8.30.3":
-  version "8.30.3"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.30.3.tgz#333315e9c0436abd2247df7b5b31375df4002cd6"
-  integrity sha512-E3WPXxAEqvpZXp6nnkkoNRFGQ2c/5Mhnbl9s0ajQiLTpqQ1Una5PlPu0s2rRvu8qGKnT1AI7xT3RDy3pd/dULg==
+"@salesforce/core@^8.31.0":
+  version "8.31.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.31.0.tgz#153beb193af8fce73d31cc39afee794c4c1ee1c0"
+  integrity sha512-TXQoR7Bs0Dk5AuNY8eaNRhMeLDLcpJ8su7LVxn7VVfnRxITrRh4gkSuOAXdBKAqx0WcjRONDs1twedaOE7Xu4Q==
   dependencies:
     "@jsforce/jsforce-node" "^3.10.13"
     "@salesforce/kit" "^3.2.4"
@@ -567,7 +567,7 @@
     change-case "^4.1.2"
     fast-levenshtein "^3.0.0"
     faye "^1.4.1"
-    form-data "^4.0.4"
+    form-data "^4.0.5"
     js2xmlparser "^4.0.1"
     jsonwebtoken "9.0.3"
     jszip "3.10.1"
@@ -2394,7 +2394,7 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
 
-form-data@^4.0.4:
+form-data@^4.0.4, form-data@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
   integrity sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==
