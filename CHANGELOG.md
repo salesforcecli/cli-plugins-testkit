@@ -1,3 +1,12 @@
+## [5.3.60](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.59...5.3.60) (2026-06-17)
+
+
+### Bug Fixes
+
+* **deps:** bump markdown-it from 14.1.0 to 14.2.0 ([1fb136c](https://github.com/salesforcecli/cli-plugins-testkit/commit/1fb136c16b08833bbc0755c59eb145fb1746af59))
+
+
+
 ## [5.3.59](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.58...5.3.59) (2026-06-13)
 
 
