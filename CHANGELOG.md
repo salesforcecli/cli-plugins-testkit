@@ -1,3 +1,12 @@
+## [5.3.61](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.60...5.3.61) (2026-06-17)
+
+
+### Bug Fixes
+
+* **deps:** bump @babel/core from 7.25.2 to 7.29.7 ([1630aa1](https://github.com/salesforcecli/cli-plugins-testkit/commit/1630aa18e52d7c404cc579ea7544d92fa17ce5ea))
+
+
+
 ## [5.3.60](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.59...5.3.60) (2026-06-17)
 
 
