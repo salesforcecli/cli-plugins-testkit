@@ -1,3 +1,12 @@
+## [5.3.63](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.62...5.3.63) (2026-07-24)
+
+
+### Bug Fixes
+
+* **deps:** bump linkify-it from 5.0.1 to 5.0.2 ([629f1d5](https://github.com/salesforcecli/cli-plugins-testkit/commit/629f1d527965fe4b977df610b97f4077dc941408))
+
+
+
 ## [5.3.62](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.61...5.3.62) (2026-06-20)
 
 
