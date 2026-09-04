@@ -53,7 +53,7 @@ describe('TestSession', () => {
     const jsonOutput = execCmd<{ username: string }>('env:create:scratch -f config/project-scratch-def.json --json', {
       cli: 'sf',
     }).jsonOutput;
-    const thirdOrg = jsonOutput.result.username;
+    const thirdOrg = jsonOutput?.result.username;
     execCmd(`project:retrieve:start -o ${thirdOrg}`);
   });
 
