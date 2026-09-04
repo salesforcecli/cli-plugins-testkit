@@ -1,8 +1,17 @@
 /*
- * Copyright (c) 2021, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 /* eslint-disable arrow-body-style */
 
@@ -33,7 +42,6 @@ type SampleData = {
   instanceUrl: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const sampleAuthData = require(path.join(__dirname, 'sample.auth.data.json')) as SampleData;
 
 const authFields: AuthFields = {
@@ -82,7 +90,7 @@ describe('hubAuth', () => {
         (): string => sampleAuthData.jwtKeyWithHeaderFooter
       );
       const jwtKeyFile = prepareForJwt(homeDir);
-      // eslint-disable-next-line no-unused-expressions
+
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
       fs.readFileSync(jwtKeyFile, 'utf8');
       const jwtPassedToWrite = writeStub.args[0][1] as string;
@@ -109,7 +117,7 @@ describe('hubAuth', () => {
         (): string => sampleAuthData.jwtKeyWithHeaderFooter
       );
       const jwtKeyFile = prepareForJwt(homeDir);
-      // eslint-disable-next-line no-unused-expressions
+
       expect(fs.existsSync(jwtKeyFile)).to.be.true;
       fs.readFileSync(jwtKeyFile, 'utf8');
       const jwtPassedToWrite = writeStub.args[0][1] as string;
@@ -142,7 +150,6 @@ describe('hubAuth', () => {
       stubMethod(sandbox, fs, 'existsSync').callsFake((): boolean => true);
       const authUrlFile = prepareForAuthUrl(homeDir);
 
-      // eslint-disable-next-line no-unused-expressions
       expect(fs.existsSync(authUrlFile)).to.be.true;
       const authUrl: string = fs.readFileSync(authUrlFile, 'utf8');
       expect(readStub.args[0][0]).to.be.equal(authUrlFile);
@@ -172,7 +179,7 @@ describe('hubAuth', () => {
         .returns(JSON.stringify(authFields));
       shellStub = stubMethod(sandbox, shell, 'exec').returns({});
       transferExistingAuthToEnv('REUSE');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
+
       expect(shellStub.calledOnce).to.be.false;
       sandbox.restore();
       expect(env.getString('TESTKIT_JWT_KEY')).to.be.equal(sampleAuthData.jwtKeyWithHeaderFooter);
@@ -190,7 +197,7 @@ describe('hubAuth', () => {
         JSON.stringify({ result: { sfdxAuthUrl: sampleAuthData.sfdxAuthUrl } })
       );
       transferExistingAuthToEnv('REUSE');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-unused-expressions
+
       expect(shellStub.calledOnce).to.be.true;
       sandbox.restore();
       expect(env.getString('TESTKIT_AUTH_URL')).to.be.equal(sampleAuthData.sfdxAuthUrl);
