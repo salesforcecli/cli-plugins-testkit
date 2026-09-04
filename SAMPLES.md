@@ -56,6 +56,21 @@ The execCmd function allows plugin commands to execute with a specific CLI execu
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { expect } from 'chai';
 
 describe('execCmd', () => {
@@ -72,6 +87,21 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { expect } from 'chai';
 
 describe('execCmd', () => {
@@ -88,6 +118,21 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('execCmd', () => {
   it('should ensure a specific exit code', () => {
@@ -102,6 +147,21 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('execCmd', () => {
   // This would actually be set in the shell or CI environment.
@@ -119,6 +179,21 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { expect } from 'chai';
 
 // This would typically be imported from your command.
@@ -132,7 +207,7 @@ describe('execCmd', () => {
   it('should provide typed and parsed JSON output', () => {
     // Simply have your command use the --json flag and provide a type.
     const rv = execCmd<ConfigResult[]>('config:list --json').jsonOutput;
-    expect(rv.result[0].key).equals('defaultdevhubusername');
+    expect(rv?.result[0].key).equals('defaultdevhubusername');
   });
 });
 ```
@@ -143,6 +218,21 @@ describe('execCmd', () => {
 
 ```typescript
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { expect } from 'chai';
 
 describe('execCmd', () => {
@@ -168,6 +258,21 @@ A TestSession provides conveniences to testing plugin commands with options to a
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -196,6 +301,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -225,7 +345,22 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import * as path from 'path';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as path from 'node:path';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -254,6 +389,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -282,6 +432,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -306,8 +471,22 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-
-import { tmpdir } from 'os';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { tmpdir } from 'node:os';
 import { expect } from 'chai';
 
 describe('TestSession', () => {
@@ -338,6 +517,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -362,6 +556,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -388,6 +597,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -418,6 +642,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -450,6 +689,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -480,8 +734,22 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
-
-import * as path from 'path';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as path from 'node:path';
 
 describe('TestSession', () => {
   let testSession: TestSession;
@@ -521,7 +789,21 @@ describe('TestSession', () => {
 
 ```typescript
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import * as shelljs from 'shelljs';
 
 /*
@@ -560,7 +842,7 @@ describe('TestSession', () => {
     const jsonOutput = execCmd<{ username: string }>('env:create:scratch -f config/project-scratch-def.json --json', {
       cli: 'sf',
     }).jsonOutput;
-    const thirdOrg = jsonOutput.result.username;
+    const thirdOrg = jsonOutput?.result.username;
     execCmd(`project:retrieve:start -o ${thirdOrg}`);
   });
 
@@ -587,6 +869,21 @@ describe('Sample NUT 2', () => {
 
 ```typescript
 import { execCmd, TestSession, TestProject } from '@salesforce/cli-plugins-testkit';
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /*
    NOTE: you could also change the cwd for one command by overriding in execCmd options.

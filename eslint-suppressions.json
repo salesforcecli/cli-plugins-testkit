@@ -1,0 +1,165 @@
+{
+  "samples/TestSession.sample1.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample10.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample11.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 5
+    }
+  },
+  "samples/TestSession.sample12.nut.ts": {
+    "@typescript-eslint/await-thenable": {
+      "count": 2
+    },
+    "@typescript-eslint/no-base-to-string": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 7
+    },
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    }
+  },
+  "samples/TestSession.sample13.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 5
+    }
+  },
+  "samples/TestSession.sample1b.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample2.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample3.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample4.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample5.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample6.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample7.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/TestSession.sample8.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 1
+    }
+  },
+  "samples/TestSession.sample9.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 4
+    }
+  },
+  "samples/execCmd.sample1.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "samples/execCmd.sample2.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "samples/execCmd.sample3.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "samples/execCmd.sample4.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "samples/execCmd.sample5.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "samples/execCmd.sample6.nut.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    }
+  },
+  "src/execCmd.ts": {
+    "@typescript-eslint/explicit-function-return-type": {
+      "count": 3
+    },
+    "@typescript-eslint/no-require-imports": {
+      "count": 1
+    },
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    },
+    "jsdoc/check-indentation": {
+      "count": 2
+    }
+  },
+  "src/hubAuth.ts": {
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    },
+    "jsdoc/check-indentation": {
+      "count": 2
+    }
+  },
+  "src/testProject.ts": {
+    "jsdoc/check-indentation": {
+      "count": 1
+    }
+  },
+  "src/testSession.ts": {
+    "@typescript-eslint/explicit-function-return-type": {
+      "count": 1
+    },
+    "@typescript-eslint/no-require-imports": {
+      "count": 1
+    },
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 1
+    },
+    "jsdoc/check-indentation": {
+      "count": 2
+    }
+  },
+  "test/unit/zip.test.ts": {
+    "no-useless-assignment": {
+      "count": 1
+    }
+  },
+  "test/unit/zzhubAuth.test.ts": {
+    "@typescript-eslint/no-require-imports": {
+      "count": 1
+    }
+  }
+}
