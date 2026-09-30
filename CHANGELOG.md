@@ -1,3 +1,12 @@
+## [5.3.67](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.66...5.3.67) (2026-09-30)
+
+
+### Bug Fixes
+
+* **deps:** bump undici from 8.10.0 to 8.11.2 ([28d8ddd](https://github.com/salesforcecli/cli-plugins-testkit/commit/28d8ddd586aab28609045fa5a0db3d603b8f558c))
+
+
+
 ## [5.3.66](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.65...5.3.66) (2026-08-08)
 
 
