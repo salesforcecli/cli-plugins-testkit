@@ -1,3 +1,12 @@
+## [5.3.68](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.67...5.3.68) (2026-10-05)
+
+
+### Bug Fixes
+
+* **deps:** bump fast-uri from 3.1.5 to 3.1.8 ([eba3c0f](https://github.com/salesforcecli/cli-plugins-testkit/commit/eba3c0f6bdccb660475d390965931ed60f896326))
+
+
+
 ## [5.3.67](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.66...5.3.67) (2026-09-30)
 
 
