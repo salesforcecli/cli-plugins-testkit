@@ -1,3 +1,12 @@
+## [5.3.72](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.71...5.3.72) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump browserslist from 4.28.2 to 4.28.9 ([a3e5f22](https://github.com/salesforcecli/cli-plugins-testkit/commit/a3e5f227642ede9e8edb855b623432fc1d1d9775))
+
+
+
 ## [5.3.71](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.70...5.3.71) (2026-10-09)
 
 
