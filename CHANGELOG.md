@@ -1,3 +1,12 @@
+## [5.3.69](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.68...5.3.69) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 9.1.10 to 9.1.11 ([fd8535a](https://github.com/salesforcecli/cli-plugins-testkit/commit/fd8535a64a857973db8881be5d9023160599c752))
+
+
+
 ## [5.3.68](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.67...5.3.68) (2026-10-05)
 
 
