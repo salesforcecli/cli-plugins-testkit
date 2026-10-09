@@ -1,3 +1,12 @@
+## [5.3.71](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.70...5.3.71) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump fast-copy from 3.0.2 to 3.1.0 ([a8831ac](https://github.com/salesforcecli/cli-plugins-testkit/commit/a8831aca359879a78ee9d2d407d3652047528c55))
+
+
+
 ## [5.3.70](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.69...5.3.70) (2026-10-09)
 
 
