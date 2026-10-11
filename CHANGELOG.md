@@ -1,3 +1,12 @@
+## [5.3.75](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.74...5.3.75) (2026-10-11)
+
+
+### Bug Fixes
+
+* **deps:** bump jszip from 3.10.1 to 3.10.2 ([299f1c6](https://github.com/salesforcecli/cli-plugins-testkit/commit/299f1c6fb6fa7135ca9cad7640f5d59fb6c72e3a))
+
+
+
 ## [5.3.74](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.73...5.3.74) (2026-10-10)
 
 
