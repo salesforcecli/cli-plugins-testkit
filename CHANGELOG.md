@@ -1,3 +1,12 @@
+## [5.3.81](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.80...5.3.81) (2026-10-25)
+
+
+### Bug Fixes
+
+* **deps:** bump zod from 4.3.6 to 4.6.7 ([9e94604](https://github.com/salesforcecli/cli-plugins-testkit/commit/9e94604618b47c78fd667cb812c9a6c350d7267b))
+
+
+
 ## [5.3.80](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.79...5.3.80) (2026-10-24)
 
 
