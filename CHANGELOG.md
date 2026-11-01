@@ -1,3 +1,12 @@
+## [5.3.87](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.86...5.3.87) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** bump diff from 3.5.0 to 3.5.1 ([fcc7ef6](https://github.com/salesforcecli/cli-plugins-testkit/commit/fcc7ef645a1891b62b1c620a2c3d273f142c4288))
+
+
+
 ## [5.3.86](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.85...5.3.86) (2026-11-01)
 
 
