@@ -1,3 +1,12 @@
+## [5.3.86](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.85...5.3.86) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** bump picomatch from 2.3.1 to 2.3.2 ([b54a377](https://github.com/salesforcecli/cli-plugins-testkit/commit/b54a377bf2408b5d32fdbb90fe04d127e1db25ed))
+
+
+
 ## [5.3.85](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.84...5.3.85) (2026-11-01)
 
 
