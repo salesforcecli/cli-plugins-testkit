@@ -1,3 +1,12 @@
+## [5.3.85](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.84...5.3.85) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** bump js-yaml from 3.14.1 to 3.15.2 ([a3cc13e](https://github.com/salesforcecli/cli-plugins-testkit/commit/a3cc13ef40919ecb15d98b013a2693aa168cf1fc))
+
+
+
 ## [5.3.84](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.83...5.3.84) (2026-11-01)
 
 
