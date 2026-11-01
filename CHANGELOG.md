@@ -1,3 +1,12 @@
+## [5.3.84](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.83...5.3.84) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** bump brace-expansion from 1.1.11 to 1.1.21 ([19e147f](https://github.com/salesforcecli/cli-plugins-testkit/commit/19e147fb4a1fb645e104af59878213e98f4ba8d6))
+
+
+
 ## [5.3.83](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.82...5.3.83) (2026-10-31)
 
 
