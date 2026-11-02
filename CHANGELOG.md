@@ -1,3 +1,12 @@
+## [5.3.88](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.87...5.3.88) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** bump path-to-regexp from 1.8.0 to 1.9.0 ([b59d442](https://github.com/salesforcecli/cli-plugins-testkit/commit/b59d442fd68a0df6e8696f798238eef652daed49))
+
+
+
 ## [5.3.87](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.86...5.3.87) (2026-11-01)
 
 
