@@ -44,7 +44,7 @@ Although oclif provides a way to run commands locally using the local `bin/run` 
 
 ```typescript
 import { exec } from 'shelljs';
-const result = exec('./bin/run mycommand --myflag --json');
+const result = exec('./bin/run.js mycommand --myflag --json');
 console.log(JSON.parse(result.stdout));
 ```
 
@@ -64,7 +64,7 @@ expect(result.name).to.equal('expectedName');
 npm install @salesforce/cli@latest-rc
 
 # Install the newly published version of my plugin
-./node_modules/.bin/sf plugins:install myplugin
+./node_modules/.bin/sf plugins install myplugin
 
 # Target the local sf
 export TESTKIT_EXECUTABLE_PATH=./node_modules/.bin/sf
