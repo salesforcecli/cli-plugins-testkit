@@ -1,3 +1,12 @@
+## [5.3.90](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.89...5.3.90) (2026-11-03)
+
+
+### Bug Fixes
+
+* add CODEOWNERS ([ec2fbb6](https://github.com/salesforcecli/cli-plugins-testkit/commit/ec2fbb6a1f1b354ac4168e7ed9e7a9ea766d8c1a))
+
+
+
 ## [5.3.89](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.88...5.3.89) (2026-11-02)
 
 
