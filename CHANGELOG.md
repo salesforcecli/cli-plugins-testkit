@@ -1,3 +1,12 @@
+## [5.3.91](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.90...5.3.91) (2026-11-07)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/ts-types from 3.2.3 to 3.2.4 ([e3fb095](https://github.com/salesforcecli/cli-plugins-testkit/commit/e3fb095b84efed5aef0f822bcde48114c2320b51))
+
+
+
 ## [5.3.90](https://github.com/salesforcecli/cli-plugins-testkit/compare/5.3.89...5.3.90) (2026-11-03)
 
 
